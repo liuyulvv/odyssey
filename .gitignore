@@ -1,0 +1,10 @@
+.DS_Store
+build/
+.vscode/
+lib/
+*.pdb
+*.exe
+*.ilk
+*.dll
+*.lib
+log/
