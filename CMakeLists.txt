@@ -16,6 +16,10 @@ if(NOT ${IS_DEBUG_BUILD})
     add_compile_definitions(NODEBUG)
 endif()
 
+# GLFW
+option(BUILD_SHARED_LIBS "" ON)
+add_subdirectory(glfw)
+
 if (MSVC)
     add_compile_options(/W4)
     set(CMAKE_CXX_FLAGS /source-charset:utf-8)
@@ -43,6 +47,7 @@ file(GLOB SRCS RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" "${CMAKE_CURRENT_SOURCE_DI
 
 include_directories(
     "include"
+    "glfw/include"
 )
 
 link_directories(
@@ -52,8 +57,8 @@ link_directories(
 if (MSVC)
     add_executable(${PROJECT_NAME} ${SRCS})
     set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS "/ENTRY:mainCRTStartup /SUBSYSTEM:WINDOWS" COMPILE_FLAGS "/EHsc")
-    target_link_libraries(${PROJECT_NAME} vulkan-1)
+    target_link_libraries(${PROJECT_NAME} vulkan-1 glfw3dll)
 elseif (APPLE)
     add_executable(${PROJECT_NAME} ${SRCS})
-    target_link_libraries(${PROJECT_NAME} vulkan)
+    target_link_libraries(${PROJECT_NAME} vulkan glfw)
 endif()
