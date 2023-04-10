@@ -15,6 +15,7 @@ void Odyssey::Run() {
 }
 
 void Odyssey::InitialVulkan() {
+    engine_ = std::make_unique<OdysseyEngine>(window_);
 }
 
 void Odyssey::MainLoop() {
@@ -24,6 +25,7 @@ void Odyssey::MainLoop() {
 }
 
 void Odyssey::Cleanup() {
+    engine_.reset(nullptr);
 }
 
 }  // namespace odyssey

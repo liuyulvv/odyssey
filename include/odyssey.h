@@ -7,8 +7,10 @@
 #if !defined(ODYSSEY_ODYSSEY_H_)
 #define ODYSSEY_ODYSSEY_H_
 
+#include <memory>
 #include <stdexcept>
 
+#include "odyssey_engine.h"
 #include "odyssey_pipeline.h"
 #include "odyssey_window.h"
 
@@ -37,6 +39,7 @@ public:
 
 private:
     OdysseyWindow window_{WIDTH, HEIGHT, "Odyssey"};
+    std::unique_ptr<OdysseyEngine> engine_{};
     OdysseyPipeline pipeline_{"shaders/vert_1.vert.spv", "shaders/frag_1.frag.spv"};
 };
 
