@@ -12,6 +12,7 @@
 
 #include "odyssey_engine.h"
 #include "odyssey_pipeline.h"
+#include "odyssey_swap_chain.h"
 #include "odyssey_window.h"
 
 namespace odyssey {
@@ -38,7 +39,8 @@ public:
 private:
     OdysseyWindow window_{WIDTH, HEIGHT, "Odyssey"};
     OdysseyEngine engine_{window_};
-    OdysseyPipeline pipeline_{engine_, "shaders/vert_1.vert.spv", "shaders/frag_1.frag.spv", OdysseyPipeline::DefaultPipelineConfigInfo(WIDTH, HEIGHT)};
+    OdysseySwapChain swap_chain_{engine_, window_.GetExtent()};
+    std::unique_ptr<OdysseyPipeline> pipeline_{};
 };
 
 }  // namespace odyssey
