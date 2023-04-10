@@ -29,9 +29,7 @@ public:
     void Run();
 
 private:
-    void InitialVulkan();
     void MainLoop();
-    void Cleanup();
 
 public:
     static constexpr int WIDTH{800};
@@ -39,8 +37,8 @@ public:
 
 private:
     OdysseyWindow window_{WIDTH, HEIGHT, "Odyssey"};
-    std::unique_ptr<OdysseyEngine> engine_{};
-    OdysseyPipeline pipeline_{"shaders/vert_1.vert.spv", "shaders/frag_1.frag.spv"};
+    OdysseyEngine engine_{window_};
+    OdysseyPipeline pipeline_{engine_, "shaders/vert_1.vert.spv", "shaders/frag_1.frag.spv", OdysseyPipeline::DefaultPipelineConfigInfo(WIDTH, HEIGHT)};
 };
 
 }  // namespace odyssey
