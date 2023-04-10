@@ -43,6 +43,9 @@ public:
     OdysseyEngine& operator=(const OdysseyEngine& odyssey_engine) = delete;
     OdysseyEngine& operator=(OdysseyEngine&& odyssey_engine) = delete;
 
+public:
+    const vk::Device& Device() const;
+
 private:
     void CreateInstance();
     void SetupDebugMessenger();

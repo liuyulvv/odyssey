@@ -34,6 +34,10 @@ OdysseyEngine::~OdysseyEngine() {
     instance_.destroy();
 }
 
+const vk::Device& OdysseyEngine::Device() const {
+    return device_;
+}
+
 void OdysseyEngine::CreateInstance() {
     if (enable_validation_layers_ && !CheckValidationLayerSupport()) {
         throw std::runtime_error("Validation layers requested, but not available.");
