@@ -14,6 +14,7 @@ Checks: >
   -cppcoreguidelines-pro-type-union-access,
   -cppcoreguidelines-avoid-magic-numbers,
   -cppcoreguidelines-avoid-non-const-global-variables,
+  -cppcoreguidelines-pro-bounds-pointer-arithmetic,
   modernize-*,
   -modernize-use-trailing-return-type,
   -modernize-pass-by-value,
