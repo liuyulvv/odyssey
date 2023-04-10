@@ -6,6 +6,8 @@
 
 #include "odyssey_window.h"
 
+#include <stdexcept>
+
 namespace odyssey {
 
 OdysseyWindow::OdysseyWindow(int width, int height, const std::string& window_name) : width_(width), height_(height), window_name_(window_name) {
@@ -30,7 +32,9 @@ void OdysseyWindow::PollEvents() {
 
 void OdysseyWindow::CreateWindowSurface(vk::Instance& instance, vk::SurfaceKHR& surface) {
     VkSurfaceKHR c_surface = nullptr;
-    glfwCreateWindowSurface(static_cast<VkInstance>(instance), window_, nullptr, &c_surface);
+    if (glfwCreateWindowSurface(static_cast<VkInstance>(instance), window_, nullptr, &c_surface) != VK_SUCCESS) {
+        throw std::runtime_error("Failed to create window surface");
+    }
     surface = vk::SurfaceKHR(c_surface);
 }
 
