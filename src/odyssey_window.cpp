@@ -38,4 +38,8 @@ void OdysseyWindow::CreateWindowSurface(vk::Instance& instance, vk::SurfaceKHR& 
     surface = vk::SurfaceKHR(c_surface);
 }
 
+vk::Extent2D OdysseyWindow::GetExtent() const {
+    return {static_cast<uint32_t>(width_), static_cast<uint32_t>(height_)};
+}
+
 }  // namespace odyssey
