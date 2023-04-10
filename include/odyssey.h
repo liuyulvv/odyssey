@@ -9,8 +9,8 @@
 
 #include <stdexcept>
 
+#include "odyssey_pipeline.h"
 #include "odyssey_window.h"
-#include "vulkan/vulkan.hpp"
 
 namespace odyssey {
 
@@ -37,6 +37,7 @@ public:
 
 private:
     OdysseyWindow window_{WIDTH, HEIGHT, "Odyssey"};
+    OdysseyPipeline pipeline_{"shaders/vert_1.vert.spv", "shaders/frag_1.frag.spv"};
 };
 
 }  // namespace odyssey
