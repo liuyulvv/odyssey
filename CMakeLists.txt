@@ -24,7 +24,7 @@ add_subdirectory(glfw)
 add_subdirectory(fmt)
 
 if (MSVC)
-    add_compile_options(/W4)
+    add_compile_options(/W4 /WX)
     set(CMAKE_CXX_FLAGS /source-charset:utf-8)
     include_directories(
         "D:/VulkanSDK/1.3.236.0/Include"
