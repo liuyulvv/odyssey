@@ -45,6 +45,14 @@ public:
 
 public:
     const vk::Device& Device() const;
+    const vk::SurfaceKHR& Surface() const;
+    SwapChainSupportDetails GetSwapChainSupport() const;
+    QueueFamilyIndices FindPhysicalQueueFamilies() const;
+    vk::ImageView CreateImageView(vk::Image& image, vk::Format format, vk::ImageAspectFlags aspect_flags);
+    vk::Format FindSupportedFormat(const std::vector<vk::Format>& candidates, vk::ImageTiling tiling, vk::FormatFeatureFlags features) const;
+    void CreateImage(uint32_t width, uint32_t height, vk::Format format, vk::ImageTiling tiling, vk::ImageUsageFlags usage, vk::MemoryPropertyFlags properties, vk::Image& image, vk::DeviceMemory& memory);
+    const vk::Queue& GetGraphicsQueue() const;
+    const vk::Queue& GetPresentQueue() const;
 
 private:
     void CreateInstance();
@@ -60,8 +68,9 @@ private:
     std::vector<const char*> GetRequiredExtensions() const;
     static void PopulateDebugMessengerCreateInfo(vk::DebugUtilsMessengerCreateInfoEXT& create_info);
     bool IsPhysicalDeviceSuitable(const vk::PhysicalDevice& device);
-    QueueFamilyIndices FindQueueFamilies(const vk::PhysicalDevice& device);
-    SwapChainSupportDetails QuerySwapChainSupport(const vk::PhysicalDevice& device);
+    QueueFamilyIndices FindQueueFamilies(const vk::PhysicalDevice& device) const;
+    SwapChainSupportDetails QuerySwapChainSupport(const vk::PhysicalDevice& device) const;
+    uint32_t FindMemoryType(uint32_t type_filter, vk::MemoryPropertyFlags properties);
 
 private:
     OdysseyWindow& window_;
