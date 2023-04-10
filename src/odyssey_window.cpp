@@ -28,4 +28,10 @@ void OdysseyWindow::PollEvents() {
     glfwPollEvents();
 }
 
+void OdysseyWindow::CreateWindowSurface(vk::Instance& instance, vk::SurfaceKHR& surface) {
+    VkSurfaceKHR c_surface = nullptr;
+    glfwCreateWindowSurface(static_cast<VkInstance>(instance), window_, nullptr, &c_surface);
+    surface = vk::SurfaceKHR(c_surface);
+}
+
 }  // namespace odyssey

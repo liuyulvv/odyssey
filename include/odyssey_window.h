@@ -7,9 +7,14 @@
 #if !defined(ODYSSEY_ODYSSEY_WINDOW_H_)
 #define ODYSSEY_ODYSSEY_WINDOW_H_
 
+#if !defined(GLFW_INCLUDE_VULKAN)
+#define GLFW_INCLUDE_VULKAN
+#endif  // GLFW_INCLUDE_VULKAN
+
 #include <string>
 
 #include "GLFW/glfw3.h"
+#include "vulkan/vulkan.hpp"
 
 namespace odyssey {
 
@@ -27,6 +32,7 @@ public:
 public:
     bool ShouldClose() const;
     void PollEvents();
+    void CreateWindowSurface(vk::Instance& instance, vk::SurfaceKHR& surface);
 
 private:
     int width_;
