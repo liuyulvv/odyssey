@@ -43,12 +43,6 @@ PipelineConfigInfo OdysseyPipeline::DefaultPipelineConfigInfo(uint32_t width, ui
         .setOffset({0, 0})
         .setExtent({width, height});
 
-    config.view_port_info_
-        .setViewportCount(1)
-        .setViewports(config.view_port_)
-        .setScissorCount(1)
-        .setScissors(config.scissor_);
-
     config.rasterization_info_
         .setDepthClampEnable(false)
         .setRasterizerDiscardEnable(false)
@@ -60,6 +54,14 @@ PipelineConfigInfo OdysseyPipeline::DefaultPipelineConfigInfo(uint32_t width, ui
         .setDepthBiasConstantFactor(0.0F)
         .setDepthBiasClamp(0.0F)
         .setDepthBiasSlopeFactor(0.0F);
+
+    config.multisample_info_
+        .setSampleShadingEnable(false)
+        .setRasterizationSamples(vk::SampleCountFlagBits::e1)
+        .setMinSampleShading(1.0F)
+        .setPSampleMask(nullptr)
+        .setAlphaToCoverageEnable(false)
+        .setAlphaToOneEnable(false);
 
     config.color_blend_attachment_
         .setColorWriteMask(vk::ColorComponentFlagBits::eR | vk::ColorComponentFlagBits::eG | vk::ColorComponentFlagBits::eB | vk::ColorComponentFlagBits::eA)
@@ -132,13 +134,20 @@ void OdysseyPipeline::CreateGraphicsPipeline(const std::string& vertex_shader_pa
 
     std::array<vk::PipelineShaderStageCreateInfo, 2> shader_stages{vert_shader_stage_info, frag_shader_stage_info};
 
+    vk::PipelineViewportStateCreateInfo view_port_info{};
+    view_port_info
+        .setViewportCount(1)
+        .setViewports(config.view_port_)
+        .setScissorCount(1)
+        .setScissors(config.scissor_);
+
     vk::GraphicsPipelineCreateInfo pipeline_info;
     pipeline_info
         .setStageCount(static_cast<uint32_t>(shader_stages.size()))
         .setStages(shader_stages)
         .setPVertexInputState(&vertex_input_info)
         .setPInputAssemblyState(&config.input_assembly_info_)
-        .setPViewportState(&config.view_port_info_)
+        .setPViewportState(&view_port_info)
         .setPRasterizationState(&config.rasterization_info_)
         .setPMultisampleState(&config.multisample_info_)
         .setPColorBlendState(&config.color_blend_info_)
@@ -146,7 +155,9 @@ void OdysseyPipeline::CreateGraphicsPipeline(const std::string& vertex_shader_pa
         .setPDynamicState(nullptr)
         .setLayout(config.pipeline_layout_)
         .setRenderPass(config.render_pass_)
-        .setSubpass(config.subpass_);
+        .setSubpass(config.subpass_)
+        .setBasePipelineIndex(-1)
+        .setBasePipelineHandle(nullptr);
     auto res = engine_.Device().createGraphicsPipeline(nullptr, pipeline_info);
     assert(res.result == vk::Result::eSuccess);
     graphics_pipeline_ = res.value;

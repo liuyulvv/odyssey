@@ -18,7 +18,6 @@ namespace odyssey {
 struct PipelineConfigInfo {
     vk::Viewport view_port_;
     vk::Rect2D scissor_;
-    vk::PipelineViewportStateCreateInfo view_port_info_;
     vk::PipelineInputAssemblyStateCreateInfo input_assembly_info_;
     vk::PipelineRasterizationStateCreateInfo rasterization_info_;
     vk::PipelineMultisampleStateCreateInfo multisample_info_;
