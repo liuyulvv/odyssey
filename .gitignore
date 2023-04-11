@@ -8,4 +8,5 @@ lib/
 *.dll
 *.lib
 log/
+shaders/*.spv
 odyssey
