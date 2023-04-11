@@ -13,12 +13,15 @@ namespace odyssey {
 
 Odyssey::Odyssey() {
     CreatePipelineLayout();
-    CreatePipeline();
+    pipeline_triangle_ = CreatePipeline("shaders/vert_1.vert.spv", "shaders/frag_1.frag.spv", vk::PrimitiveTopology::eTriangleList, 1.0F);
+    pipeline_line_ = CreatePipeline("shaders/blue.vert.spv", "shaders/blue.frag.spv", vk::PrimitiveTopology::eLineList, 1.0F);
     CreateCommandBuffers();
 }
 
 Odyssey::~Odyssey() {
     engine_.Device().destroyPipelineLayout(pipeline_layout_);
+    pipeline_triangle_.reset(nullptr);
+    pipeline_line_.reset(nullptr);
 }
 
 void Odyssey::Run() {
@@ -46,11 +49,11 @@ void Odyssey::CreatePipelineLayout() {
     }
 }
 
-void Odyssey::CreatePipeline() {
-    auto pipeline_config = OdysseyPipeline::DefaultPipelineConfigInfo(swap_chain_.GetWidth(), swap_chain_.GetHeight());
+std::unique_ptr<OdysseyPipeline> Odyssey::CreatePipeline(const std::string& vert_shader_path, const std::string& frag_shader_path, vk::PrimitiveTopology primitive_topology, float line_width) {
+    auto pipeline_config = OdysseyPipeline::DefaultPipelineConfigInfo(swap_chain_.GetWidth(), swap_chain_.GetHeight(), primitive_topology, line_width);
     pipeline_config.render_pass_ = swap_chain_.GetRenderPass();
     pipeline_config.pipeline_layout_ = pipeline_layout_;
-    pipeline_ = std::make_unique<OdysseyPipeline>(engine_, "shaders/vert_1.vert.spv", "shaders/frag_1.frag.spv", pipeline_config);
+    return std::move(std::make_unique<OdysseyPipeline>(engine_, vert_shader_path, frag_shader_path, pipeline_config));
 }
 
 void Odyssey::CreateCommandBuffers() {
@@ -61,6 +64,7 @@ void Odyssey::CreateCommandBuffers() {
         .setCommandPool(engine_.GetCommandPool())
         .setCommandBufferCount(static_cast<uint32_t>(command_buffers_.size()));
     command_buffers_ = engine_.Device().allocateCommandBuffers(alloc_info);
+
     for (size_t i = 0; i < command_buffers_.size(); ++i) {
         vk::CommandBufferBeginInfo begin_info{};
         command_buffers_[i].begin(begin_info);
@@ -72,7 +76,6 @@ void Odyssey::CreateCommandBuffers() {
         render_pass_info.renderArea
             .setOffset({0, 0})
             .setExtent(swap_chain_.GetSwapChainExtent());
-
         std::array<vk::ClearValue, 2> clear_values{};
         clear_values[0].setColor({0.17F, 0.17F, 0.17F, 1.0F});
         clear_values[1].setDepthStencil({1.0F, 0});
@@ -81,8 +84,11 @@ void Odyssey::CreateCommandBuffers() {
             .setClearValues(clear_values);
 
         command_buffers_[i].beginRenderPass(render_pass_info, vk::SubpassContents::eInline);
-        pipeline_->Bind(command_buffers_[i]);
 
+        pipeline_triangle_->Bind(command_buffers_[i]);
+        command_buffers_[i].draw(3, 1, 0, 0);
+
+        pipeline_line_->Bind(command_buffers_[i]);
         command_buffers_[i].draw(3, 1, 0, 0);
 
         command_buffers_[i].endRenderPass();

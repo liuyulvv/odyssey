@@ -33,7 +33,7 @@ public:
 private:
     void MainLoop();
     void CreatePipelineLayout();
-    void CreatePipeline();
+    std::unique_ptr<OdysseyPipeline> CreatePipeline(const std::string& vert_shader_path, const std::string& frag_shader_path, vk::PrimitiveTopology primitive_topology, float line_width);
     void CreateCommandBuffers();
     void Draw();
 
@@ -45,7 +45,8 @@ private:
     OdysseyWindow window_{WIDTH, HEIGHT, "Odyssey"};
     OdysseyEngine engine_{window_};
     OdysseySwapChain swap_chain_{engine_, window_.GetExtent()};
-    std::unique_ptr<OdysseyPipeline> pipeline_{};
+    std::unique_ptr<OdysseyPipeline> pipeline_triangle_{};
+    std::unique_ptr<OdysseyPipeline> pipeline_line_{};
     vk::PipelineLayout pipeline_layout_{};
     std::vector<vk::CommandBuffer> command_buffers_{};
 };
