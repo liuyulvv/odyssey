@@ -54,7 +54,7 @@ std::unique_ptr<OdysseyPipeline> Odyssey::CreatePipeline(const std::string& vert
     auto pipeline_config = OdysseyPipeline::DefaultPipelineConfigInfo(swap_chain_.GetWidth(), swap_chain_.GetHeight(), primitive_topology, line_width);
     pipeline_config.render_pass_ = swap_chain_.GetRenderPass();
     pipeline_config.pipeline_layout_ = pipeline_layout_;
-    return std::move(std::make_unique<OdysseyPipeline>(engine_, vert_shader_path, frag_shader_path, pipeline_config));
+    return std::make_unique<OdysseyPipeline>(engine_, vert_shader_path, frag_shader_path, pipeline_config);
 }
 
 void Odyssey::CreateCommandBuffers() {
