@@ -55,11 +55,11 @@ vk::Extent2D OdysseySwapChain::GetSwapChainExtent() const {
     return swap_chain_extent_;
 }
 
-const vk::Framebuffer& OdysseySwapChain::GetFrameBuffer(int index) const {
+const vk::Framebuffer& OdysseySwapChain::GetFrameBuffer(size_t index) const {
     return swap_chain_frame_buffers_[index];
 }
 
-const vk::ImageView& OdysseySwapChain::GetImageView(int index) const {
+const vk::ImageView& OdysseySwapChain::GetImageView(size_t index) const {
     return swap_chain_image_views_[index];
 }
 
@@ -79,10 +79,12 @@ float OdysseySwapChain::GetExtentAspectRatio() const {
     return static_cast<float>(swap_chain_extent_.width) / static_cast<float>(swap_chain_extent_.height);
 }
 
-vk::Result OdysseySwapChain::AcquireNextImage() {
+vk::Result OdysseySwapChain::AcquireNextImage(uint32_t& index) {
     auto res = engine_.Device().waitForFences(in_flight_fences_[current_frame_], true, std::numeric_limits<uint64_t>::max());
     assert(res == vk::Result::eSuccess);
-    return engine_.Device().acquireNextImageKHR(swap_chain_, std::numeric_limits<uint64_t>::max(), image_available_semaphores_[current_frame_], nullptr).result;
+    auto result = engine_.Device().acquireNextImageKHR(swap_chain_, std::numeric_limits<uint64_t>::max(), image_available_semaphores_[current_frame_], nullptr);
+    index = result.value;
+    return result.result;
 }
 
 vk::Result OdysseySwapChain::SubmitCommandBuffers(const vk::CommandBuffer& buffer, uint32_t& image_index) {

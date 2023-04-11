@@ -29,13 +29,13 @@ public:
     const vk::Format& GetSwapChainImageFormat() const;
     size_t GetImageCount() const;
     vk::Extent2D GetSwapChainExtent() const;
-    const vk::Framebuffer& GetFrameBuffer(int index) const;
-    const vk::ImageView& GetImageView(int index) const;
+    const vk::Framebuffer& GetFrameBuffer(size_t index) const;
+    const vk::ImageView& GetImageView(size_t index) const;
     const vk::RenderPass& GetRenderPass() const;
     uint32_t GetWidth() const;
     uint32_t GetHeight() const;
     float GetExtentAspectRatio() const;
-    vk::Result AcquireNextImage();
+    vk::Result AcquireNextImage(uint32_t& index);
     vk::Result SubmitCommandBuffers(const vk::CommandBuffer& buffers, uint32_t& image_index);
 
 private:
