@@ -23,6 +23,9 @@ add_subdirectory(glfw)
 # FMT
 add_subdirectory(fmt)
 
+# GLM
+add_subdirectory(glm)
+
 if (MSVC)
     add_compile_options(/W4 /WX)
     set(CMAKE_CXX_FLAGS /source-charset:utf-8)
@@ -52,6 +55,7 @@ include_directories(
     "include"
     "glfw/include"
     "fmt/include"
+    "glm"
 )
 
 link_directories(
