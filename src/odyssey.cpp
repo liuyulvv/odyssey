@@ -12,9 +12,10 @@
 namespace odyssey {
 
 Odyssey::Odyssey() {
+    LoadModel();
     CreatePipelineLayout();
-    pipeline_triangle_ = CreatePipeline("shaders/vert_1.vert.spv", "shaders/frag_1.frag.spv", vk::PrimitiveTopology::eTriangleList, 1.0F);
-    pipeline_line_ = CreatePipeline("shaders/blue.vert.spv", "shaders/blue.frag.spv", vk::PrimitiveTopology::eLineList, 1.0F);
+    pipeline_triangle_ = CreatePipeline("shaders/blue.vert.spv", "shaders/blue.frag.spv", vk::PrimitiveTopology::eTriangleList, 1.0F);
+    pipeline_line_ = CreatePipeline("shaders/blue.vert.spv", "shaders/red.frag.spv", vk::PrimitiveTopology::eLineList, 5.0F);
     CreateCommandBuffers();
 }
 
@@ -86,10 +87,13 @@ void Odyssey::CreateCommandBuffers() {
         command_buffers_[i].beginRenderPass(render_pass_info, vk::SubpassContents::eInline);
 
         pipeline_triangle_->Bind(command_buffers_[i]);
-        command_buffers_[i].draw(3, 1, 0, 0);
+
+        model_->Bind(command_buffers_[i]);
+        model_->Draw(command_buffers_[i]);
 
         pipeline_line_->Bind(command_buffers_[i]);
-        command_buffers_[i].draw(3, 1, 0, 0);
+        model_->Bind(command_buffers_[i]);
+        model_->Draw(command_buffers_[i]);
 
         command_buffers_[i].endRenderPass();
         command_buffers_[i].end();
@@ -106,6 +110,15 @@ void Odyssey::Draw() {
     if (res != vk::Result::eSuccess) {
         throw std::runtime_error("Failed to present swap chain image.");
     }
+}
+
+void Odyssey::LoadModel() {
+    std::vector<OdysseyModel::Vertex> vertices{
+        {{0.0F, -0.5F}},
+        {{0.5F, 0.5F}},
+        {{-0.5F, 0.5F}},
+    };
+    model_ = std::make_unique<OdysseyModel>(engine_, vertices);
 }
 
 }  // namespace odyssey

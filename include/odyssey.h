@@ -11,6 +11,7 @@
 #include <vector>
 
 #include "odyssey_engine.h"
+#include "odyssey_model.h"
 #include "odyssey_pipeline.h"
 #include "odyssey_swap_chain.h"
 #include "odyssey_window.h"
@@ -36,6 +37,7 @@ private:
     std::unique_ptr<OdysseyPipeline> CreatePipeline(const std::string& vert_shader_path, const std::string& frag_shader_path, vk::PrimitiveTopology primitive_topology, float line_width);
     void CreateCommandBuffers();
     void Draw();
+    void LoadModel();
 
 public:
     static constexpr int WIDTH{800};
@@ -49,6 +51,7 @@ private:
     std::unique_ptr<OdysseyPipeline> pipeline_line_{};
     vk::PipelineLayout pipeline_layout_{};
     std::vector<vk::CommandBuffer> command_buffers_{};
+    std::unique_ptr<OdysseyModel> model_{};
 };
 
 }  // namespace odyssey
