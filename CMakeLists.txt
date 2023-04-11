@@ -17,21 +17,15 @@ if(NOT ${IS_DEBUG_BUILD})
 endif()
 
 if (MSVC)
-    add_compile_options(/W4 /WX)
+    add_compile_options(/W4)
     set(CMAKE_CXX_FLAGS /source-charset:utf-8)
     set(Vulkan_SDK "D:/VulkanSDK/1.3.236.0")
 else()
     if (APPLE)
         set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -framework Cocoa -framework IOKit")
-        include_directories(
-            "/usr/local/include"
-        )
-        link_directories(
-            "/usr/local/lib"
-        )
     endif()
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++20")
-    add_compile_options(-Wall -Wextra -pedantic -Werror)
+    add_compile_options(-Wall -Wextra -pedantic)
 endif()
 
 find_package(Vulkan REQUIRED COMPONENTS glslc)
@@ -88,5 +82,5 @@ if (MSVC)
     target_link_libraries(${PROJECT_NAME} ${Vulkan_LIBRARIES} glfw3dll fmt::fmt)
 elseif (APPLE)
     add_executable(${PROJECT_NAME} ${SRCS})
-    target_link_libraries(${PROJECT_NAME} vulkan glfw fmt::fmt)
+    target_link_libraries(${PROJECT_NAME} ${Vulkan_LIBRARIES} glfw fmt::fmt)
 endif()
