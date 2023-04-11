@@ -8,19 +8,20 @@
 #define ODYSSEY_ODYSSEY_H_
 
 #include <memory>
-#include <stdexcept>
+#include <vector>
 
 #include "odyssey_engine.h"
 #include "odyssey_pipeline.h"
 #include "odyssey_swap_chain.h"
 #include "odyssey_window.h"
+#include "vulkan/vulkan.hpp"
 
 namespace odyssey {
 
 class Odyssey {
 public:
-    Odyssey() = default;
-    ~Odyssey() = default;
+    Odyssey();
+    ~Odyssey();
     Odyssey(const Odyssey& odyssey) = delete;
     Odyssey(Odyssey&& odyssey) = delete;
     Odyssey& operator=(const Odyssey& odyssey) = delete;
@@ -31,6 +32,10 @@ public:
 
 private:
     void MainLoop();
+    void CreatePipelineLayout();
+    void CreatePipeline();
+    void CreateCommandBuffers();
+    void Draw();
 
 public:
     static constexpr int WIDTH{800};
@@ -41,6 +46,8 @@ private:
     OdysseyEngine engine_{window_};
     OdysseySwapChain swap_chain_{engine_, window_.GetExtent()};
     std::unique_ptr<OdysseyPipeline> pipeline_{};
+    vk::PipelineLayout pipeline_layout_{};
+    std::vector<vk::CommandBuffer> command_buffers_{};
 };
 
 }  // namespace odyssey
