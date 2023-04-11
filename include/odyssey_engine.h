@@ -53,6 +53,7 @@ public:
     void CreateImage(uint32_t width, uint32_t height, vk::Format format, vk::ImageTiling tiling, vk::ImageUsageFlags usage, vk::MemoryPropertyFlags properties, vk::Image& image, vk::DeviceMemory& memory);
     const vk::Queue& GetGraphicsQueue() const;
     const vk::Queue& GetPresentQueue() const;
+    const vk::CommandPool& GetCommandPool() const;
 
 private:
     void CreateInstance();

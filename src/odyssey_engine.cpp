@@ -118,6 +118,10 @@ const vk::Queue& OdysseyEngine::GetPresentQueue() const {
     return present_queue_;
 }
 
+const vk::CommandPool& OdysseyEngine::GetCommandPool() const {
+    return command_pool_;
+}
+
 void OdysseyEngine::CreateInstance() {
     if (enable_validation_layers_ && !CheckValidationLayerSupport()) {
         throw std::runtime_error("Validation layers requested, but not available.");
@@ -220,6 +224,9 @@ void OdysseyEngine::CreateCommandPool() {
         .setFlags(vk::CommandPoolCreateFlagBits::eResetCommandBuffer)
         .setQueueFamilyIndex(queue_family_indices.graphics_family_);
     command_pool_ = device_.createCommandPool(pool_info);
+    if (!command_pool_) {
+        throw std::runtime_error("Failed to create command pool");
+    }
 }
 
 bool OdysseyEngine::CheckValidationLayerSupport() {
