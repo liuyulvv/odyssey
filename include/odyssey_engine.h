@@ -75,6 +75,7 @@ private:
 private:
     OdysseyWindow& window_;
 
+private:
 #if defined(NODEBUG)
     bool enable_validation_layers_ = false;
 #else
@@ -87,14 +88,19 @@ private:
     vk::DebugUtilsMessengerEXT debug_utils_messenger_;
 #endif  // NODEBUG
 
+private:
     vk::Instance instance_{};
     vk::SurfaceKHR surface_{};
     vk::PhysicalDevice physical_{};
+
+private:
 #if defined(_WIN32)
     std::vector<const char*> device_extensions_ = {"VK_KHR_swapchain"};
 #else
     std::vector<const char*> device_extensions_ = {"VK_KHR_portability_subset", "VK_KHR_swapchain"};
 #endif
+
+private:
     vk::Device device_{};
     vk::Queue graphics_queue_{};
     vk::Queue present_queue_{};
