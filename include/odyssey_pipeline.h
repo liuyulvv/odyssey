@@ -16,14 +16,15 @@
 namespace odyssey {
 
 struct PipelineConfigInfo {
-    vk::Viewport view_port_;
-    vk::Rect2D scissor_;
-    vk::PipelineInputAssemblyStateCreateInfo input_assembly_info_;
-    vk::PipelineRasterizationStateCreateInfo rasterization_info_;
-    vk::PipelineMultisampleStateCreateInfo multisample_info_;
-    vk::PipelineColorBlendAttachmentState color_blend_attachment_;
-    vk::PipelineColorBlendStateCreateInfo color_blend_info_;
-    vk::PipelineDepthStencilStateCreateInfo depth_stencil_info_;
+    vk::Viewport view_port_{};
+    vk::Rect2D scissor_{};
+    vk::PipelineInputAssemblyStateCreateInfo input_assembly_info_{};
+    vk::PipelineRasterizationStateCreateInfo rasterization_info_{};
+    vk::PipelineMultisampleStateCreateInfo multisample_info_{};
+    vk::PipelineColorBlendAttachmentState color_blend_attachment_{};
+    vk::PipelineColorBlendStateCreateInfo color_blend_info_{};
+    vk::PipelineDepthStencilStateCreateInfo depth_stencil_info_{};
+    vk::PipelineDynamicStateCreateInfo dynamic_state_info_{};
     vk::PipelineLayout pipeline_layout_{nullptr};
     vk::RenderPass render_pass_{nullptr};
     uint32_t subpass_{0};
@@ -44,8 +45,8 @@ public:
     static PipelineConfigInfo DefaultPipelineConfigInfo(uint32_t width, uint32_t height);
 
 private:
-    static std::vector<char> ReadFile(const std::string& path);
     void CreateGraphicsPipeline(const std::string& vertex_shader_path, const std::string& fragment_shader_path, const PipelineConfigInfo& config);
+    static std::vector<char> ReadFile(const std::string& path);
     vk::ShaderModule CreateShaderModule(const std::vector<char>& code);
 
 private:

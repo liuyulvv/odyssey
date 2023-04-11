@@ -91,20 +91,12 @@ PipelineConfigInfo OdysseyPipeline::DefaultPipelineConfigInfo(uint32_t width, ui
         .setFront({})
         .setBack({});
 
-    return config;
-}
+    std::array<vk::DynamicState, 2> dynamic_states{vk::DynamicState::eViewport, vk::DynamicState::eScissor};
+    config.dynamic_state_info_
+        .setDynamicStateCount(static_cast<uint32_t>(dynamic_states.size()))
+        .setDynamicStates(dynamic_states);
 
-std::vector<char> OdysseyPipeline::ReadFile(const std::string& path) {
-    std::ifstream file(path, std::ios::ate | std::ios::binary);
-    if (!file.is_open()) {
-        throw std::runtime_error(fmt::format("Failed to open file: {}.", path));
-    }
-    auto file_size = static_cast<std::streamsize>(file.tellg());
-    std::vector<char> buffer(file_size);
-    file.seekg(0);
-    file.read(buffer.data(), file_size);
-    file.close();
-    return buffer;
+    return config;
 }
 
 void OdysseyPipeline::CreateGraphicsPipeline(const std::string& vertex_shader_path, const std::string& fragment_shader_path, [[maybe_unused]] const PipelineConfigInfo& config) {
@@ -152,7 +144,7 @@ void OdysseyPipeline::CreateGraphicsPipeline(const std::string& vertex_shader_pa
         .setPMultisampleState(&config.multisample_info_)
         .setPColorBlendState(&config.color_blend_info_)
         .setPDepthStencilState(&config.depth_stencil_info_)
-        .setPDynamicState(nullptr)
+        .setPDynamicState(&config.dynamic_state_info_)
         .setLayout(config.pipeline_layout_)
         .setRenderPass(config.render_pass_)
         .setSubpass(config.subpass_)
@@ -164,6 +156,19 @@ void OdysseyPipeline::CreateGraphicsPipeline(const std::string& vertex_shader_pa
     if (!graphics_pipeline_) {
         throw std::runtime_error("Failed to create graphics pipeline.");
     }
+}
+
+std::vector<char> OdysseyPipeline::ReadFile(const std::string& path) {
+    std::ifstream file(path, std::ios::ate | std::ios::binary);
+    if (!file.is_open()) {
+        throw std::runtime_error(fmt::format("Failed to open file: {}.", path));
+    }
+    auto file_size = static_cast<std::streamsize>(file.tellg());
+    std::vector<char> buffer(file_size);
+    file.seekg(0);
+    file.read(buffer.data(), file_size);
+    file.close();
+    return buffer;
 }
 
 vk::ShaderModule OdysseyPipeline::CreateShaderModule(const std::vector<char>& code) {
