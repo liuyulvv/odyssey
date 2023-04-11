@@ -54,6 +54,7 @@ public:
     const vk::Queue& GetGraphicsQueue() const;
     const vk::Queue& GetPresentQueue() const;
     const vk::CommandPool& GetCommandPool() const;
+    void CreateBuffer(vk::DeviceSize size, vk::BufferUsageFlags usage, vk::MemoryPropertyFlags properties, vk::Buffer& buffer, vk::DeviceMemory& memory);
 
 private:
     void CreateInstance();

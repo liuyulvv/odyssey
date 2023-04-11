@@ -122,6 +122,29 @@ const vk::CommandPool& OdysseyEngine::GetCommandPool() const {
     return command_pool_;
 }
 
+void OdysseyEngine::CreateBuffer(vk::DeviceSize size, vk::BufferUsageFlags usage, vk::MemoryPropertyFlags properties, vk::Buffer& buffer, vk::DeviceMemory& memory) {
+    vk::BufferCreateInfo buffer_info;
+    buffer_info
+        .setFlags(vk::BufferCreateFlags())
+        .setSize(size)
+        .setUsage(usage)
+        .setSharingMode(vk::SharingMode::eExclusive);
+    buffer = device_.createBuffer(buffer_info);
+    if (!buffer) {
+        throw std::runtime_error("Failed to create buffer");
+    }
+    auto memory_requirements = device_.getBufferMemoryRequirements(buffer);
+    vk::MemoryAllocateInfo allocate_info;
+    allocate_info
+        .setAllocationSize(memory_requirements.size)
+        .setMemoryTypeIndex(FindMemoryType(memory_requirements.memoryTypeBits, properties));
+    memory = device_.allocateMemory(allocate_info);
+    if (!memory) {
+        throw std::runtime_error("Failed to allocate memory");
+    }
+    device_.bindBufferMemory(buffer, memory, 0);
+}
+
 void OdysseyEngine::CreateInstance() {
     if (enable_validation_layers_ && !CheckValidationLayerSupport()) {
         throw std::runtime_error("Validation layers requested, but not available.");
