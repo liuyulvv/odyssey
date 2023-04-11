@@ -43,6 +43,7 @@ public:
 
 public:
     static PipelineConfigInfo DefaultPipelineConfigInfo(uint32_t width, uint32_t height);
+    void Bind(const vk::CommandBuffer& buffer);
 
 private:
     void CreateGraphicsPipeline(const std::string& vertex_shader_path, const std::string& fragment_shader_path, const PipelineConfigInfo& config);

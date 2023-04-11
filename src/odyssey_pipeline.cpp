@@ -99,7 +99,11 @@ PipelineConfigInfo OdysseyPipeline::DefaultPipelineConfigInfo(uint32_t width, ui
     return config;
 }
 
-void OdysseyPipeline::CreateGraphicsPipeline(const std::string& vertex_shader_path, const std::string& fragment_shader_path, [[maybe_unused]] const PipelineConfigInfo& config) {
+void OdysseyPipeline::Bind(const vk::CommandBuffer& buffer) {
+    buffer.bindPipeline(vk::PipelineBindPoint::eGraphics, graphics_pipeline_);
+}
+
+void OdysseyPipeline::CreateGraphicsPipeline(const std::string& vertex_shader_path, const std::string& fragment_shader_path, const PipelineConfigInfo& config) {
     auto vert_shader_code = ReadFile(vertex_shader_path);
     auto frag_shader_code = ReadFile(fragment_shader_path);
     vert_shader_module_ = CreateShaderModule(vert_shader_code);
@@ -144,7 +148,8 @@ void OdysseyPipeline::CreateGraphicsPipeline(const std::string& vertex_shader_pa
         .setPMultisampleState(&config.multisample_info_)
         .setPColorBlendState(&config.color_blend_info_)
         .setPDepthStencilState(&config.depth_stencil_info_)
-        .setPDynamicState(&config.dynamic_state_info_)
+        // .setPDynamicState(&config.dynamic_state_info_)
+        .setPDynamicState(nullptr)
         .setLayout(config.pipeline_layout_)
         .setRenderPass(config.render_pass_)
         .setSubpass(config.subpass_)
