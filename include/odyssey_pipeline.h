@@ -42,7 +42,7 @@ public:
     OdysseyPipeline& operator=(OdysseyPipeline&& odyssey_pipeline) = delete;
 
 public:
-    static PipelineConfigInfo DefaultPipelineConfigInfo(uint32_t width, uint32_t height);
+    static PipelineConfigInfo DefaultPipelineConfigInfo(uint32_t width, uint32_t height, vk::PrimitiveTopology primitive_topology = vk::PrimitiveTopology::eTriangleList, float line_width = 1.0F);
     void Bind(const vk::CommandBuffer& buffer);
 
 private:

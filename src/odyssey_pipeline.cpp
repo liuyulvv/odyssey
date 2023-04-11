@@ -24,11 +24,11 @@ OdysseyPipeline::~OdysseyPipeline() {
     engine_.Device().destroyPipeline(graphics_pipeline_);
 }
 
-PipelineConfigInfo OdysseyPipeline::DefaultPipelineConfigInfo(uint32_t width, uint32_t height) {
+PipelineConfigInfo OdysseyPipeline::DefaultPipelineConfigInfo(uint32_t width, uint32_t height, vk::PrimitiveTopology primitive_topology, float line_width) {
     PipelineConfigInfo config{};
 
     config.input_assembly_info_
-        .setTopology(vk::PrimitiveTopology::eTriangleList)
+        .setTopology(primitive_topology)
         .setPrimitiveRestartEnable(false);
 
     config.view_port_
@@ -47,7 +47,7 @@ PipelineConfigInfo OdysseyPipeline::DefaultPipelineConfigInfo(uint32_t width, ui
         .setDepthClampEnable(false)
         .setRasterizerDiscardEnable(false)
         .setPolygonMode(vk::PolygonMode::eFill)
-        .setLineWidth(1.0F)
+        .setLineWidth(line_width)
         .setCullMode(vk::CullModeFlagBits::eNone)
         .setFrontFace(vk::FrontFace::eClockwise)
         .setDepthBiasEnable(false)
