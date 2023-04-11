@@ -3,7 +3,7 @@
 vec2 positions[3] = vec2[] (
     vec2(0.7, 0.7),
     vec2(0.9, 0.9),
-    vec2(·0.4, 0.4)
+    vec2(0.4, 0.4)
 );
 
 void main() {
