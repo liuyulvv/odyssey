@@ -11,6 +11,7 @@
 #include <stdexcept>
 
 #include "fmt/format.h"
+#include "odyssey_model.h"
 
 namespace odyssey {
 
@@ -122,11 +123,13 @@ void OdysseyPipeline::CreateGraphicsPipeline(const std::string& vertex_shader_pa
         .setPName("main");
 
     vk::PipelineVertexInputStateCreateInfo vertex_input_info;
+    auto binding_descriptions = OdysseyModel::Vertex::GetBindingDescriptions();
+    auto attribute_descriptions = OdysseyModel::Vertex::GetAttributeDescriptions();
     vertex_input_info
-        .setVertexAttributeDescriptionCount(0)
-        .setVertexBindingDescriptionCount(0)
-        .setPVertexAttributeDescriptions(nullptr)
-        .setPVertexBindingDescriptions(nullptr);
+        .setVertexBindingDescriptionCount(static_cast<uint32_t>(binding_descriptions.size()))
+        .setVertexBindingDescriptions(binding_descriptions)
+        .setVertexAttributeDescriptionCount(static_cast<uint32_t>(attribute_descriptions.size()))
+        .setVertexAttributeDescriptions(attribute_descriptions);
 
     std::array<vk::PipelineShaderStageCreateInfo, 2> shader_stages{vert_shader_stage_info, frag_shader_stage_info};
 
