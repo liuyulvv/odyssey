@@ -16,25 +16,10 @@ if(NOT ${IS_DEBUG_BUILD})
     add_compile_definitions(NODEBUG)
 endif()
 
-# GLFW
-option(BUILD_SHARED_LIBS "" ON)
-add_subdirectory(glfw)
-
-# FMT
-add_subdirectory(fmt)
-
-# GLM
-add_subdirectory(glm)
-
 if (MSVC)
     add_compile_options(/W4 /WX)
     set(CMAKE_CXX_FLAGS /source-charset:utf-8)
-    include_directories(
-        "D:/VulkanSDK/1.3.236.0/Include"
-    )
-    link_directories(
-        "D:/VulkanSDK/1.3.236.0/Lib"
-    )
+    set(Vulkan_SDK "D:/VulkanSDK/1.3.236.0")
 else()
     if (APPLE)
         set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -framework Cocoa -framework IOKit")
@@ -49,9 +34,43 @@ else()
     add_compile_options(-Wall -Wextra -pedantic -Werror)
 endif()
 
+find_package(Vulkan REQUIRED COMPONENTS glslc)
+find_program(glslc_executable NAMES glslc HINTS Vulkan::glslc)
+
+# glslc compile shader
+file(GLOB shaders ${CMAKE_CURRENT_SOURCE_DIR}/shaders/*.vert ${CMAKE_CURRENT_SOURCE_DIR}/shaders/*.frag)
+foreach(shader IN LISTS shaders)
+    get_filename_component(filename ${shader} NAME ABSOLUTE)
+    add_custom_command(
+        COMMAND
+        ${glslc_executable}
+        -o ${CMAKE_CURRENT_SOURCE_DIR}/shaders/${filename}.spv
+        ${shader}
+        OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/shaders/${filename}.spv
+        DEPENDS ${shader} ${CMAKE_CURRENT_SOURCE_DIR}/shaders
+        COMMENT "Compiling ${filename}"
+    )
+    list(APPEND spv_shaders ${CMAKE_CURRENT_SOURCE_DIR}/shaders/${filename}.spv)
+endforeach()
+add_custom_target(shaders ALL DEPENDS ${spv_shaders})
+
+# GLFW
+set(GLFW_LIBRARY_TYPE "SHARED" CACHE STRING "" FORCE)
+set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
+set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+add_subdirectory(glfw)
+
+# FMT
+add_subdirectory(fmt)
+
+# GLM
+add_subdirectory(glm)
+
 file(GLOB SRCS RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp")
 
 include_directories(
+    ${Vulkan_INCLUDE_DIRS}
     "include"
     "glfw/include"
     "fmt/include"
@@ -59,13 +78,14 @@ include_directories(
 )
 
 link_directories(
+    ${Vulkan_LIBRARY}
     ${EXECUTABLE_OUTPUT_PATH}/lib
 )
 
 if (MSVC)
     add_executable(${PROJECT_NAME} ${SRCS})
     set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS "/ENTRY:mainCRTStartup /SUBSYSTEM:WINDOWS" COMPILE_FLAGS "/EHsc")
-    target_link_libraries(${PROJECT_NAME} vulkan-1 glfw3dll fmt::fmt)
+    target_link_libraries(${PROJECT_NAME} ${Vulkan_LIBRARIES} glfw3dll fmt::fmt)
 elseif (APPLE)
     add_executable(${PROJECT_NAME} ${SRCS})
     target_link_libraries(${PROJECT_NAME} vulkan glfw fmt::fmt)
