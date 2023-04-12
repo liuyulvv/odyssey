@@ -62,6 +62,7 @@ add_subdirectory(fmt)
 add_subdirectory(glm)
 
 file(GLOB SRCS RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp")
+file(GLOB IMGUI_SRCS RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}/imgui/*.cpp")
 
 include_directories(
     ${Vulkan_INCLUDE_DIRS}
@@ -69,6 +70,7 @@ include_directories(
     "glfw/include"
     "fmt/include"
     "glm"
+    "imgui"
 )
 
 link_directories(
@@ -77,10 +79,10 @@ link_directories(
 )
 
 if (MSVC)
-    add_executable(${PROJECT_NAME} ${SRCS})
+    add_executable(${PROJECT_NAME} ${SRCS} ${IMGUI_SRCS})
     set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS "/ENTRY:mainCRTStartup /SUBSYSTEM:WINDOWS" COMPILE_FLAGS "/EHsc")
     target_link_libraries(${PROJECT_NAME} ${Vulkan_LIBRARIES} glfw3dll fmt::fmt)
 elseif (APPLE)
-    add_executable(${PROJECT_NAME} ${SRCS})
+    add_executable(${PROJECT_NAME} ${SRCS} ${IMGUI_SRCS})
     target_link_libraries(${PROJECT_NAME} ${Vulkan_LIBRARIES} glfw fmt::fmt)
 endif()
