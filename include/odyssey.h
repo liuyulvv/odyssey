@@ -11,6 +11,7 @@
 #include <vector>
 
 #include "odyssey_engine.h"
+#include "odyssey_gui.h"
 #include "odyssey_model.h"
 #include "odyssey_pipeline.h"
 #include "odyssey_swap_chain.h"
@@ -52,6 +53,7 @@ private:
     vk::PipelineLayout pipeline_layout_{};
     std::vector<vk::CommandBuffer> command_buffers_{};
     std::unique_ptr<OdysseyModel> model_{};
+    std::unique_ptr<OdysseyGUI> gui_{};
 };
 
 }  // namespace odyssey

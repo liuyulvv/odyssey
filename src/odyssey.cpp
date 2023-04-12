@@ -15,11 +15,13 @@ Odyssey::Odyssey() {
     LoadModel();
     CreatePipelineLayout();
     pipeline_triangle_ = CreatePipeline("shaders/blue.vert.spv", "shaders/blue.frag.spv", vk::PrimitiveTopology::eTriangleList, 1.0F);
-    pipeline_line_ = CreatePipeline("shaders/blue.vert.spv", "shaders/red.frag.spv", vk::PrimitiveTopology::eLineList, 5.0F);
+    pipeline_line_ = CreatePipeline("shaders/blue.vert.spv", "shaders/red.frag.spv", vk::PrimitiveTopology::eLineList, 1.0F);
     CreateCommandBuffers();
+    gui_ = std::make_unique<OdysseyGUI>(engine_, window_, swap_chain_);
 }
 
 Odyssey::~Odyssey() {
+    gui_.reset(nullptr);
     engine_.Device().destroyPipelineLayout(pipeline_layout_);
     pipeline_triangle_.reset(nullptr);
     pipeline_line_.reset(nullptr);
@@ -65,39 +67,6 @@ void Odyssey::CreateCommandBuffers() {
         .setCommandPool(engine_.GetCommandPool())
         .setCommandBufferCount(static_cast<uint32_t>(command_buffers_.size()));
     command_buffers_ = engine_.Device().allocateCommandBuffers(alloc_info);
-
-    for (size_t i = 0; i < command_buffers_.size(); ++i) {
-        vk::CommandBufferBeginInfo begin_info{};
-        command_buffers_[i].begin(begin_info);
-
-        vk::RenderPassBeginInfo render_pass_info{};
-        render_pass_info
-            .setRenderPass(swap_chain_.GetRenderPass())
-            .setFramebuffer(swap_chain_.GetFrameBuffer(i));
-        render_pass_info.renderArea
-            .setOffset({0, 0})
-            .setExtent(swap_chain_.GetSwapChainExtent());
-        std::array<vk::ClearValue, 2> clear_values{};
-        clear_values[0].setColor({0.17F, 0.17F, 0.17F, 1.0F});
-        clear_values[1].setDepthStencil({1.0F, 0});
-        render_pass_info
-            .setClearValueCount(static_cast<uint32_t>(clear_values.size()))
-            .setClearValues(clear_values);
-
-        command_buffers_[i].beginRenderPass(render_pass_info, vk::SubpassContents::eInline);
-
-        pipeline_triangle_->Bind(command_buffers_[i]);
-
-        model_->Bind(command_buffers_[i]);
-        model_->Draw(command_buffers_[i]);
-
-        pipeline_line_->Bind(command_buffers_[i]);
-        model_->Bind(command_buffers_[i]);
-        model_->Draw(command_buffers_[i]);
-
-        command_buffers_[i].endRenderPass();
-        command_buffers_[i].end();
-    }
 }
 
 void Odyssey::Draw() {
@@ -106,6 +75,40 @@ void Odyssey::Draw() {
     if (res != vk::Result::eSuccess && res != vk::Result::eSuboptimalKHR) {
         throw std::runtime_error("Failed to acquire swap chain image.");
     }
+
+    vk::CommandBufferBeginInfo begin_info{};
+    command_buffers_[image_index].begin(begin_info);
+
+    vk::RenderPassBeginInfo render_pass_info{};
+    render_pass_info
+        .setRenderPass(swap_chain_.GetRenderPass())
+        .setFramebuffer(swap_chain_.GetFrameBuffer(image_index));
+    render_pass_info.renderArea
+        .setOffset({0, 0})
+        .setExtent(swap_chain_.GetSwapChainExtent());
+    std::array<vk::ClearValue, 2> clear_values{};
+    clear_values[0].setColor({0.17F, 0.17F, 0.17F, 1.0F});
+    clear_values[1].setDepthStencil({1.0F, 0});
+    render_pass_info
+        .setClearValueCount(static_cast<uint32_t>(clear_values.size()))
+        .setClearValues(clear_values);
+
+    command_buffers_[image_index].beginRenderPass(render_pass_info, vk::SubpassContents::eInline);
+
+    gui_->Draw(command_buffers_[image_index]);
+
+    pipeline_triangle_->Bind(command_buffers_[image_index]);
+
+    model_->Bind(command_buffers_[image_index]);
+    model_->Draw(command_buffers_[image_index]);
+
+    pipeline_line_->Bind(command_buffers_[image_index]);
+    model_->Bind(command_buffers_[image_index]);
+    model_->Draw(command_buffers_[image_index]);
+
+    command_buffers_[image_index].endRenderPass();
+    command_buffers_[image_index].end();
+
     res = swap_chain_.SubmitCommandBuffers(command_buffers_[image_index], image_index);
     if (res != vk::Result::eSuccess) {
         throw std::runtime_error("Failed to present swap chain image.");
