@@ -15,6 +15,7 @@ OdysseyWindow::OdysseyWindow(int width, int height, const std::string& window_na
     glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
     glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
     window_ = glfwCreateWindow(width_, height_, window_name.c_str(), nullptr, nullptr);
+    glfwSetMouseButtonCallback(window_, MouseButtonCallback);
 }
 
 OdysseyWindow::~OdysseyWindow() {
@@ -44,6 +45,16 @@ vk::Extent2D OdysseyWindow::GetExtent() const {
 
 GLFWwindow* OdysseyWindow::GetWindow() const {
     return window_;
+}
+
+void OdysseyWindow::KeyBoardCallback([[maybe_unused]] GLFWwindow* window, int key, [[maybe_unused]] int scan_code, int action, [[maybe_unused]] int mods) {
+}
+
+void OdysseyWindow::MouseButtonCallback([[maybe_unused]] GLFWwindow* window, int button, int action, [[maybe_unused]] int mods) {
+    if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
+    } else if (button == GLFW_MOUSE_BUTTON_MIDDLE && action == GLFW_PRESS) {
+    } else if (button == GLFW_MOUSE_BUTTON_MIDDLE && action == GLFW_RELEASE) {
+    }
 }
 
 }  // namespace odyssey

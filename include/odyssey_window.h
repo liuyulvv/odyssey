@@ -34,7 +34,11 @@ public:
     static void PollEvents();
     void CreateWindowSurface(vk::Instance& instance, vk::SurfaceKHR& surface);
     vk::Extent2D GetExtent() const;
-    GLFWwindow* GetWindow()const;
+    GLFWwindow* GetWindow() const;
+
+private:
+    static void KeyBoardCallback(GLFWwindow* window, int key, int scan_code, int action, int mods);
+    static void MouseButtonCallback(GLFWwindow* window, int button, int action, int mods);
 
 private:
     int width_;
