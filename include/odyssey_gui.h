@@ -28,7 +28,7 @@ public:
     void Draw(vk::CommandBuffer& command_buffer);
 
 private:
-    void Draw();
+    void DrawTopMenuBar();
 
 private:
     OdysseyEngine& engine_;

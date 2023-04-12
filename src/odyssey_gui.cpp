@@ -65,15 +65,13 @@ void OdysseyGUI::Draw(vk::CommandBuffer &command_buffer) {
     ImGui_ImplVulkan_NewFrame();
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
-
-    Draw();
-
+    DrawTopMenuBar();
     ImGui::Render();
     auto *gui_data = ImGui::GetDrawData();
     ImGui_ImplVulkan_RenderDrawData(gui_data, command_buffer);
 }
 
-void OdysseyGUI::Draw() {
+void OdysseyGUI::DrawTopMenuBar() {
     if (top_menu_bar_) {
         auto *viewport = (ImGuiViewportP *)(void *)ImGui::GetMainViewport();
         auto window_flags = ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_MenuBar;
@@ -81,6 +79,12 @@ void OdysseyGUI::Draw() {
             if (ImGui::BeginMenuBar()) {
                 if (ImGui::BeginMenu("File")) {
                     if (ImGui::MenuItem("Open", "Ctrl+O")) {
+                    }
+                    if (ImGui::MenuItem("Save", "Ctrl+S")) {
+                    }
+                    if (ImGui::MenuItem("Import", "Ctrl+I")) {
+                    }
+                    if (ImGui::MenuItem("Output", "Ctrl+Shift+S")) {
                     }
                     ImGui::EndMenu();
                 }
