@@ -46,6 +46,8 @@ public:
 public:
     const vk::Device& Device() const;
     const vk::SurfaceKHR& Surface() const;
+    const vk::Instance& Instance() const;
+    const vk::PhysicalDevice& PhysicalDevice() const;
     SwapChainSupportDetails GetSwapChainSupport() const;
     QueueFamilyIndices FindPhysicalQueueFamilies() const;
     vk::ImageView CreateImageView(vk::Image& image, vk::Format format, vk::ImageAspectFlags aspect_flags);
@@ -55,6 +57,8 @@ public:
     const vk::Queue& GetPresentQueue() const;
     const vk::CommandPool& GetCommandPool() const;
     void CreateBuffer(vk::DeviceSize size, vk::BufferUsageFlags usage, vk::MemoryPropertyFlags properties, vk::Buffer& buffer, vk::DeviceMemory& memory);
+    vk::CommandBuffer BeginSingleTimeCommands();
+    void EndSingleTimeCommands(vk::CommandBuffer& command_buffer);
 
 private:
     void CreateInstance();

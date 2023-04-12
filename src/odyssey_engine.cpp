@@ -42,6 +42,14 @@ const vk::SurfaceKHR& OdysseyEngine::Surface() const {
     return surface_;
 }
 
+const vk::Instance& OdysseyEngine::Instance() const {
+    return instance_;
+}
+
+const vk::PhysicalDevice& OdysseyEngine::PhysicalDevice() const {
+    return physical_;
+}
+
 SwapChainSupportDetails OdysseyEngine::GetSwapChainSupport() const {
     return QuerySwapChainSupport(physical_);
 }
@@ -143,6 +151,30 @@ void OdysseyEngine::CreateBuffer(vk::DeviceSize size, vk::BufferUsageFlags usage
         throw std::runtime_error("Failed to allocate memory");
     }
     device_.bindBufferMemory(buffer, memory, 0);
+}
+
+vk::CommandBuffer OdysseyEngine::BeginSingleTimeCommands() {
+    vk::CommandBufferAllocateInfo allocate_info;
+    allocate_info
+        .setLevel(vk::CommandBufferLevel::ePrimary)
+        .setCommandPool(command_pool_)
+        .setCommandBufferCount(1);
+    auto command_buffer = device_.allocateCommandBuffers(allocate_info);
+    vk::CommandBufferBeginInfo begin_info;
+    begin_info.setFlags(vk::CommandBufferUsageFlagBits::eOneTimeSubmit);
+    command_buffer.at(0).begin(begin_info);
+    return command_buffer.at(0);
+}
+
+void OdysseyEngine::EndSingleTimeCommands(vk::CommandBuffer& command_buffer) {
+    command_buffer.end();
+    vk::SubmitInfo submit_info;
+    submit_info
+        .setCommandBufferCount(1)
+        .setCommandBuffers(command_buffer);
+    graphics_queue_.submit(submit_info);
+    graphics_queue_.waitIdle();
+    device_.freeCommandBuffers(command_pool_, command_buffer);
 }
 
 void OdysseyEngine::CreateInstance() {
