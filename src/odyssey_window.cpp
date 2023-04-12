@@ -42,4 +42,8 @@ vk::Extent2D OdysseyWindow::GetExtent() const {
     return {static_cast<uint32_t>(width_), static_cast<uint32_t>(height_)};
 }
 
+GLFWwindow* OdysseyWindow::GetWindow() const {
+    return window_;
+}
+
 }  // namespace odyssey

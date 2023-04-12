@@ -34,6 +34,7 @@ public:
     static void PollEvents();
     void CreateWindowSurface(vk::Instance& instance, vk::SurfaceKHR& surface);
     vk::Extent2D GetExtent() const;
+    GLFWwindow* GetWindow()const;
 
 private:
     int width_;
