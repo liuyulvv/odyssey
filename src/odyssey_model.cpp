@@ -7,6 +7,7 @@
 #include "odyssey_model.h"
 
 #include <array>
+#include <cstddef>
 #include <cstring>
 
 namespace odyssey {
@@ -53,12 +54,17 @@ std::vector<vk::VertexInputBindingDescription> OdysseyModel::Vertex::GetBindingD
 }
 
 std::vector<vk::VertexInputAttributeDescription> OdysseyModel::Vertex::GetAttributeDescriptions() {
-    std::vector<vk::VertexInputAttributeDescription> attribute_descriptions(1);
+    std::vector<vk::VertexInputAttributeDescription> attribute_descriptions(2);
     attribute_descriptions.at(0)
         .setBinding(0)
         .setLocation(0)
         .setFormat(vk::Format::eR32G32Sfloat)
-        .setOffset(0);
+        .setOffset(offsetof(Vertex, position_));
+    attribute_descriptions.at(1)
+        .setBinding(0)
+        .setLocation(1)
+        .setFormat(vk::Format::eR32G32B32A32Sfloat)
+        .setOffset(offsetof(Vertex, color_));
     return attribute_descriptions;
 }
 

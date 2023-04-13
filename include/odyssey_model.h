@@ -19,6 +19,7 @@
 
 #include "glm/glm.hpp"
 #include "odyssey_engine.h"
+#include "odyssey_util.h"
 #include "vulkan/vulkan.hpp"
 
 namespace odyssey {
@@ -27,6 +28,7 @@ class OdysseyModel {
 public:
     struct Vertex {
         glm::vec2 position_;
+        glm::vec4 color_;
         static std::vector<vk::VertexInputBindingDescription> GetBindingDescriptions();
         static std::vector<vk::VertexInputAttributeDescription> GetAttributeDescriptions();
     };

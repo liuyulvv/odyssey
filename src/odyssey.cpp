@@ -14,8 +14,7 @@ namespace odyssey {
 Odyssey::Odyssey() {
     LoadModel();
     CreatePipelineLayout();
-    pipeline_triangle_ = CreatePipeline("shaders/blue.vert.spv", "shaders/blue.frag.spv", vk::PrimitiveTopology::eTriangleList, 1.0F);
-    pipeline_line_ = CreatePipeline("shaders/blue.vert.spv", "shaders/red.frag.spv", vk::PrimitiveTopology::eLineList, 1.0F);
+    pipeline_line_ = CreatePipeline("shaders/shader.vert.spv", "shaders/shader.frag.spv", vk::PrimitiveTopology::eTriangleList, 1.0F);
     CreateCommandBuffers();
     gui_ = std::make_unique<OdysseyGUI>(engine_, window_, swap_chain_);
 }
@@ -23,7 +22,6 @@ Odyssey::Odyssey() {
 Odyssey::~Odyssey() {
     gui_.reset(nullptr);
     engine_.Device().destroyPipelineLayout(pipeline_layout_);
-    pipeline_triangle_.reset(nullptr);
     pipeline_line_.reset(nullptr);
 }
 
@@ -97,11 +95,6 @@ void Odyssey::Draw() {
 
     gui_->Draw(command_buffers_[image_index]);
 
-    pipeline_triangle_->Bind(command_buffers_[image_index]);
-
-    model_->Bind(command_buffers_[image_index]);
-    model_->Draw(command_buffers_[image_index]);
-
     pipeline_line_->Bind(command_buffers_[image_index]);
     model_->Bind(command_buffers_[image_index]);
     model_->Draw(command_buffers_[image_index]);
@@ -117,9 +110,12 @@ void Odyssey::Draw() {
 
 void Odyssey::LoadModel() {
     std::vector<OdysseyModel::Vertex> vertices{
-        {{0.0F, -0.5F}},
-        {{0.5F, 0.5F}},
-        {{-0.5F, 0.5F}},
+        {{0.0F, 0.0F}, {1.0F, 0.0F, 0.0F, 1.0F}},
+        {{0.5F, 0.5F}, {0.0F, 1.0F, 0.0F, 1.0F}},
+        {{0.5F, -0.5F}, {0.0F, 0.0F, 1.0F, 1.0F}},
+        {{-0.5F, -0.5F}, {1.0F, 0.0F, 0.0F, 1.0F}},
+        {{-0.5F, 0.5F}, {0.0F, 1.0F, 0.0F, 1.0F}},
+        {{1.0F, 1.0F}, {0.0F, 0.0F, 1.0F, 1.0F}},
     };
     model_ = std::make_unique<OdysseyModel>(engine_, vertices);
 }
