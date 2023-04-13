@@ -25,24 +25,18 @@ OdysseyPipeline::~OdysseyPipeline() {
     engine_->Device().destroyPipeline(graphics_pipeline_);
 }
 
-PipelineConfigInfo OdysseyPipeline::DefaultPipelineConfigInfo(uint32_t width, uint32_t height, vk::PrimitiveTopology primitive_topology, float line_width) {
+PipelineConfigInfo OdysseyPipeline::DefaultPipelineConfigInfo(vk::PrimitiveTopology primitive_topology, float line_width) {
     PipelineConfigInfo config{};
+
+    config.viewport_info_
+        .setViewportCount(1)
+        .setPViewports(nullptr)
+        .setScissorCount(1)
+        .setPScissors(nullptr);
 
     config.input_assembly_info_
         .setTopology(primitive_topology)
         .setPrimitiveRestartEnable(false);
-
-    config.view_port_
-        .setX(0.0F)
-        .setY(0.0F)
-        .setWidth(static_cast<float>(width))
-        .setHeight(static_cast<float>(height))
-        .setMinDepth(0.0F)
-        .setMaxDepth(1.0F);
-
-    config.scissor_
-        .setOffset({0, 0})
-        .setExtent({width, height});
 
     config.rasterization_info_
         .setDepthClampEnable(false)
@@ -92,10 +86,10 @@ PipelineConfigInfo OdysseyPipeline::DefaultPipelineConfigInfo(uint32_t width, ui
         .setFront({})
         .setBack({});
 
-    std::array<vk::DynamicState, 2> dynamic_states{vk::DynamicState::eViewport, vk::DynamicState::eScissor};
+    config.dynamic_states_ = {vk::DynamicState::eViewport, vk::DynamicState::eScissor};
     config.dynamic_state_info_
-        .setDynamicStateCount(static_cast<uint32_t>(dynamic_states.size()))
-        .setDynamicStates(dynamic_states);
+        .setDynamicStateCount(static_cast<uint32_t>(config.dynamic_states_.size()))
+        .setDynamicStates(config.dynamic_states_);
 
     return config;
 }
@@ -133,26 +127,18 @@ void OdysseyPipeline::CreateGraphicsPipeline(const std::string& vertex_shader_pa
 
     std::array<vk::PipelineShaderStageCreateInfo, 2> shader_stages{vert_shader_stage_info, frag_shader_stage_info};
 
-    vk::PipelineViewportStateCreateInfo view_port_info{};
-    view_port_info
-        .setViewportCount(1)
-        .setViewports(config.view_port_)
-        .setScissorCount(1)
-        .setScissors(config.scissor_);
-
     vk::GraphicsPipelineCreateInfo pipeline_info;
     pipeline_info
         .setStageCount(static_cast<uint32_t>(shader_stages.size()))
         .setStages(shader_stages)
         .setPVertexInputState(&vertex_input_info)
         .setPInputAssemblyState(&config.input_assembly_info_)
-        .setPViewportState(&view_port_info)
+        .setPViewportState(&config.viewport_info_)
         .setPRasterizationState(&config.rasterization_info_)
         .setPMultisampleState(&config.multisample_info_)
         .setPColorBlendState(&config.color_blend_info_)
         .setPDepthStencilState(&config.depth_stencil_info_)
-        // .setPDynamicState(&config.dynamic_state_info_)
-        .setPDynamicState(nullptr)
+        .setPDynamicState(&config.dynamic_state_info_)
         .setLayout(config.pipeline_layout_)
         .setRenderPass(config.render_pass_)
         .setSubpass(config.subpass_)

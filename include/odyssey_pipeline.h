@@ -17,14 +17,16 @@
 namespace odyssey {
 
 struct PipelineConfigInfo {
-    vk::Viewport view_port_{};
-    vk::Rect2D scissor_{};
+    PipelineConfigInfo() = default;
+
+    vk::PipelineViewportStateCreateInfo viewport_info_{};
     vk::PipelineInputAssemblyStateCreateInfo input_assembly_info_{};
     vk::PipelineRasterizationStateCreateInfo rasterization_info_{};
     vk::PipelineMultisampleStateCreateInfo multisample_info_{};
     vk::PipelineColorBlendAttachmentState color_blend_attachment_{};
     vk::PipelineColorBlendStateCreateInfo color_blend_info_{};
     vk::PipelineDepthStencilStateCreateInfo depth_stencil_info_{};
+    std::vector<vk::DynamicState> dynamic_states_{};
     vk::PipelineDynamicStateCreateInfo dynamic_state_info_{};
     vk::PipelineLayout pipeline_layout_{nullptr};
     vk::RenderPass render_pass_{nullptr};
@@ -43,7 +45,7 @@ public:
     OdysseyPipeline& operator=(OdysseyPipeline&& odyssey_pipeline) = delete;
 
 public:
-    static PipelineConfigInfo DefaultPipelineConfigInfo(uint32_t width, uint32_t height, vk::PrimitiveTopology primitive_topology = vk::PrimitiveTopology::eTriangleList, float line_width = 1.0F);
+    static PipelineConfigInfo DefaultPipelineConfigInfo(vk::PrimitiveTopology primitive_topology = vk::PrimitiveTopology::eTriangleList, float line_width = 1.0F);
     void Bind(const vk::CommandBuffer& buffer);
 
 private:
