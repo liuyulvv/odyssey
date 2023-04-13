@@ -7,6 +7,7 @@
 #include "odyssey_engine.h"
 
 #include <iostream>
+#include <stdexcept>
 #include <string>
 #include <unordered_set>
 #include <vector>
@@ -15,7 +16,7 @@
 
 namespace odyssey {
 
-OdysseyEngine::OdysseyEngine(OdysseyWindow& window) : window_(window) {
+OdysseyEngine::OdysseyEngine(std::shared_ptr<OdysseyWindow> window) : window_(std::move(window)) {
     CreateInstance();
     SetupDebugMessenger();
     CreateSurface();
@@ -103,18 +104,12 @@ void OdysseyEngine::CreateImage(uint32_t width, uint32_t height, vk::Format form
         .setHeight(height)
         .setDepth(1);
     image = device_.createImage(image_info);
-    if (!image) {
-        throw std::runtime_error("Failed to create image.");
-    }
     auto memory_requirements = device_.getImageMemoryRequirements(image);
     vk::MemoryAllocateInfo allocate_info;
     allocate_info
         .setAllocationSize(memory_requirements.size)
         .setMemoryTypeIndex(FindMemoryType(memory_requirements.memoryTypeBits, properties));
     memory = device_.allocateMemory(allocate_info);
-    if (!memory) {
-        throw std::runtime_error("Failed to allocate image memory.");
-    }
     device_.bindImageMemory(image, memory, 0);
 }
 
@@ -138,18 +133,12 @@ void OdysseyEngine::CreateBuffer(vk::DeviceSize size, vk::BufferUsageFlags usage
         .setUsage(usage)
         .setSharingMode(vk::SharingMode::eExclusive);
     buffer = device_.createBuffer(buffer_info);
-    if (!buffer) {
-        throw std::runtime_error("Failed to create buffer");
-    }
     auto memory_requirements = device_.getBufferMemoryRequirements(buffer);
     vk::MemoryAllocateInfo allocate_info;
     allocate_info
         .setAllocationSize(memory_requirements.size)
         .setMemoryTypeIndex(FindMemoryType(memory_requirements.memoryTypeBits, properties));
     memory = device_.allocateMemory(allocate_info);
-    if (!memory) {
-        throw std::runtime_error("Failed to allocate memory");
-    }
     device_.bindBufferMemory(buffer, memory, 0);
 }
 
@@ -221,7 +210,7 @@ void OdysseyEngine::SetupDebugMessenger() {
 }
 
 void OdysseyEngine::CreateSurface() {
-    window_.CreateWindowSurface(instance_, surface_);
+    window_->CreateWindowSurface(instance_, surface_);
 }
 
 void OdysseyEngine::PickPhysicalDevice() {
@@ -229,12 +218,10 @@ void OdysseyEngine::PickPhysicalDevice() {
     for (const auto& device : devices) {
         if (IsPhysicalDeviceSuitable(device)) {
             physical_ = device;
-            break;
+            return;
         }
     }
-    if (!physical_) {
-        throw std::runtime_error("Failed to find a suitable GPU.");
-    }
+    throw std::runtime_error("Failed to find a suitable GPU.");
 }
 
 void OdysseyEngine::CreateLogicalDevice() {
@@ -279,9 +266,6 @@ void OdysseyEngine::CreateCommandPool() {
         .setFlags(vk::CommandPoolCreateFlagBits::eResetCommandBuffer)
         .setQueueFamilyIndex(queue_family_indices.graphics_family_);
     command_pool_ = device_.createCommandPool(pool_info);
-    if (!command_pool_) {
-        throw std::runtime_error("Failed to create command pool");
-    }
 }
 
 bool OdysseyEngine::CheckValidationLayerSupport() {

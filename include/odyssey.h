@@ -39,16 +39,17 @@ private:
     void CreateCommandBuffers();
     void Draw();
     void LoadModel();
+    void RecreateSwapChain();
+    void RecordCommandBuffer(uint32_t image_index);
 
 public:
     static constexpr int WIDTH{800};
     static constexpr int HEIGHT{600};
 
 private:
-    OdysseyWindow window_{WIDTH, HEIGHT, "Odyssey"};
-    OdysseyEngine engine_{window_};
-    OdysseySwapChain swap_chain_{engine_, window_.GetExtent()};
-    std::unique_ptr<OdysseyPipeline> pipeline_triangle_{};
+    std::shared_ptr<OdysseyWindow> window_{};
+    std::shared_ptr<OdysseyEngine> engine_{};
+    std::unique_ptr<OdysseySwapChain> swap_chain_{};
     std::unique_ptr<OdysseyPipeline> pipeline_line_{};
     vk::PipelineLayout pipeline_layout_{};
     std::vector<vk::CommandBuffer> command_buffers_{};

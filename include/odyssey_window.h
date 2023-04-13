@@ -33,18 +33,22 @@ public:
     bool ShouldClose() const;
     static void PollEvents();
     void CreateWindowSurface(vk::Instance& instance, vk::SurfaceKHR& surface);
-    vk::Extent2D GetExtent() const;
+    static vk::Extent2D GetExtent();
     GLFWwindow* GetWindow() const;
 
 private:
     static void KeyBoardCallback(GLFWwindow* window, int key, int scan_code, int action, int mods);
     static void MouseButtonCallback(GLFWwindow* window, int button, int action, int mods);
+    static void CursorPositionCallback(GLFWwindow* window, double x, double y);
+    static void ResizedCallback(GLFWwindow* window, int width, int height);
 
 private:
-    int width_;
-    int height_;
+    static int width_;
+    static int height_;
     std::string window_name_;
     GLFWwindow* window_{nullptr};
+    static double mouse_x_;
+    static double mouse_y_;
 };
 
 }  // namespace odyssey

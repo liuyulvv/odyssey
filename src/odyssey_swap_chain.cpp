@@ -10,7 +10,7 @@
 
 namespace odyssey {
 
-OdysseySwapChain::OdysseySwapChain(OdysseyEngine& engine, vk::Extent2D window_extent) : engine_(engine), window_extent_(window_extent) {
+OdysseySwapChain::OdysseySwapChain(std::shared_ptr<OdysseyEngine> engine, vk::Extent2D window_extent) : engine_(std::move(engine)), window_extent_(window_extent) {
     CreateSwapChain();
     CreateRenderPass();
     CreateDepthResources();
@@ -20,27 +20,27 @@ OdysseySwapChain::OdysseySwapChain(OdysseyEngine& engine, vk::Extent2D window_ex
 
 OdysseySwapChain::~OdysseySwapChain() {
     for (auto image_view : swap_chain_image_views_) {
-        engine_.Device().destroyImageView(image_view);
+        engine_->Device().destroyImageView(image_view);
     }
     swap_chain_image_views_.clear();
     if (swap_chain_) {
-        engine_.Device().destroySwapchainKHR(swap_chain_);
+        engine_->Device().destroySwapchainKHR(swap_chain_);
         swap_chain_ = nullptr;
     }
     for (size_t i = 0; i < depth_images_.size(); ++i) {
-        engine_.Device().destroyImageView(depth_image_views_[i]);
-        engine_.Device().destroyImage(depth_images_[i]);
-        engine_.Device().freeMemory(depth_image_memories_[i]);
+        engine_->Device().destroyImageView(depth_image_views_[i]);
+        engine_->Device().destroyImage(depth_images_[i]);
+        engine_->Device().freeMemory(depth_image_memories_[i]);
     }
-    for (auto framebuffer : swap_chain_frame_buffers_) {
-        engine_.Device().destroyFramebuffer(framebuffer);
+    for (auto& framebuffer : swap_chain_frame_buffers_) {
+        engine_->Device().destroyFramebuffer(framebuffer);
     }
     for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT_; ++i) {
-        engine_.Device().destroySemaphore(render_finished_semaphores_[i]);
-        engine_.Device().destroySemaphore(image_available_semaphores_[i]);
-        engine_.Device().destroyFence(in_flight_fences_[i]);
+        engine_->Device().destroySemaphore(render_finished_semaphores_[i]);
+        engine_->Device().destroySemaphore(image_available_semaphores_[i]);
+        engine_->Device().destroyFence(in_flight_fences_[i]);
     }
-    engine_.Device().destroyRenderPass(render_pass_);
+    engine_->Device().destroyRenderPass(render_pass_);
 }
 
 const vk::Format& OdysseySwapChain::GetSwapChainImageFormat() const {
@@ -79,18 +79,14 @@ float OdysseySwapChain::GetExtentAspectRatio() const {
     return static_cast<float>(swap_chain_extent_.width) / static_cast<float>(swap_chain_extent_.height);
 }
 
-vk::Result OdysseySwapChain::AcquireNextImage(uint32_t& index) {
-    auto res = engine_.Device().waitForFences(in_flight_fences_[current_frame_], true, std::numeric_limits<uint64_t>::max());
-    assert(res == vk::Result::eSuccess);
-    auto result = engine_.Device().acquireNextImageKHR(swap_chain_, std::numeric_limits<uint64_t>::max(), image_available_semaphores_[current_frame_], nullptr);
-    index = result.value;
-    return result.result;
+uint32_t OdysseySwapChain::AcquireNextImage() {
+    engine_->Device().waitForFences(in_flight_fences_[current_frame_], true, std::numeric_limits<uint64_t>::max());
+    return engine_->Device().acquireNextImageKHR(swap_chain_, std::numeric_limits<uint64_t>::max(), image_available_semaphores_[current_frame_], nullptr).value;
 }
 
-vk::Result OdysseySwapChain::SubmitCommandBuffers(const vk::CommandBuffer& buffer, uint32_t& image_index) {
+void OdysseySwapChain::SubmitCommandBuffers(const vk::CommandBuffer& buffer, uint32_t& image_index) {
     if (images_in_flight_[image_index]) {
-        auto res = engine_.Device().waitForFences(images_in_flight_[image_index], true, std::numeric_limits<uint64_t>::max());
-        assert(res == vk::Result::eSuccess);
+        engine_->Device().waitForFences(images_in_flight_[image_index], true, std::numeric_limits<uint64_t>::max());
     }
     images_in_flight_[image_index] = in_flight_fences_[current_frame_];
 
@@ -105,9 +101,9 @@ vk::Result OdysseySwapChain::SubmitCommandBuffers(const vk::CommandBuffer& buffe
         .setSignalSemaphoreCount(1)
         .setSignalSemaphores(render_finished_semaphores_[current_frame_]);
 
-    engine_.Device().resetFences(in_flight_fences_[current_frame_]);
+    engine_->Device().resetFences(in_flight_fences_[current_frame_]);
 
-    engine_.GetGraphicsQueue().submit(submit_info, in_flight_fences_[current_frame_]);
+    engine_->GetGraphicsQueue().submit(submit_info, in_flight_fences_[current_frame_]);
 
     vk::PresentInfoKHR present_info;
     present_info
@@ -117,15 +113,12 @@ vk::Result OdysseySwapChain::SubmitCommandBuffers(const vk::CommandBuffer& buffe
         .setSwapchains(swap_chain_)
         .setImageIndices(image_index);
 
-    auto res = engine_.GetPresentQueue().presentKHR(present_info);
-
+    engine_->GetPresentQueue().presentKHR(present_info);
     current_frame_ = (current_frame_ + 1) % MAX_FRAMES_IN_FLIGHT_;
-
-    return res;
 }
 
 void OdysseySwapChain::CreateSwapChain() {
-    auto swap_chain_support = engine_.GetSwapChainSupport();
+    auto swap_chain_support = engine_->GetSwapChainSupport();
     auto surface_format = ChooseSwapSurfaceFormat(swap_chain_support.formats_);
     swap_chain_image_format_ = surface_format.format;
     auto present_mode = ChooseSwapPresentMode(swap_chain_support.present_modes_);
@@ -137,7 +130,7 @@ void OdysseySwapChain::CreateSwapChain() {
     }
     vk::SwapchainCreateInfoKHR create_info{};
     create_info
-        .setSurface(engine_.Surface())
+        .setSurface(engine_->Surface())
         .setMinImageCount(image_count)
         .setImageFormat(surface_format.format)
         .setImageColorSpace(surface_format.colorSpace)
@@ -148,7 +141,7 @@ void OdysseySwapChain::CreateSwapChain() {
         .setCompositeAlpha(vk::CompositeAlphaFlagBitsKHR::eOpaque)
         .setPresentMode(present_mode)
         .setClipped(true);
-    auto indices = engine_.FindPhysicalQueueFamilies();
+    auto indices = engine_->FindPhysicalQueueFamilies();
     if (indices.graphics_family_ != indices.present_family_) {
         std::array<uint32_t, 2> queue_family_indices{indices.graphics_family_, indices.present_family_};
         create_info
@@ -159,17 +152,11 @@ void OdysseySwapChain::CreateSwapChain() {
             .setImageSharingMode(vk::SharingMode::eExclusive)
             .setQueueFamilyIndices(indices.graphics_family_);
     }
-    swap_chain_ = engine_.Device().createSwapchainKHR(create_info);
-    if (!swap_chain_) {
-        throw std::runtime_error("Failed to create swap chain.");
-    }
-    swap_chain_images_ = engine_.Device().getSwapchainImagesKHR(swap_chain_);
+    swap_chain_ = engine_->Device().createSwapchainKHR(create_info);
+    swap_chain_images_ = engine_->Device().getSwapchainImagesKHR(swap_chain_);
     swap_chain_image_views_.resize(swap_chain_images_.size());
     for (size_t i = 0; i < swap_chain_images_.size(); ++i) {
-        swap_chain_image_views_[i] = engine_.CreateImageView(swap_chain_images_[i], swap_chain_image_format_, vk::ImageAspectFlagBits::eColor);
-        if (!swap_chain_image_views_[i]) {
-            throw std::runtime_error("Failed to create texture image view.");
-        }
+        swap_chain_image_views_[i] = engine_->CreateImageView(swap_chain_images_[i], swap_chain_image_format_, vk::ImageAspectFlagBits::eColor);
     }
 }
 
@@ -230,10 +217,7 @@ void OdysseySwapChain::CreateRenderPass() {
         .setSubpasses(subpass)
         .setDependencyCount(1)
         .setDependencies(dependency);
-    render_pass_ = engine_.Device().createRenderPass(render_pass_info);
-    if (!render_pass_) {
-        throw std::runtime_error("Failed to create render pass.");
-    }
+    render_pass_ = engine_->Device().createRenderPass(render_pass_info);
 }
 
 void OdysseySwapChain::CreateDepthResources() {
@@ -243,11 +227,8 @@ void OdysseySwapChain::CreateDepthResources() {
     depth_image_memories_.resize(GetImageCount());
     depth_image_views_.resize(GetImageCount());
     for (size_t i = 0; i < depth_images_.size(); ++i) {
-        engine_.CreateImage(swap_chain_extent.width, swap_chain_extent.height, depth_format, vk::ImageTiling::eOptimal, vk::ImageUsageFlagBits::eDepthStencilAttachment, vk::MemoryPropertyFlagBits::eDeviceLocal, depth_images_[i], depth_image_memories_[i]);
-        depth_image_views_[i] = engine_.CreateImageView(depth_images_[i], depth_format, vk::ImageAspectFlagBits::eDepth);
-        if (!depth_image_views_[i]) {
-            throw std::runtime_error("Failed to create texture image view.");
-        }
+        engine_->CreateImage(swap_chain_extent.width, swap_chain_extent.height, depth_format, vk::ImageTiling::eOptimal, vk::ImageUsageFlagBits::eDepthStencilAttachment, vk::MemoryPropertyFlagBits::eDeviceLocal, depth_images_[i], depth_image_memories_[i]);
+        depth_image_views_[i] = engine_->CreateImageView(depth_images_[i], depth_format, vk::ImageAspectFlagBits::eDepth);
     }
 }
 
@@ -265,10 +246,7 @@ void OdysseySwapChain::CreateFrameBuffers() {
             .setHeight(swap_chain_extent.height)
             .setLayers(1);
 
-        swap_chain_frame_buffers_[i] = engine_.Device().createFramebuffer(framebuffer_info);
-        if (!swap_chain_frame_buffers_[i]) {
-            throw std::runtime_error("Failed to create framebuffer.");
-        }
+        swap_chain_frame_buffers_[i] = engine_->Device().createFramebuffer(framebuffer_info);
     }
 }
 
@@ -282,12 +260,9 @@ void OdysseySwapChain::CreateSyncObjects() {
     vk::FenceCreateInfo fence_info{};
     fence_info.setFlags(vk::FenceCreateFlagBits::eSignaled);
     for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT_; ++i) {
-        image_available_semaphores_[i] = engine_.Device().createSemaphore(semaphore_info);
-        render_finished_semaphores_[i] = engine_.Device().createSemaphore(semaphore_info);
-        in_flight_fences_[i] = engine_.Device().createFence(fence_info);
-        if (!image_available_semaphores_[i] || !render_finished_semaphores_[i] || !in_flight_fences_[i]) {
-            throw std::runtime_error("Failed to create synchronization objects for a frame.");
-        }
+        image_available_semaphores_[i] = engine_->Device().createSemaphore(semaphore_info);
+        render_finished_semaphores_[i] = engine_->Device().createSemaphore(semaphore_info);
+        in_flight_fences_[i] = engine_->Device().createFence(fence_info);
     }
 }
 
@@ -320,7 +295,7 @@ vk::Extent2D OdysseySwapChain::ChooseSwapExtent(const vk::SurfaceCapabilitiesKHR
 }
 
 vk::Format OdysseySwapChain::FindDepthFormat() const {
-    return engine_.FindSupportedFormat({vk::Format::eD32Sfloat, vk::Format::eD32SfloatS8Uint, vk::Format::eD24UnormS8Uint}, vk::ImageTiling::eOptimal, vk::FormatFeatureFlagBits::eDepthStencilAttachment);
+    return engine_->FindSupportedFormat({vk::Format::eD32Sfloat, vk::Format::eD32SfloatS8Uint, vk::Format::eD24UnormS8Uint}, vk::ImageTiling::eOptimal, vk::FormatFeatureFlagBits::eDepthStencilAttachment);
 }
 
 }  // namespace odyssey

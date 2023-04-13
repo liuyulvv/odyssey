@@ -7,6 +7,8 @@
 #if !defined(ODYSSEY_ODYSSEY_GUI_H_)
 #define ODYSSEY_ODYSSEY_GUI_H_
 
+#include <memory>
+
 #include "odyssey_engine.h"
 #include "odyssey_swap_chain.h"
 #include "odyssey_window.h"
@@ -16,7 +18,7 @@ namespace odyssey {
 
 class OdysseyGUI {
 public:
-    OdysseyGUI(OdysseyEngine& engine, OdysseyWindow& window, OdysseySwapChain& swap_chain);
+    OdysseyGUI(std::shared_ptr<OdysseyEngine> engine, std::shared_ptr<OdysseyWindow> window, const vk::RenderPass& render_pass);
     ~OdysseyGUI();
     OdysseyGUI() = delete;
     OdysseyGUI(const OdysseyGUI& odyssey_gui) = delete;
@@ -31,9 +33,9 @@ private:
     void DrawTopMenuBar();
 
 private:
-    OdysseyEngine& engine_;
-    OdysseyWindow& window_;
-    OdysseySwapChain& swap_chain_;
+    std::shared_ptr<OdysseyEngine> engine_;
+    std::shared_ptr<OdysseyWindow> window_;
+    const vk::RenderPass& render_pass_;
     vk::DescriptorPool pool_;
 
     bool top_menu_bar_{true};

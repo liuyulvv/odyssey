@@ -15,11 +15,11 @@
 #define GLM_DEPTH_ZERO_TO_ONE
 #endif  // GLM_DEPTH_ZERO_TO_ONE
 
+#include <memory>
 #include <vector>
 
 #include "glm/glm.hpp"
 #include "odyssey_engine.h"
-#include "odyssey_util.h"
 #include "vulkan/vulkan.hpp"
 
 namespace odyssey {
@@ -34,7 +34,7 @@ public:
     };
 
 public:
-    OdysseyModel(OdysseyEngine& engine, const std::vector<Vertex>& vertices);
+    OdysseyModel(std::shared_ptr<OdysseyEngine> engine, const std::vector<Vertex>& vertices);
     ~OdysseyModel();
 
     OdysseyModel() = delete;
@@ -51,7 +51,7 @@ private:
     void CreateVertexBuffer(const std::vector<Vertex>& vertices);
 
 private:
-    OdysseyEngine& engine_;
+    std::shared_ptr<OdysseyEngine> engine_;
     vk::Buffer vertex_buffer_{};
     vk::DeviceMemory vertex_buffer_memory_{};
     uint32_t vertex_count_{0};

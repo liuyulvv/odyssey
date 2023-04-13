@@ -7,6 +7,7 @@
 #if !defined(ODYSSEY_ODYSSEY_ENGINE_H_)
 #define ODYSSEY_ODYSSEY_ENGINE_H_
 
+#include <memory>
 #include <vector>
 
 #include "odyssey_window.h"
@@ -34,7 +35,7 @@ struct SwapChainSupportDetails {
 
 class OdysseyEngine {
 public:
-    explicit OdysseyEngine(OdysseyWindow& window);
+    explicit OdysseyEngine(std::shared_ptr<OdysseyWindow> window);
     ~OdysseyEngine();
 
     OdysseyEngine() = delete;
@@ -79,7 +80,7 @@ private:
     uint32_t FindMemoryType(uint32_t type_filter, vk::MemoryPropertyFlags properties);
 
 private:
-    OdysseyWindow& window_;
+    std::shared_ptr<OdysseyWindow> window_;
 
 private:
 #if defined(NODEBUG)

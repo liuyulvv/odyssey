@@ -10,12 +10,22 @@
 
 namespace odyssey {
 
-OdysseyWindow::OdysseyWindow(int width, int height, const std::string& window_name) : width_(width), height_(height), window_name_(window_name) {
+int OdysseyWindow::width_{0};
+int OdysseyWindow::height_{0};
+double OdysseyWindow::mouse_x_{0.0};
+double OdysseyWindow::mouse_y_{0.0};
+
+OdysseyWindow::OdysseyWindow(int width, int height, const std::string& window_name) : window_name_(window_name) {
+    width_ = width;
+    height_ = height;
     glfwInit();
     glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-    glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
+    glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
     window_ = glfwCreateWindow(width_, height_, window_name.c_str(), nullptr, nullptr);
+    glfwSetWindowUserPointer(window_, this);
     glfwSetMouseButtonCallback(window_, MouseButtonCallback);
+    glfwSetCursorPosCallback(window_, CursorPositionCallback);
+    glfwSetFramebufferSizeCallback(window_, ResizedCallback);
 }
 
 OdysseyWindow::~OdysseyWindow() {
@@ -39,7 +49,7 @@ void OdysseyWindow::CreateWindowSurface(vk::Instance& instance, vk::SurfaceKHR& 
     surface = vk::SurfaceKHR(c_surface);
 }
 
-vk::Extent2D OdysseyWindow::GetExtent() const {
+vk::Extent2D OdysseyWindow::GetExtent() {
     return {static_cast<uint32_t>(width_), static_cast<uint32_t>(height_)};
 }
 
@@ -55,6 +65,17 @@ void OdysseyWindow::MouseButtonCallback([[maybe_unused]] GLFWwindow* window, int
     } else if (button == GLFW_MOUSE_BUTTON_MIDDLE && action == GLFW_PRESS) {
     } else if (button == GLFW_MOUSE_BUTTON_MIDDLE && action == GLFW_RELEASE) {
     }
+}
+
+void OdysseyWindow::CursorPositionCallback([[maybe_unused]] GLFWwindow* window, double x, double y) {
+    mouse_x_ = x;
+    mouse_y_ = y;
+}
+
+void OdysseyWindow::ResizedCallback(GLFWwindow* window, int width, int height) {
+    auto* odyssey_window = reinterpret_cast<OdysseyWindow*>(window);
+    OdysseyWindow::width_ = width;
+    OdysseyWindow::height_ = height;
 }
 
 }  // namespace odyssey

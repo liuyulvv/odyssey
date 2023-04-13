@@ -7,6 +7,7 @@
 #if !defined(ODYSSEY_ODYSSEY_SWAP_CHAIN_H_)
 #define ODYSSEY_ODYSSEY_SWAP_CHAIN_H_
 
+#include <memory>
 #include <vector>
 
 #include "odyssey_engine.h"
@@ -16,7 +17,7 @@ namespace odyssey {
 
 class OdysseySwapChain {
 public:
-    OdysseySwapChain(OdysseyEngine& engine, vk::Extent2D window_extent);
+    OdysseySwapChain(std::shared_ptr<OdysseyEngine> engine, vk::Extent2D window_extent);
     ~OdysseySwapChain();
 
     OdysseySwapChain() = delete;
@@ -35,8 +36,8 @@ public:
     uint32_t GetWidth() const;
     uint32_t GetHeight() const;
     float GetExtentAspectRatio() const;
-    vk::Result AcquireNextImage(uint32_t& index);
-    vk::Result SubmitCommandBuffers(const vk::CommandBuffer& buffers, uint32_t& image_index);
+    uint32_t AcquireNextImage();
+    void SubmitCommandBuffers(const vk::CommandBuffer& buffers, uint32_t& image_index);
 
 private:
     void CreateSwapChain();
@@ -55,7 +56,7 @@ public:
     static constexpr int MAX_FRAMES_IN_FLIGHT_{2};
 
 private:
-    OdysseyEngine& engine_;
+    std::shared_ptr<OdysseyEngine> engine_;
     vk::Extent2D window_extent_;
     vk::Format swap_chain_image_format_{};
     vk::Extent2D swap_chain_extent_{};

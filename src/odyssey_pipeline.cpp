@@ -15,14 +15,14 @@
 
 namespace odyssey {
 
-OdysseyPipeline::OdysseyPipeline(OdysseyEngine& engine, const std::string& vertex_shader_path, const std::string& fragment_shader_path, const PipelineConfigInfo& config) : engine_(engine) {
+OdysseyPipeline::OdysseyPipeline(std::shared_ptr<OdysseyEngine> engine, const std::string& vertex_shader_path, const std::string& fragment_shader_path, const PipelineConfigInfo& config) : engine_(std::move(engine)) {
     CreateGraphicsPipeline(vertex_shader_path, fragment_shader_path, config);
 }
 
 OdysseyPipeline::~OdysseyPipeline() {
-    engine_.Device().destroyShaderModule(vert_shader_module_);
-    engine_.Device().destroyShaderModule(frag_shader_module_);
-    engine_.Device().destroyPipeline(graphics_pipeline_);
+    engine_->Device().destroyShaderModule(vert_shader_module_);
+    engine_->Device().destroyShaderModule(frag_shader_module_);
+    engine_->Device().destroyPipeline(graphics_pipeline_);
 }
 
 PipelineConfigInfo OdysseyPipeline::DefaultPipelineConfigInfo(uint32_t width, uint32_t height, vk::PrimitiveTopology primitive_topology, float line_width) {
@@ -158,12 +158,7 @@ void OdysseyPipeline::CreateGraphicsPipeline(const std::string& vertex_shader_pa
         .setSubpass(config.subpass_)
         .setBasePipelineIndex(-1)
         .setBasePipelineHandle(nullptr);
-    auto res = engine_.Device().createGraphicsPipeline(nullptr, pipeline_info);
-    assert(res.result == vk::Result::eSuccess);
-    graphics_pipeline_ = res.value;
-    if (!graphics_pipeline_) {
-        throw std::runtime_error("Failed to create graphics pipeline.");
-    }
+    graphics_pipeline_ = engine_->Device().createGraphicsPipeline(nullptr, pipeline_info).value;
 }
 
 std::vector<char> OdysseyPipeline::ReadFile(const std::string& path) {
@@ -183,7 +178,7 @@ vk::ShaderModule OdysseyPipeline::CreateShaderModule(const std::vector<char>& co
     vk::ShaderModuleCreateInfo create_info;
     create_info.setCodeSize(code.size());
     create_info.pCode = reinterpret_cast<const uint32_t*>(code.data());
-    return engine_.Device().createShaderModule(create_info);
+    return engine_->Device().createShaderModule(create_info);
 }
 
 }  // namespace odyssey
