@@ -4,19 +4,25 @@
  * @date 2023-04-09
  */
 
-#include <cstdlib>
-#include <iostream>
-#include <stdexcept>
+#include <QApplication>
+#include <QGuiApplication>
+#include <QVulkanInstance>
 
-#include "odyssey.h"
+#include "odyssey_gui.h"
+#include "odyssey_window.h"
 
-int main() {
-    try {
-        odyssey::Odyssey app;
-        app.Run();
-    } catch (const std::exception& e) {
-        std::cerr << e.what() << std::endl;
-        return EXIT_FAILURE;
-    }
-    return EXIT_SUCCESS;
+int main(int argc, char* argv[]) {
+    QApplication app(argc, argv);
+    QVulkanInstance instance;
+#if !defined(NODEBUG)
+    instance.setLayers({"VK_LAYER_KHRONOS_validation"});
+#endif
+    if (!instance.create()) 
+        return -1;
+    auto* odysseyWindow = new odyssey::OdysseyWindow();
+    odysseyWindow->setVulkanInstance(&instance);
+    odyssey::OdysseyGUI odysseyGUI(odysseyWindow);
+    odysseyGUI.resize(1024, 768);
+    odysseyGUI.show();
+    return app.exec();
 }
