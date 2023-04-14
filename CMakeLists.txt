@@ -52,10 +52,14 @@ foreach(shader IN LISTS shaders)
 endforeach()
 add_custom_target(shaders ALL DEPENDS ${spv_shaders})
 
+# GLM
+add_subdirectory(glm)
+
 file(GLOB SRCS RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp")
 
 include_directories(
     "include"
+    "glm"
 )
 
 link_directories(

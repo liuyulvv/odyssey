@@ -9,15 +9,22 @@
 #include <QVulkanWindowRenderer>
 #include <stdexcept>
 
-#include "odyssey_render.h"
+#include "odyssey_window_render.h"
 
 namespace odyssey {
 
-OdysseyWindow::OdysseyWindow() {
+OdysseyWindow::OdysseyWindow() : m_instance(new QVulkanInstance()) {
+#if !defined(NODEBUG)
+    m_instance->setLayers({"VK_LAYER_KHRONOS_validation"});
+#endif
+    if (!m_instance->create()) {
+        throw std::runtime_error("Failed to create vulkan instance.");
+    }
+    setVulkanInstance(m_instance);
 }
 
 QVulkanWindowRenderer* OdysseyWindow::createRenderer() {
-    return new OdysseyRender(this);
+    return new OdysseyWindowRender(this);
 }
 
 }  // namespace odyssey

@@ -7,6 +7,9 @@
 #if !defined(ODYSSEY_WINDOW_H_)
 #define ODYSSEY_WINDOW_H_
 
+#include <vulkan/vulkan.h>
+
+#include <QVulkanInstance>
 #include <QVulkanWindow>
 #include <QVulkanWindowRenderer>
 
@@ -23,6 +26,9 @@ public:
 
 public:
     QVulkanWindowRenderer* createRenderer() override;
+
+private:
+    QVulkanInstance* m_instance{nullptr};
 };
 
 }  // namespace odyssey

@@ -1,10 +1,10 @@
 /**
- * @file odyssey_gui.cpp
+ * @file odyssey.cpp
  * @author liuyulvv (liuyulvv@outlook.com)
  * @date 2023-04-12
  */
 
-#include "odyssey_gui.h"
+#include "odyssey.h"
 
 #include <QVBoxLayout>
 
@@ -12,11 +12,18 @@
 
 namespace odyssey {
 
-OdysseyGUI::OdysseyGUI(OdysseyWindow* window) {
-    auto* wrapper = QWidget::createWindowContainer(window);
+Odyssey::Odyssey() : m_window(new OdysseyWindow()) {
+    auto* wrapper = QWidget::createWindowContainer(m_window);
     auto* layout = new QVBoxLayout();
     layout->addWidget(wrapper);
     setLayout(layout);
+}
+
+Odyssey::~Odyssey() {
+    if (m_window) {
+        delete m_window;
+        m_window = nullptr;
+    }
 }
 
 }  // namespace odyssey
