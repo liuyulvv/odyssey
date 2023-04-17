@@ -74,6 +74,7 @@ include_directories(
     "glfw/include"
     "fmt/include"
     "glm"
+    ${Qt6Gui_PRIVATE_INCLUDE_DIRS}
 )
 
 link_directories(

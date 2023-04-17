@@ -11,16 +11,14 @@
 
 namespace odyssey {
 
-Odyssey::Odyssey() : window_(std::make_shared<OdysseyWindow>(WIDTH, HEIGHT, "Odyssey")), engine_(std::make_shared<OdysseyEngine>(window_)) {
+Odyssey::Odyssey() : window_(std::make_shared<OdysseyWindow>(WIDTH, HEIGHT, "Odyssey")), engine_(std::make_shared<OdysseyEngine>(window_->GetSurface())) {
     LoadModel();
     CreatePipelineLayout();
     RecreateSwapChain();
     CreateCommandBuffers();
-    gui_ = std::make_unique<OdysseyGUI>(engine_, window_, swap_chain_->GetRenderPass());
 }
 
 Odyssey::~Odyssey() {
-    gui_.release();
     engine_->Device().destroyPipelineLayout(pipeline_layout_);
 }
 
@@ -92,7 +90,7 @@ void Odyssey::RecreateSwapChain() {
     auto extent = OdysseyWindow::GetExtent();
     while (extent.width == 0 || extent.height == 0) {
         extent = OdysseyWindow::GetExtent();
-        glfwWaitEvents();
+        // glfwWaitEvents();
     }
     engine_->Device().waitIdle();
     swap_chain_.reset(nullptr);

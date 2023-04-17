@@ -6,6 +6,10 @@
 
 #include "odyssey_window.h"
 
+#include <qpa/qplatformnativeinterface.h>
+
+#include <QByteArray>
+#include <QGuiApplication>
 #include <stdexcept>
 
 namespace odyssey {
@@ -16,66 +20,47 @@ double OdysseyWindow::mouse_x_{0.0};
 double OdysseyWindow::mouse_y_{0.0};
 
 OdysseyWindow::OdysseyWindow(int width, int height, const std::string& window_name) : window_name_(window_name) {
+    setSurfaceType(QSurface::VulkanSurface);
+    show();
+    auto* interface = QGuiApplication::platformNativeInterface();
+    // auto wid = winId();
+    // auto window = windowHandle();
+    auto* p = interface->nativeResourceForWindow(QByteArrayLiteral("vkSurface"), this);
+    VkSurfaceKHR c_surface = p ? (*static_cast<VkSurfaceKHR*>(p)) : VK_NULL_HANDLE;
+    surface_ = vk::SurfaceKHR(c_surface);
+    // QWidget::setAttribute(Qt::WA_PaintOnScreen);
+    // setFocusPolicy(Qt::WheelFocus);
+    // setMouseTracking(true);
     width_ = width;
     height_ = height;
-    glfwInit();
-    glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-    glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
-    window_ = glfwCreateWindow(width_, height_, window_name.c_str(), nullptr, nullptr);
-    glfwSetWindowUserPointer(window_, this);
-    glfwSetMouseButtonCallback(window_, MouseButtonCallback);
-    glfwSetCursorPosCallback(window_, CursorPositionCallback);
-    glfwSetFramebufferSizeCallback(window_, ResizedCallback);
 }
 
 OdysseyWindow::~OdysseyWindow() {
-    glfwDestroyWindow(window_);
-    glfwTerminate();
 }
 
+// QPaintEngine* OdysseyWindow::paintEngine() const {
+//     return nullptr;
+// }
+
+// void OdysseyWindow::paintEvent(QPaintEvent* event) {
+// }
+
+// void OdysseyWindow::resizeEvent(QResizeEvent* event) {
+// }
+
 bool OdysseyWindow::ShouldClose() const {
-    return glfwWindowShouldClose(window_);
+    return false;
 }
 
 void OdysseyWindow::PollEvents() {
-    glfwPollEvents();
-}
-
-void OdysseyWindow::CreateWindowSurface(vk::Instance& instance, vk::SurfaceKHR& surface) {
-    VkSurfaceKHR c_surface = nullptr;
-    if (glfwCreateWindowSurface(static_cast<VkInstance>(instance), window_, nullptr, &c_surface) != VK_SUCCESS) {
-        throw std::runtime_error("Failed to create window surface");
-    }
-    surface = vk::SurfaceKHR(c_surface);
 }
 
 vk::Extent2D OdysseyWindow::GetExtent() {
     return {static_cast<uint32_t>(width_), static_cast<uint32_t>(height_)};
 }
 
-GLFWwindow* OdysseyWindow::GetWindow() const {
-    return window_;
-}
-
-void OdysseyWindow::KeyBoardCallback([[maybe_unused]] GLFWwindow* window, int key, [[maybe_unused]] int scan_code, int action, [[maybe_unused]] int mods) {
-}
-
-void OdysseyWindow::MouseButtonCallback([[maybe_unused]] GLFWwindow* window, int button, int action, [[maybe_unused]] int mods) {
-    if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
-    } else if (button == GLFW_MOUSE_BUTTON_MIDDLE && action == GLFW_PRESS) {
-    } else if (button == GLFW_MOUSE_BUTTON_MIDDLE && action == GLFW_RELEASE) {
-    }
-}
-
-void OdysseyWindow::CursorPositionCallback([[maybe_unused]] GLFWwindow* window, double x, double y) {
-    mouse_x_ = x;
-    mouse_y_ = y;
-}
-
-void OdysseyWindow::ResizedCallback(GLFWwindow* window, int width, int height) {
-    auto* odyssey_window = reinterpret_cast<OdysseyWindow*>(window);
-    OdysseyWindow::width_ = width;
-    OdysseyWindow::height_ = height;
+vk::SurfaceKHR OdysseyWindow::GetSurface() const {
+    return surface_;
 }
 
 }  // namespace odyssey

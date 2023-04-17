@@ -16,10 +16,9 @@
 
 namespace odyssey {
 
-OdysseyEngine::OdysseyEngine(std::shared_ptr<OdysseyWindow> window) : window_(std::move(window)) {
+OdysseyEngine::OdysseyEngine(vk::SurfaceKHR surface) : surface_(surface) {
     CreateInstance();
     SetupDebugMessenger();
-    CreateSurface();
     PickPhysicalDevice();
     CreateLogicalDevice();
     CreateCommandPool();
@@ -209,10 +208,6 @@ void OdysseyEngine::SetupDebugMessenger() {
     debug_utils_messenger_ = instance_.createDebugUtilsMessengerEXT(debug_create_info, nullptr, vk::DispatchLoaderDynamic(instance_, reinterpret_cast<PFN_vkGetInstanceProcAddr>(instance_.getProcAddr("vkGetInstanceProcAddr"))));
 }
 
-void OdysseyEngine::CreateSurface() {
-    window_->CreateWindowSurface(instance_, surface_);
-}
-
 void OdysseyEngine::PickPhysicalDevice() {
     auto devices = instance_.enumeratePhysicalDevices();
     for (const auto& device : devices) {
@@ -300,9 +295,9 @@ void OdysseyEngine::CheckExtensionsSupport() {
 }
 
 std::vector<const char*> OdysseyEngine::GetRequiredExtensions() const {
-    uint32_t glfw_extension_count = 0;
-    const auto** glfw_extensions = glfwGetRequiredInstanceExtensions(&glfw_extension_count);
-    std::vector<const char*> extensions(glfw_extensions, glfw_extensions + glfw_extension_count);
+#if defined(_WIN32)
+    std::vector<const char*> extensions{"VK_KHR_surface", "VK_KHR_win32_surface"};
+#endif
     if (enable_validation_layers_) {
         extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
     }

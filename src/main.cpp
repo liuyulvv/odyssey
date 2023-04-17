@@ -4,19 +4,19 @@
  * @date 2023-04-09
  */
 
-#include <cstdlib>
+#include <QGuiApplication>
+#include <QWidget>
 #include <iostream>
-#include <stdexcept>
 
 #include "odyssey.h"
+#include "odyssey_window.h"
 
-int main() {
-    try {
-        odyssey::Odyssey app;
-        app.Run();
-    } catch (const std::exception& e) {
-        std::cerr << e.what() << std::endl;
-        return EXIT_FAILURE;
-    }
-    return EXIT_SUCCESS;
+int main(int argc, char* argv[]) {
+    QGuiApplication app(argc, argv);
+    odyssey::OdysseyWindow window(800, 600, "123");
+    // QWidget::createWindowContainer()
+    // widget.show();
+    // odyssey::Odyssey odyssey_app;
+    // odyssey_app.Run();
+    return app.exec();
 }

@@ -35,7 +35,7 @@ struct SwapChainSupportDetails {
 
 class OdysseyEngine {
 public:
-    explicit OdysseyEngine(std::shared_ptr<OdysseyWindow> window);
+    explicit OdysseyEngine(vk::SurfaceKHR surface);
     ~OdysseyEngine();
 
     OdysseyEngine() = delete;
@@ -64,7 +64,6 @@ public:
 private:
     void CreateInstance();
     void SetupDebugMessenger();
-    void CreateSurface();
     void PickPhysicalDevice();
     void CreateLogicalDevice();
     void CreateCommandPool();
@@ -80,8 +79,6 @@ private:
     uint32_t FindMemoryType(uint32_t type_filter, vk::MemoryPropertyFlags properties);
 
 private:
-    std::shared_ptr<OdysseyWindow> window_;
-
 private:
 #if defined(NODEBUG)
     bool enable_validation_layers_ = false;
