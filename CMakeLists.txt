@@ -58,11 +58,13 @@ add_subdirectory(glm)
 file(GLOB SRCS RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp")
 
 include_directories(
+    ${Vulkan_INCLUDE_DIRS}
     "include"
     "glm"
 )
 
 link_directories(
+    ${Vulkan_LIBRARY}
 )
 
 if (MSVC)
@@ -74,10 +76,11 @@ if (MSVC)
     )
     target_link_libraries(${PROJECT_NAME} 
         PRIVATE  
-                Qt6::Concurrent
-                Qt6::Core
-                Qt6::Gui
-                Qt6::Widgets
+            ${Vulkan_LIBRARIES}
+            Qt6::Concurrent
+            Qt6::Core
+            Qt6::Gui
+            Qt6::Widgets
     )
 elseif (APPLE)
     add_executable(${PROJECT_NAME} ${SRCS} ${IMGUI_SRCS})
@@ -87,6 +90,7 @@ elseif (APPLE)
     )
     target_link_libraries(${PROJECT_NAME} 
     PRIVATE
+        ${Vulkan_LIBRARIES}
         Qt6::Concurrent
         Qt6::Core
         Qt6::Gui
