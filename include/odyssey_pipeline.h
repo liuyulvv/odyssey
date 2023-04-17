@@ -20,18 +20,18 @@ class OdysseyWindow;
 struct PipelineConfigInfo {
     PipelineConfigInfo() = default;
 
-    VkPipelineViewportStateCreateInfo viewportInfo{};
-    VkPipelineInputAssemblyStateCreateInfo inputAssemblyInfo{};
-    VkPipelineRasterizationStateCreateInfo rasterizationInfo{};
-    VkPipelineMultisampleStateCreateInfo multisampleInfo{};
-    VkPipelineColorBlendAttachmentState colorBlendAttachment{};
-    VkPipelineColorBlendStateCreateInfo colorBlendInfo{};
-    VkPipelineDepthStencilStateCreateInfo depthStencilInfo{};
-    std::vector<VkDynamicState> dynamicStates{};
-    VkPipelineDynamicStateCreateInfo dynamicStateInfo{};
-    VkPipelineLayout pipelineLayout{nullptr};
-    VkRenderPass renderPass{nullptr};
-    uint32_t subpass{0};
+    VkPipelineViewportStateCreateInfo m_viewportInfo{};
+    VkPipelineInputAssemblyStateCreateInfo m_inputAssemblyInfo{};
+    VkPipelineRasterizationStateCreateInfo m_rasterizationInfo{};
+    VkPipelineMultisampleStateCreateInfo m_multisampleInfo{};
+    VkPipelineColorBlendAttachmentState m_colorBlendAttachment{};
+    VkPipelineColorBlendStateCreateInfo m_colorBlendInfo{};
+    VkPipelineDepthStencilStateCreateInfo m_depthStencilInfo{};
+    std::vector<VkDynamicState> m_dynamicStates{};
+    VkPipelineDynamicStateCreateInfo m_dynamicStateInfo{};
+    VkPipelineLayout m_pipelineLayout{nullptr};
+    VkRenderPass m_renderPass{nullptr};
+    uint32_t m_subpass{0};
 };
 
 class OdysseyPipeline {
@@ -52,14 +52,14 @@ public:
 private:
     void createGraphicsPipeline(const std::string& vertShaderPath, const std::string& fragShaderPath, const PipelineConfigInfo& config);
     static std::vector<char> readFile(const std::string& path);
-    void createShaderModule(const std::vector<char>& code, VkShaderModule& shaderModule);
+    void createShaderModule(const std::vector<char>& code, VkShaderModule* shaderModule);
 
 private:
     OdysseyWindow* m_window{};
     QVulkanDeviceFunctions* m_deviceFuncs{};
-    VkPipeline graphicsPipeline{};
-    VkShaderModule vertShaderModule{};
-    VkShaderModule fragShaderModule{};
+    VkPipeline m_graphicsPipeline{};
+    VkShaderModule m_vertShaderModule{};
+    VkShaderModule m_fragShaderModule{};
 };
 
 }  // namespace odyssey

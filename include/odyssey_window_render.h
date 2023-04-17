@@ -7,9 +7,12 @@
 #if !defined(ODYSSEY_WINDOW_RENDER_H_)
 #define ODYSSEY_WINDOW_RENDER_H_
 
+#include <vulkan/vulkan.h>
+
 #include <QVulkanDeviceFunctions>
 #include <QVulkanWindowRenderer>
 #include <string>
+#include <vector>
 
 #include "odyssey_pipeline.h"
 
@@ -35,15 +38,22 @@ public:
     void releaseResources() override;
     void startNextFrame() override;
 
+public:
+    void createBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer* buffer, VkDeviceMemory* memory);
+    void copyBuffer(VkBuffer src, VkBuffer dst, VkDeviceSize size);
+
 private:
     void createPipelineLayout();
-    OdysseyPipeline* createPipeline(const std::string& vertShaderPath, const std::string& fragShaderPath, VkPrimitiveTopology primitiveTopology);
-    void createBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer& buffer, VkDeviceMemory& memory);
+    void createPipeline(const std::string& vertShaderPath, const std::string& fragShaderPath, VkPrimitiveTopology primitiveTopology);
+    uint32_t findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties);
+    VkCommandBuffer beginSingleTimeCommands();
+    void endSingleTimeCommands(VkCommandBuffer commandBuffer);
 
 private:
     OdysseyWindow* m_window{};
     QVulkanDeviceFunctions* m_deviceFuncs{};
     VkPipelineLayout m_pipelineLayout{VK_NULL_HANDLE};
+    std::vector<OdysseyPipeline*> m_pipelines{};
 };
 
 }  // namespace odyssey

@@ -6,6 +6,8 @@
 
 #include "odyssey_window_render.h"
 
+#include <QtConcurrentRun>
+
 #include "odyssey_pipeline.h"
 #include "odyssey_window.h"
 
@@ -16,7 +18,8 @@ OdysseyWindowRender::OdysseyWindowRender(OdysseyWindow* window) : m_window(windo
 
 void OdysseyWindowRender::initResources() {
     m_deviceFuncs = m_window->vulkanInstance()->deviceFunctions(m_window->device());
-    createPipelineLayout();
+    // createPipelineLayout();
+    // createPipeline("shaders/shader.vert.spv", "shaders/shader.frag.spv", VK_PRIMITIVE_TOPOLOGY_LINE_LIST);
 }
 
 void OdysseyWindowRender::initSwapChainResources() {
@@ -52,6 +55,31 @@ void OdysseyWindowRender::startNextFrame() {
     m_window->requestUpdate();
 }
 
+void OdysseyWindowRender::createBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer* buffer, VkDeviceMemory* memory) {
+    VkBufferCreateInfo bufferInfo{};
+    bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+    bufferInfo.size = size;
+    bufferInfo.usage = usage;
+    bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+    m_deviceFuncs->vkCreateBuffer(m_window->device(), &bufferInfo, nullptr, buffer);
+    VkMemoryRequirements memoryRequireMents{};
+    m_deviceFuncs->vkGetBufferMemoryRequirements(m_window->device(), *buffer, &memoryRequireMents);
+    VkMemoryAllocateInfo allocateInfo{};
+    allocateInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+    allocateInfo.allocationSize = memoryRequireMents.size;
+    allocateInfo.memoryTypeIndex = findMemoryType(memoryRequireMents.memoryTypeBits, properties);
+    m_deviceFuncs->vkAllocateMemory(m_window->device(), &allocateInfo, nullptr, memory);
+    m_deviceFuncs->vkBindBufferMemory(m_window->device(), *buffer, *memory, 0);
+}
+
+void OdysseyWindowRender::copyBuffer(VkBuffer src, VkBuffer dst, VkDeviceSize size) {
+    auto commandBuffer = beginSingleTimeCommands();
+    VkBufferCopy copyRegion{};
+    copyRegion.size = size;
+    m_deviceFuncs->vkCmdCopyBuffer(commandBuffer, src, dst, 1, &copyRegion);
+    endSingleTimeCommands(commandBuffer);
+}
+
 void OdysseyWindowRender::createPipelineLayout() {
     VkPipelineLayoutCreateInfo pipelineInfo{};
     pipelineInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
@@ -62,19 +90,49 @@ void OdysseyWindowRender::createPipelineLayout() {
     m_deviceFuncs->vkCreatePipelineLayout(m_window->device(), &pipelineInfo, nullptr, &m_pipelineLayout);
 }
 
-OdysseyPipeline* OdysseyWindowRender::createPipeline(const std::string& vertShaderPath, const std::string& fragShaderPath, VkPrimitiveTopology primitiveTopology) {
+void OdysseyWindowRender::createPipeline(const std::string& vertShaderPath, const std::string& fragShaderPath, VkPrimitiveTopology primitiveTopology) {
     auto pipelineConfig = OdysseyPipeline::defaultPipelineConfigInfo(primitiveTopology);
-    pipelineConfig.renderPass = m_window->defaultRenderPass();
-    pipelineConfig.pipelineLayout = m_pipelineLayout;
-    return new OdysseyPipeline(m_window, m_deviceFuncs, vertShaderPath, fragShaderPath, pipelineConfig);
+    pipelineConfig.m_renderPass = m_window->defaultRenderPass();
+    pipelineConfig.m_pipelineLayout = m_pipelineLayout;
+    m_pipelines.push_back(new OdysseyPipeline(m_window, m_deviceFuncs, vertShaderPath, fragShaderPath, pipelineConfig));
 }
 
-void OdysseyWindowRender::createBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer& buffer, VkDeviceMemory& memory) {
-    VkBufferCreateInfo bufferInfo{};
-    bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-    bufferInfo.size = size;
-    bufferInfo.usage = usage;
-    bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+uint32_t OdysseyWindowRender::findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties) {
+    VkPhysicalDeviceMemoryProperties memoryProperties{};
+    vkGetPhysicalDeviceMemoryProperties(m_window->physicalDevice(), &memoryProperties);
+    for (uint32_t i = 0; i < memoryProperties.memoryTypeCount; ++i) {
+        if ((typeFilter & (1 << i)) && (memoryProperties.memoryTypes[i].propertyFlags & properties) == properties) {
+            return i;
+        }
+    }
+    throw std::runtime_error("Failed to find suitable memory type.");
+}
+
+VkCommandBuffer OdysseyWindowRender::beginSingleTimeCommands() {
+    VkCommandBufferAllocateInfo allocateInfo{};
+    allocateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+    allocateInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+    allocateInfo.commandPool = m_window->graphicsCommandPool();
+    allocateInfo.commandBufferCount = 1;
+
+    VkCommandBuffer commandBuffer{};
+    m_deviceFuncs->vkAllocateCommandBuffers(m_window->device(), &allocateInfo, &commandBuffer);
+    VkCommandBufferBeginInfo beginInfo{};
+    beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+    beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+    m_deviceFuncs->vkBeginCommandBuffer(commandBuffer, &beginInfo);
+    return commandBuffer;
+}
+
+void OdysseyWindowRender::endSingleTimeCommands(VkCommandBuffer commandBuffer) {
+    m_deviceFuncs->vkEndCommandBuffer(commandBuffer);
+    VkSubmitInfo submitInfo{};
+    submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+    submitInfo.commandBufferCount = 1;
+    submitInfo.pCommandBuffers = &commandBuffer;
+    m_deviceFuncs->vkQueueSubmit(m_window->graphicsQueue(), 1, &submitInfo, VK_NULL_HANDLE);
+    m_deviceFuncs->vkQueueWaitIdle(m_window->graphicsQueue());
+    m_deviceFuncs->vkFreeCommandBuffers(m_window->device(), m_window->graphicsCommandPool(), 1, &commandBuffer);
 }
 
 }  // namespace odyssey

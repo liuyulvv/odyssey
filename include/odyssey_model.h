@@ -21,6 +21,8 @@
 #include <glm/glm.hpp>
 #include <vector>
 
+#include "odyssey_window_render.h"
+
 namespace odyssey {
 
 class OdysseyWindow;
@@ -28,14 +30,14 @@ class OdysseyWindow;
 class OdysseyModel {
 public:
     struct Vertex {
-        glm::vec2 position;
-        glm::vec4 color;
+        glm::vec2 m_position;
+        glm::vec4 m_color;
         static std::vector<VkVertexInputBindingDescription> getBindingDescriptions();
         static std::vector<VkVertexInputAttributeDescription> getAttributeDescriptions();
     };
 
 public:
-    OdysseyModel(OdysseyWindow* window, QVulkanDeviceFunctions* deviceFuncs, const std::vector<Vertex>& vertices);
+    OdysseyModel(OdysseyWindow* window, OdysseyWindowRender* render, QVulkanDeviceFunctions* deviceFuncs, const std::vector<Vertex>& vertices);
     ~OdysseyModel();
 
     OdysseyModel() = delete;
@@ -53,10 +55,11 @@ private:
 
 private:
     OdysseyWindow* m_window;
+    OdysseyWindowRender* m_render;
     QVulkanDeviceFunctions* m_deviceFuncs;
-    VkBuffer vertexBuffer{};
-    VkDeviceMemory vertexBufferMemory{};
-    uint32_t vertexCount{0};
+    VkBuffer m_buffer{};
+    VkDeviceMemory m_memory{};
+    uint32_t m_vertexCount{0};
 };
 
 }  // namespace odyssey
