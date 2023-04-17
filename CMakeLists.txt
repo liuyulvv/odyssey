@@ -74,7 +74,6 @@ include_directories(
     "glfw/include"
     "fmt/include"
     "glm"
-    "imgui"
 )
 
 link_directories(

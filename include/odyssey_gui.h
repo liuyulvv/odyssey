@@ -36,9 +36,6 @@ private:
     std::shared_ptr<OdysseyEngine> engine_;
     std::shared_ptr<OdysseyWindow> window_;
     const vk::RenderPass& render_pass_;
-    vk::DescriptorPool pool_;
-
-    bool top_menu_bar_{true};
 };
 
 }  // namespace odyssey

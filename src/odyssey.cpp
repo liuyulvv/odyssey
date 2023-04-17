@@ -133,8 +133,6 @@ void Odyssey::RecordCommandBuffer(uint32_t image_index) {
     command_buffers_[image_index].setViewport(0, viewport);
     command_buffers_[image_index].setScissor(0, scissor);
 
-    gui_->Draw(command_buffers_[image_index]);
-
     pipeline_line_->Bind(command_buffers_[image_index]);
     model_->Bind(command_buffers_[image_index]);
     model_->Draw(command_buffers_[image_index]);
