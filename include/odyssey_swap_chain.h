@@ -7,17 +7,22 @@
 #if !defined(ODYSSEY_ODYSSEY_SWAP_CHAIN_H_)
 #define ODYSSEY_ODYSSEY_SWAP_CHAIN_H_
 
-#include <memory>
 #include <vector>
 
 #include "odyssey_engine.h"
+
+#if defined(_WIN32)
+#if !defined(VK_USE_PLATFORM_WIN32_KHR)
+#define VK_USE_PLATFORM_WIN32_KHR
+#endif  // VK_USE_PLATFORM_WIN32_KHR
+#endif
 #include "vulkan/vulkan.hpp"
 
 namespace odyssey {
 
 class OdysseySwapChain {
 public:
-    OdysseySwapChain(std::shared_ptr<OdysseyEngine> engine, vk::Extent2D window_extent);
+    OdysseySwapChain(OdysseyEngine* engine, int width, int height);
     ~OdysseySwapChain();
 
     OdysseySwapChain() = delete;
@@ -37,7 +42,7 @@ public:
     uint32_t GetHeight() const;
     float GetExtentAspectRatio() const;
     uint32_t AcquireNextImage();
-    void SubmitCommandBuffers(const vk::CommandBuffer& buffers, uint32_t& image_index);
+    void SubmitCommandBuffers(const vk::CommandBuffer& buffers, uint32_t image_index);
 
 private:
     void CreateSwapChain();
@@ -56,7 +61,7 @@ public:
     static constexpr int MAX_FRAMES_IN_FLIGHT_{2};
 
 private:
-    std::shared_ptr<OdysseyEngine> engine_;
+    OdysseyEngine* engine_;
     vk::Extent2D window_extent_;
     vk::Format swap_chain_image_format_{};
     vk::Extent2D swap_chain_extent_{};

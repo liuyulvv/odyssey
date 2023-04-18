@@ -6,18 +6,6 @@ Checks: >
   -bugprone-unchecked-optional-access,
   -bugprone-branch-clone,
   -bugprone-implicit-widening-of-multiplication-result,
-  cppcoreguidelines-*,
-  -cppcoreguidelines-pro-type-reinterpret-cast,
-  -cppcoreguidelines-pro-type-const-cast,
-  -cppcoreguidelines-pro-type-vararg,
-  -cppcoreguidelines-prefer-member-initializer,
-  -cppcoreguidelines-pro-type-union-access,
-  -cppcoreguidelines-avoid-magic-numbers,
-  -cppcoreguidelines-avoid-non-const-global-variables,
-  -cppcoreguidelines-pro-bounds-pointer-arithmetic,
-  modernize-*,
-  -modernize-use-trailing-return-type,
-  -modernize-pass-by-value,
   performance-*,
   portability-*,
   readability-*,
@@ -27,28 +15,29 @@ Checks: >
   -readability-function-cognitive-complexity,
   -readability-implicit-bool-conversion,
   -readability-else-after-return,
-  -readability-magic-numbers
+  -readability-magic-numbers,
+  -readability-static-accessed-through-instance
 
 WarningsAsErrors: "*"
 
 CheckOptions:
-  - { key: readability-identifier-naming.ClassMemberCase, value: lower_case }
-  - { key: readability-identifier-naming.PrivateMemberCase, value: lower_case }
+  - { key: readability-identifier-naming.ClassMemberCase, value: camelBack }
+  - { key: readability-identifier-naming.PrivateMemberCase, value: camelBack }
   - {
       key: readability-identifier-naming.ProtectedMemberCase,
-      value: lower_case,
+      value: camelBack,
     }
-  - { key: readability-identifier-naming.PublicMemberCase, value: lower_case }
+  - { key: readability-identifier-naming.PublicMemberCase, value: camelBack }
 
-  - { key: readability-identifier-naming.ClassMemberSuffix, value: _ }
-  - { key: readability-identifier-naming.PrivateMemberSuffix, value: _ }
-  - { key: readability-identifier-naming.ProtectedMemberSuffix, value: _ }
-  - { key: readability-identifier-naming.PublicMemberSuffix, value: _ }
+  - { key: readability-identifier-naming.ClassMemberPrefix, value: m_ }
+  - { key: readability-identifier-naming.PrivateMemberPrefix, value: m_ }
+  - { key: readability-identifier-naming.ProtectedMemberPrefix, value: m_ }
+  - { key: readability-identifier-naming.PublicMemberPrefix, value: m_ }
 
-  - { key: readability-identifier-naming.ClassMethodCase, value: CamelCase }
-  - { key: readability-identifier-naming.PrivateMethodCase, value: CamelCase }
-  - { key: readability-identifier-naming.ProtectedMethodCase, value: CamelCase }
-  - { key: readability-identifier-naming.PublicMethodCase, value: CamelCase }
+  - { key: readability-identifier-naming.ClassMethodCase, value: camelBack }
+  - { key: readability-identifier-naming.PrivateMethodCase, value: camelBack }
+  - { key: readability-identifier-naming.ProtectedMethodCase, value: camelBack }
+  - { key: readability-identifier-naming.PublicMethodCase, value: camelBack }
 
   - { key: readability-identifier-naming.NamespaceCase, value: lower_case }
   - { key: readability-identifier-naming.ClassCase, value: CamelCase }
@@ -57,7 +46,7 @@ CheckOptions:
       key: readability-identifier-naming.TemplateParameterCase,
       value: CamelCase,
     }
-  - { key: readability-identifier-naming.VariableCase, value: lower_case }
+  - { key: readability-identifier-naming.VariableCase, value: camelBack }
 
   - { key: readability-identifier-naming.EnumConstantCase, value: UPPER_CASE }
   - { key: readability-identifier-naming.ConstantCase, value: UPPER_CASE }

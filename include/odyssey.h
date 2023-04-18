@@ -7,20 +7,14 @@
 #if !defined(ODYSSEY_ODYSSEY_H_)
 #define ODYSSEY_ODYSSEY_H_
 
-#include <memory>
-#include <vector>
-
-#include "odyssey_engine.h"
-#include "odyssey_gui.h"
-#include "odyssey_model.h"
-#include "odyssey_pipeline.h"
-#include "odyssey_swap_chain.h"
-#include "odyssey_window.h"
-#include "vulkan/vulkan.hpp"
+#include <QWidget>
 
 namespace odyssey {
 
-class Odyssey {
+class OdysseyWindow;
+class OdysseyEngine;
+
+class Odyssey : public QWidget {
 public:
     Odyssey();
     ~Odyssey();
@@ -30,31 +24,15 @@ public:
     Odyssey& operator=(Odyssey&& odyssey) = delete;
 
 public:
-    void Run();
+    void paintEvent(QPaintEvent* event);
+    void resizeEvent(QResizeEvent* event);
 
 private:
-    void MainLoop();
-    void CreatePipelineLayout();
-    std::unique_ptr<OdysseyPipeline> CreatePipeline(const std::string& vert_shader_path, const std::string& frag_shader_path, vk::PrimitiveTopology primitive_topology, float line_width);
-    void CreateCommandBuffers();
     void Draw();
-    void LoadModel();
-    void RecreateSwapChain();
-    void RecordCommandBuffer(uint32_t image_index);
-
-public:
-    static constexpr int WIDTH{800};
-    static constexpr int HEIGHT{600};
 
 private:
-    std::shared_ptr<OdysseyWindow> window_{};
-    std::shared_ptr<OdysseyEngine> engine_{};
-    std::unique_ptr<OdysseySwapChain> swap_chain_{};
-    std::unique_ptr<OdysseyPipeline> pipeline_line_{};
-    vk::PipelineLayout pipeline_layout_{};
-    std::vector<vk::CommandBuffer> command_buffers_{};
-    std::unique_ptr<OdysseyModel> model_{};
-    std::unique_ptr<OdysseyGUI> gui_{};
+    OdysseyWindow* window_{nullptr};
+    OdysseyEngine* engine_{nullptr};
 };
 
 }  // namespace odyssey

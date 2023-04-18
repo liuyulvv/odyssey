@@ -12,7 +12,7 @@
 
 namespace odyssey {
 
-OdysseyModel::OdysseyModel(std::shared_ptr<OdysseyEngine> engine, const std::vector<Vertex>& vertices) : engine_(std::move(engine)) {
+OdysseyModel::OdysseyModel(OdysseyEngine* engine, const std::vector<Vertex>& vertices) : engine_(engine) {
     CreateVertexBuffer(vertices);
 }
 

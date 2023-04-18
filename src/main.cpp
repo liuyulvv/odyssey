@@ -4,19 +4,15 @@
  * @date 2023-04-09
  */
 
-#include <cstdlib>
+#include <QApplication>
+#include <QWidget>
 #include <iostream>
-#include <stdexcept>
 
 #include "odyssey.h"
+#include "odyssey_window.h"
 
-int main() {
-    try {
-        odyssey::Odyssey app;
-        app.Run();
-    } catch (const std::exception& e) {
-        std::cerr << e.what() << std::endl;
-        return EXIT_FAILURE;
-    }
-    return EXIT_SUCCESS;
+int main(int argc, char* argv[]) {
+    QApplication app(argc, argv);
+    odyssey::Odyssey odyssey_app;
+    return app.exec();
 }

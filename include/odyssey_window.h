@@ -7,48 +7,38 @@
 #if !defined(ODYSSEY_ODYSSEY_WINDOW_H_)
 #define ODYSSEY_ODYSSEY_WINDOW_H_
 
-#if !defined(GLFW_INCLUDE_VULKAN)
-#define GLFW_INCLUDE_VULKAN
-#endif  // GLFW_INCLUDE_VULKAN
+#include <qpa/qplatformnativeinterface.h>
 
-#include <string>
+#include <QWindow>
 
-#include "GLFW/glfw3.h"
+#if defined(_WIN32)
+#if !defined(VK_USE_PLATFORM_WIN32_KHR)
+#define VK_USE_PLATFORM_WIN32_KHR
+#endif  // VK_USE_PLATFORM_WIN32_KHR
+#endif
 #include "vulkan/vulkan.hpp"
 
 namespace odyssey {
 
-class OdysseyWindow {
+class OdysseyWindow : public QWindow {
 public:
-    OdysseyWindow(int width, int height, const std::string& window_name);
-    ~OdysseyWindow();
+    OdysseyWindow() = default;
+    ~OdysseyWindow() = default;
 
-    OdysseyWindow() = delete;
     OdysseyWindow(const OdysseyWindow& odyssey_window) = delete;
     OdysseyWindow(OdysseyWindow&& odyssey_window) = delete;
     OdysseyWindow& operator=(const OdysseyWindow& odyssey_window) = delete;
     OdysseyWindow& operator=(OdysseyWindow&& odyssey_window) = delete;
 
 public:
-    bool ShouldClose() const;
-    static void PollEvents();
-    void CreateWindowSurface(vk::Instance& instance, vk::SurfaceKHR& surface);
-    static vk::Extent2D GetExtent();
-    GLFWwindow* GetWindow() const;
+    vk::Extent2D GetExtent();
+
+#if defined(_WIN32)
+    vk::Win32SurfaceCreateInfoKHR GetSurfaceInfo();
+#endif
 
 private:
-    static void KeyBoardCallback(GLFWwindow* window, int key, int scan_code, int action, int mods);
-    static void MouseButtonCallback(GLFWwindow* window, int button, int action, int mods);
-    static void CursorPositionCallback(GLFWwindow* window, double x, double y);
-    static void ResizedCallback(GLFWwindow* window, int width, int height);
-
-private:
-    static int width_;
-    static int height_;
-    std::string window_name_;
-    GLFWwindow* window_{nullptr};
-    static double mouse_x_;
-    static double mouse_y_;
+    vk::SurfaceKHR surface_{};
 };
 
 }  // namespace odyssey

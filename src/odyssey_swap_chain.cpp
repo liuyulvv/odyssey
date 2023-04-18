@@ -7,10 +7,13 @@
 #include "odyssey_swap_chain.h"
 
 #include <array>
+#include <limits>
 
 namespace odyssey {
 
-OdysseySwapChain::OdysseySwapChain(std::shared_ptr<OdysseyEngine> engine, vk::Extent2D window_extent) : engine_(std::move(engine)), window_extent_(window_extent) {
+OdysseySwapChain::OdysseySwapChain(OdysseyEngine* engine, int width, int height) : engine_(engine) {
+    window_extent_.setWidth(width);
+    window_extent_.setHeight(height);
     CreateSwapChain();
     CreateRenderPass();
     CreateDepthResources();
@@ -80,13 +83,13 @@ float OdysseySwapChain::GetExtentAspectRatio() const {
 }
 
 uint32_t OdysseySwapChain::AcquireNextImage() {
-    engine_->Device().waitForFences(in_flight_fences_[current_frame_], true, std::numeric_limits<uint64_t>::max());
-    return engine_->Device().acquireNextImageKHR(swap_chain_, std::numeric_limits<uint64_t>::max(), image_available_semaphores_[current_frame_], nullptr).value;
+    engine_->Device().waitForFences(in_flight_fences_[current_frame_], true, (std::numeric_limits<uint64_t>::max)());
+    return engine_->Device().acquireNextImageKHR(swap_chain_, (std::numeric_limits<uint64_t>::max)(), image_available_semaphores_[current_frame_], nullptr).value;
 }
 
-void OdysseySwapChain::SubmitCommandBuffers(const vk::CommandBuffer& buffer, uint32_t& image_index) {
+void OdysseySwapChain::SubmitCommandBuffers(const vk::CommandBuffer& buffer, uint32_t image_index) {
     if (images_in_flight_[image_index]) {
-        engine_->Device().waitForFences(images_in_flight_[image_index], true, std::numeric_limits<uint64_t>::max());
+        engine_->Device().waitForFences(images_in_flight_[image_index], true, (std::numeric_limits<uint64_t>::max)());
     }
     images_in_flight_[image_index] = in_flight_fences_[current_frame_];
 
@@ -285,12 +288,12 @@ vk::PresentModeKHR OdysseySwapChain::ChooseSwapPresentMode(const std::vector<vk:
 }
 
 vk::Extent2D OdysseySwapChain::ChooseSwapExtent(const vk::SurfaceCapabilitiesKHR& capabilities) {
-    if (capabilities.currentExtent.width != std::numeric_limits<uint32_t>::max()) {
+    if (capabilities.currentExtent.width != (std::numeric_limits<uint32_t>::max)()) {
         return capabilities.currentExtent;
     }
     vk::Extent2D actual_extent = window_extent_;
-    actual_extent.width = std::max(capabilities.minImageExtent.width, std::min(capabilities.maxImageExtent.width, actual_extent.width));
-    actual_extent.height = std::max(capabilities.minImageExtent.height, std::min(capabilities.maxImageExtent.height, actual_extent.height));
+    actual_extent.width = (std::max)(capabilities.minImageExtent.width, (std::min)(capabilities.maxImageExtent.width, actual_extent.width));
+    actual_extent.height = (std::max)(capabilities.minImageExtent.height, (std::min)(capabilities.maxImageExtent.height, actual_extent.height));
     return actual_extent;
 }
 

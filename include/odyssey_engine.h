@@ -11,9 +11,19 @@
 #include <vector>
 
 #include "odyssey_window.h"
+
+#if defined(_WIN32)
+#if !defined(VK_USE_PLATFORM_WIN32_KHR)
+#define VK_USE_PLATFORM_WIN32_KHR
+#endif  // VK_USE_PLATFORM_WIN32_KHR
+#endif
 #include "vulkan/vulkan.hpp"
 
 namespace odyssey {
+
+class OdysseyPipeline;
+class OdysseySwapChain;
+class OdysseyModel;
 
 struct QueueFamilyIndices {
     uint32_t graphics_family_;
@@ -35,10 +45,10 @@ struct SwapChainSupportDetails {
 
 class OdysseyEngine {
 public:
-    explicit OdysseyEngine(std::shared_ptr<OdysseyWindow> window);
+#if defined(_WIN32)
+    explicit OdysseyEngine(const vk::Win32SurfaceCreateInfoKHR& surface_info, int width, int height);
+#endif
     ~OdysseyEngine();
-
-    OdysseyEngine() = delete;
     OdysseyEngine(const OdysseyEngine& odyssey_engine) = delete;
     OdysseyEngine(OdysseyEngine&& odyssey_engine) = delete;
     OdysseyEngine& operator=(const OdysseyEngine& odyssey_engine) = delete;
@@ -60,14 +70,20 @@ public:
     void CreateBuffer(vk::DeviceSize size, vk::BufferUsageFlags usage, vk::MemoryPropertyFlags properties, vk::Buffer& buffer, vk::DeviceMemory& memory);
     vk::CommandBuffer BeginSingleTimeCommands();
     void EndSingleTimeCommands(vk::CommandBuffer& command_buffer);
+    void RecreateSwapChain(int width, int height);
+    uint32_t AcquireNextImage();
+    void RecordCommandBuffer(uint32_t image_index);
+    void SubmitCommandBuffers(uint32_t image_index);
 
 private:
     void CreateInstance();
     void SetupDebugMessenger();
-    void CreateSurface();
     void PickPhysicalDevice();
     void CreateLogicalDevice();
     void CreateCommandPool();
+    void CreatePipelineLayout();
+    std::unique_ptr<OdysseyPipeline> CreatePipeline(const std::string& vert_shader_path, const std::string& frag_shader_path, vk::PrimitiveTopology primitive_topology, float line_width);
+    void CreateCommandBuffers();
 
 private:
     bool CheckValidationLayerSupport();
@@ -78,9 +94,6 @@ private:
     QueueFamilyIndices FindQueueFamilies(const vk::PhysicalDevice& device) const;
     SwapChainSupportDetails QuerySwapChainSupport(const vk::PhysicalDevice& device) const;
     uint32_t FindMemoryType(uint32_t type_filter, vk::MemoryPropertyFlags properties);
-
-private:
-    std::shared_ptr<OdysseyWindow> window_;
 
 private:
 #if defined(NODEBUG)
@@ -112,6 +125,11 @@ private:
     vk::Queue graphics_queue_{};
     vk::Queue present_queue_{};
     vk::CommandPool command_pool_{};
+    vk::PipelineLayout pipeline_layout_{};
+    std::unique_ptr<OdysseySwapChain> swap_chain_{};
+    std::unique_ptr<OdysseyPipeline> pipeline_line_{};
+    std::vector<vk::CommandBuffer> command_buffers_{};
+    std::unique_ptr<OdysseyModel> model_{};
 };
 
 }  // namespace odyssey
