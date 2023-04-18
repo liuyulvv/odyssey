@@ -17,7 +17,7 @@ if(NOT ${IS_DEBUG_BUILD})
 endif()
 
 if (MSVC)
-    add_compile_options(/W4)
+    add_compile_options(/W3)
     set(CMAKE_CXX_FLAGS /utf-8)
     set(Vulkan_SDK "D:/VulkanSDK/1.3.236.0")
     set(CMAKE_PREFIX_PATH "D:/Qt/6.5.0/msvc2019_64/lib/cmake")
@@ -29,7 +29,7 @@ else()
     add_compile_options(-Wall -Wextra -pedantic)
 endif()
 
-find_package(Qt6 REQUIRED COMPONENTS Concurrent Core Gui Widgets)
+find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets)
 qt_standard_project_setup()
 
 find_package(Vulkan REQUIRED COMPONENTS glslc)
@@ -61,39 +61,19 @@ include_directories(
     ${Vulkan_INCLUDE_DIRS}
     "include"
     "glm"
+    ${Qt6Gui_PRIVATE_INCLUDE_DIRS}
 )
 
 link_directories(
     ${Vulkan_LIBRARY}
+    ${EXECUTABLE_OUTPUT_PATH}/lib
 )
 
-if (MSVC)
-    add_executable(${PROJECT_NAME} ${SRCS} ${IMGUI_SRCS})
-    set_target_properties(${PROJECT_NAME} PROPERTIES 
-        COMPILE_FLAGS "/EHsc"
-        WIN32_EXECUTABLE ON
-        MACOSX_BUNDLE ON
-    )
-    target_link_libraries(${PROJECT_NAME} 
-        PRIVATE  
-            ${Vulkan_LIBRARIES}
-            Qt6::Concurrent
-            Qt6::Core
-            Qt6::Gui
-            Qt6::Widgets
-    )
-elseif (APPLE)
-    add_executable(${PROJECT_NAME} ${SRCS} ${IMGUI_SRCS})
-    set_target_properties(${PROJECT_NAME} PROPERTIES 
-        WIN32_EXECUTABLE ON
-        MACOSX_BUNDLE ON
-    )
-    target_link_libraries(${PROJECT_NAME} 
-    PRIVATE
-        ${Vulkan_LIBRARIES}
-        Qt6::Concurrent
-        Qt6::Core
-        Qt6::Gui
-        Qt6::Widgets
-    )
-endif()
+add_executable(${PROJECT_NAME} ${SRCS})
+target_link_libraries(${PROJECT_NAME} 
+PRIVATE  
+    ${Vulkan_LIBRARIES}
+    Qt6::Core
+    Qt6::Gui
+    Qt6::Widgets
+)

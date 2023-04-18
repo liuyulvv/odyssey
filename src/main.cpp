@@ -5,13 +5,15 @@
  */
 
 #include <QApplication>
+#include <QWidget>
+#include <iostream>
 
 #include "odyssey.h"
+#include "odyssey_window.h"
 
 int main(int argc, char* argv[]) {
     QApplication app(argc, argv);
-    odyssey::Odyssey odysseyAPP;
-    odysseyAPP.resize(1024, 768);
-    odysseyAPP.show();
+    odyssey::Odyssey odyssey_app;
+    odyssey_app.Run();
     return app.exec();
 }

@@ -15,29 +15,32 @@
 #define GLM_DEPTH_ZERO_TO_ONE
 #endif  // GLM_DEPTH_ZERO_TO_ONE
 
-#include <vulkan/vulkan.h>
-
-#include <QVulkanDeviceFunctions>
-#include <glm/glm.hpp>
+#include <memory>
 #include <vector>
 
-#include "odyssey_window_render.h"
+#include "glm/glm.hpp"
+#include "odyssey_engine.h"
+
+#if defined(_WIN32)
+#if !defined(VK_USE_PLATFORM_WIN32_KHR)
+#define VK_USE_PLATFORM_WIN32_KHR
+#endif  // VK_USE_PLATFORM_WIN32_KHR
+#endif
+#include "vulkan/vulkan.hpp"
 
 namespace odyssey {
-
-class OdysseyWindow;
 
 class OdysseyModel {
 public:
     struct Vertex {
-        glm::vec2 m_position;
-        glm::vec4 m_color;
-        static std::vector<VkVertexInputBindingDescription> getBindingDescriptions();
-        static std::vector<VkVertexInputAttributeDescription> getAttributeDescriptions();
+        glm::vec2 position_;
+        glm::vec4 color_;
+        static std::vector<vk::VertexInputBindingDescription> GetBindingDescriptions();
+        static std::vector<vk::VertexInputAttributeDescription> GetAttributeDescriptions();
     };
 
 public:
-    OdysseyModel(OdysseyWindow* window, OdysseyWindowRender* render, QVulkanDeviceFunctions* deviceFuncs, const std::vector<Vertex>& vertices);
+    OdysseyModel(OdysseyEngine* engine, const std::vector<Vertex>& vertices);
     ~OdysseyModel();
 
     OdysseyModel() = delete;
@@ -47,19 +50,17 @@ public:
     OdysseyModel& operator=(OdysseyModel&& odyssey_model) = delete;
 
 public:
-    void bind(VkCommandBuffer& command_buffer) const;
-    void draw(VkCommandBuffer& command_buffer) const;
+    void Bind(vk::CommandBuffer& command_buffer) const;
+    void Draw(vk::CommandBuffer& command_buffer) const;
 
 private:
-    void createVertexBuffer(const std::vector<Vertex>& vertices);
+    void CreateVertexBuffer(const std::vector<Vertex>& vertices);
 
 private:
-    OdysseyWindow* m_window;
-    OdysseyWindowRender* m_render;
-    QVulkanDeviceFunctions* m_deviceFuncs;
-    VkBuffer m_buffer{};
-    VkDeviceMemory m_memory{};
-    uint32_t m_vertexCount{0};
+    OdysseyEngine* engine_;
+    vk::Buffer vertex_buffer_{};
+    vk::DeviceMemory vertex_buffer_memory_{};
+    uint32_t vertex_count_{0};
 };
 
 }  // namespace odyssey

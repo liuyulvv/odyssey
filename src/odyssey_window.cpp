@@ -6,25 +6,35 @@
 
 #include "odyssey_window.h"
 
-#include <QVulkanWindowRenderer>
+#include <QGuiApplication>
+#include <QWindow>
 #include <stdexcept>
-
-#include "odyssey_window_render.h"
 
 namespace odyssey {
 
-OdysseyWindow::OdysseyWindow() : m_instance(new QVulkanInstance()) {
-#if !defined(NODEBUG)
-    m_instance->setLayers({"VK_LAYER_KHRONOS_validation"});
-#endif
-    if (!m_instance->create()) {
-        throw std::runtime_error("Failed to create vulkan instance.");
-    }
-    setVulkanInstance(m_instance);
+OdysseyWindow::OdysseyWindow(int width, int height, const std::string& window_name) : window_name_(window_name) {
+    // QWidget::setAttribute(Qt::WA_PaintOnScreen);
+    // setFocusPolicy(Qt::WheelFocus);
+    // setMouseTracking(true);
+    // setWindowTitle(window_name);
+    resize(width, height);
+    show();
 }
 
-QVulkanWindowRenderer* OdysseyWindow::createRenderer() {
-    return new OdysseyWindowRender(this);
+#if defined(_WIN32)
+vk::Win32SurfaceCreateInfoKHR OdysseyWindow::GetSurfaceInfo() {
+    vk::Win32SurfaceCreateInfoKHR surface_info{};
+    auto* platform_interface = QGuiApplication::platformNativeInterface();
+    auto* handle = platform_interface->nativeResourceForWindow("handle", this);
+    auto* hwnd = static_cast<HWND>(handle);
+    surface_info.setHwnd(hwnd);
+    surface_info.setHinstance(GetModuleHandle(nullptr));
+    return surface_info;
+}
+#endif
+
+vk::Extent2D OdysseyWindow::GetExtent() {
+    return {static_cast<uint32_t>(width()), static_cast<uint32_t>(height())};
 }
 
 }  // namespace odyssey

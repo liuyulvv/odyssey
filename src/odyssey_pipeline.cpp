@@ -6,8 +6,6 @@
 
 #include "odyssey_pipeline.h"
 
-#include <odyssey_window.h>
-
 #include <cstring>
 #include <fstream>
 #include <stdexcept>
@@ -16,154 +14,156 @@
 
 namespace odyssey {
 
-OdysseyPipeline::OdysseyPipeline(OdysseyWindow* window, QVulkanDeviceFunctions* deviceFuncs, const std::string& vertexShaderPath, const std::string& fragmentShaderPath, const PipelineConfigInfo& config) : m_window(window), m_deviceFuncs(deviceFuncs) {
-    createGraphicsPipeline(vertexShaderPath, fragmentShaderPath, config);
+OdysseyPipeline::OdysseyPipeline(OdysseyEngine* engine, const std::string& vertex_shader_path, const std::string& fragment_shader_path, const PipelineConfigInfo& config) : engine_(engine) {
+    CreateGraphicsPipeline(vertex_shader_path, fragment_shader_path, config);
 }
 
 OdysseyPipeline::~OdysseyPipeline() {
-    m_deviceFuncs->vkDestroyShaderModule(m_window->device(), m_vertShaderModule, nullptr);
-    m_deviceFuncs->vkDestroyShaderModule(m_window->device(), m_fragShaderModule, nullptr);
-    m_deviceFuncs->vkDestroyPipeline(m_window->device(), m_graphicsPipeline, nullptr);
+    engine_->Device().destroyShaderModule(vert_shader_module_);
+    engine_->Device().destroyShaderModule(frag_shader_module_);
+    engine_->Device().destroyPipeline(graphics_pipeline_);
 }
 
-PipelineConfigInfo OdysseyPipeline::defaultPipelineConfigInfo(VkPrimitiveTopology primitiveTopology) {
+PipelineConfigInfo OdysseyPipeline::DefaultPipelineConfigInfo(vk::PrimitiveTopology primitive_topology, float line_width) {
     PipelineConfigInfo config{};
 
-    config.m_viewportInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
-    config.m_viewportInfo.viewportCount = 1;
-    config.m_viewportInfo.pViewports = nullptr;
-    config.m_viewportInfo.scissorCount = 1;
-    config.m_viewportInfo.pScissors = nullptr;
+    config.viewport_info_
+        .setViewportCount(1)
+        .setPViewports(nullptr)
+        .setScissorCount(1)
+        .setPScissors(nullptr);
 
-    config.m_inputAssemblyInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
-    config.m_inputAssemblyInfo.topology = primitiveTopology;
-    config.m_inputAssemblyInfo.primitiveRestartEnable = VK_FALSE;
+    config.input_assembly_info_
+        .setTopology(primitive_topology)
+        .setPrimitiveRestartEnable(false);
 
-    config.m_rasterizationInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
-    config.m_rasterizationInfo.depthClampEnable = VK_FALSE;
-    config.m_rasterizationInfo.rasterizerDiscardEnable = VK_FALSE;
-    config.m_rasterizationInfo.polygonMode = VK_POLYGON_MODE_FILL;
-    config.m_rasterizationInfo.lineWidth = 1.0F;
-    config.m_rasterizationInfo.cullMode = VK_CULL_MODE_NONE;
-    config.m_rasterizationInfo.frontFace = VK_FRONT_FACE_CLOCKWISE;
-    config.m_rasterizationInfo.depthBiasEnable = VK_FALSE;
-    config.m_rasterizationInfo.depthBiasConstantFactor = 0.0F;
-    config.m_rasterizationInfo.depthBiasClamp = 0.0F;
-    config.m_rasterizationInfo.depthBiasSlopeFactor = 0.0F;
+    config.rasterization_info_
+        .setDepthClampEnable(false)
+        .setRasterizerDiscardEnable(false)
+        .setPolygonMode(vk::PolygonMode::eFill)
+        .setLineWidth(line_width)
+        .setCullMode(vk::CullModeFlagBits::eNone)
+        .setFrontFace(vk::FrontFace::eClockwise)
+        .setDepthBiasEnable(false)
+        .setDepthBiasConstantFactor(0.0F)
+        .setDepthBiasClamp(0.0F)
+        .setDepthBiasSlopeFactor(0.0F);
 
-    config.m_multisampleInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
-    config.m_multisampleInfo.sampleShadingEnable = VK_FALSE;
-    config.m_multisampleInfo.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
-    config.m_multisampleInfo.minSampleShading = 1.0F;
-    config.m_multisampleInfo.pSampleMask = nullptr;
-    config.m_multisampleInfo.alphaToCoverageEnable = VK_FALSE;
-    config.m_multisampleInfo.alphaToOneEnable = VK_FALSE;
+    config.multisample_info_
+        .setSampleShadingEnable(false)
+        .setRasterizationSamples(vk::SampleCountFlagBits::e1)
+        .setMinSampleShading(1.0F)
+        .setPSampleMask(nullptr)
+        .setAlphaToCoverageEnable(false)
+        .setAlphaToOneEnable(false);
 
-    config.m_colorBlendAttachment.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
-    config.m_colorBlendAttachment.blendEnable = VK_FALSE;
-    config.m_colorBlendAttachment.srcColorBlendFactor = VK_BLEND_FACTOR_ONE;
-    config.m_colorBlendAttachment.dstColorBlendFactor = VK_BLEND_FACTOR_ZERO;
-    config.m_colorBlendAttachment.colorBlendOp = VK_BLEND_OP_ADD;
-    config.m_colorBlendAttachment.srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
-    config.m_colorBlendAttachment.dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO;
-    config.m_colorBlendAttachment.alphaBlendOp = VK_BLEND_OP_ADD;
+    config.color_blend_attachment_
+        .setColorWriteMask(vk::ColorComponentFlagBits::eR | vk::ColorComponentFlagBits::eG | vk::ColorComponentFlagBits::eB | vk::ColorComponentFlagBits::eA)
+        .setBlendEnable(false)
+        .setSrcColorBlendFactor(vk::BlendFactor::eOne)
+        .setDstColorBlendFactor(vk::BlendFactor::eZero)
+        .setColorBlendOp(vk::BlendOp::eAdd)
+        .setSrcAlphaBlendFactor(vk::BlendFactor::eOne)
+        .setDstAlphaBlendFactor(vk::BlendFactor::eZero)
+        .setAlphaBlendOp(vk::BlendOp::eAdd);
 
-    config.m_colorBlendInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
-    config.m_colorBlendInfo.logicOpEnable = VK_FALSE;
-    config.m_colorBlendInfo.logicOp = VK_LOGIC_OP_COPY;
-    config.m_colorBlendInfo.attachmentCount = 1;
-    config.m_colorBlendInfo.pAttachments = &config.m_colorBlendAttachment;
-    config.m_colorBlendInfo.blendConstants[0] = 0.0F;
-    config.m_colorBlendInfo.blendConstants[1] = 0.0F;
-    config.m_colorBlendInfo.blendConstants[2] = 0.0F;
-    config.m_colorBlendInfo.blendConstants[3] = 0.0F;
+    config.color_blend_info_
+        .setLogicOpEnable(false)
+        .setLogicOp(vk::LogicOp::eCopy)
+        .setAttachmentCount(1)
+        .setAttachments(config.color_blend_attachment_)
+        .setBlendConstants({0.0F, 0.0F, 0.0F, 0.0F});
 
-    config.m_depthStencilInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
-    config.m_depthStencilInfo.depthTestEnable = VK_TRUE;
-    config.m_depthStencilInfo.depthWriteEnable = VK_TRUE;
-    config.m_depthStencilInfo.depthCompareOp = VK_COMPARE_OP_LESS;
-    config.m_depthStencilInfo.depthBoundsTestEnable = VK_FALSE;
-    config.m_depthStencilInfo.minDepthBounds = 0.0F;
-    config.m_depthStencilInfo.maxDepthBounds = 1.0F;
-    config.m_depthStencilInfo.stencilTestEnable = VK_FALSE;
-    config.m_depthStencilInfo.front = {};
-    config.m_depthStencilInfo.back = {};
+    config.depth_stencil_info_
+        .setDepthTestEnable(true)
+        .setDepthWriteEnable(true)
+        .setDepthCompareOp(vk::CompareOp::eLess)
+        .setDepthBoundsTestEnable(false)
+        .setMinDepthBounds(0.0F)
+        .setMaxDepthBounds(1.0F)
+        .setStencilTestEnable(false)
+        .setFront({})
+        .setBack({});
 
-    config.m_dynamicStates = {VK_DYNAMIC_STATE_VIEWPORT, VK_DYNAMIC_STATE_SCISSOR};
-    config.m_dynamicStateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
-    config.m_dynamicStateInfo.pDynamicStates = config.m_dynamicStates.data();
-    config.m_dynamicStateInfo.dynamicStateCount = static_cast<uint32_t>(config.m_dynamicStates.size());
-    config.m_dynamicStateInfo.flags = 0;
+    config.dynamic_states_ = {vk::DynamicState::eViewport, vk::DynamicState::eScissor};
+    config.dynamic_state_info_
+        .setDynamicStateCount(static_cast<uint32_t>(config.dynamic_states_.size()))
+        .setDynamicStates(config.dynamic_states_);
+
     return config;
 }
 
-void OdysseyPipeline::bind(const VkCommandBuffer& commandBuffer) {
-    m_deviceFuncs->vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_graphicsPipeline);
+void OdysseyPipeline::Bind(const vk::CommandBuffer& buffer) {
+    buffer.bindPipeline(vk::PipelineBindPoint::eGraphics, graphics_pipeline_);
 }
 
-void OdysseyPipeline::createGraphicsPipeline(const std::string& vertShaderPath, const std::string& fragShaderPath, const PipelineConfigInfo& config) {
-    createShaderModule(readFile(vertShaderPath), &m_vertShaderModule);
-    createShaderModule(readFile(fragShaderPath), &m_fragShaderModule);
+void OdysseyPipeline::CreateGraphicsPipeline(const std::string& vertex_shader_path, const std::string& fragment_shader_path, const PipelineConfigInfo& config) {
+    auto vert_shader_code = ReadFile(vertex_shader_path);
+    auto frag_shader_code = ReadFile(fragment_shader_path);
+    vert_shader_module_ = CreateShaderModule(vert_shader_code);
+    frag_shader_module_ = CreateShaderModule(frag_shader_code);
 
-    VkPipelineShaderStageCreateInfo vertShaderStageInfo{};
-    vertShaderStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-    vertShaderStageInfo.module = m_vertShaderModule;
-    vertShaderStageInfo.pName = "main";
-    VkPipelineShaderStageCreateInfo fragShaderStageInfo{};
-    fragShaderStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-    fragShaderStageInfo.module = m_fragShaderModule;
-    vertShaderStageInfo.pName = "main";
+    vk::PipelineShaderStageCreateInfo vert_shader_stage_info;
+    vert_shader_stage_info
+        .setStage(vk::ShaderStageFlagBits::eVertex)
+        .setModule(vert_shader_module_)
+        .setPName("main");
 
-    VkPipelineVertexInputStateCreateInfo vertexInputInfo{};
-    auto bindingDescriptions = OdysseyModel::Vertex::getBindingDescriptions();
-    auto attributeDescriptions = OdysseyModel::Vertex::getAttributeDescriptions();
-    vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
-    vertexInputInfo.vertexBindingDescriptionCount = static_cast<uint32_t>(bindingDescriptions.size());
-    vertexInputInfo.pVertexBindingDescriptions = bindingDescriptions.data();
-    vertexInputInfo.vertexAttributeDescriptionCount = static_cast<uint32_t>(attributeDescriptions.size());
-    vertexInputInfo.pVertexAttributeDescriptions = attributeDescriptions.data();
+    vk::PipelineShaderStageCreateInfo frag_shader_stage_info;
+    frag_shader_stage_info
+        .setStage(vk::ShaderStageFlagBits::eFragment)
+        .setModule(frag_shader_module_)
+        .setPName("main");
 
-    std::array<VkPipelineShaderStageCreateInfo, 2> shaderStages{vertShaderStageInfo, fragShaderStageInfo};
+    vk::PipelineVertexInputStateCreateInfo vertex_input_info;
+    auto binding_descriptions = OdysseyModel::Vertex::GetBindingDescriptions();
+    auto attribute_descriptions = OdysseyModel::Vertex::GetAttributeDescriptions();
+    vertex_input_info
+        .setVertexBindingDescriptionCount(static_cast<uint32_t>(binding_descriptions.size()))
+        .setVertexBindingDescriptions(binding_descriptions)
+        .setVertexAttributeDescriptionCount(static_cast<uint32_t>(attribute_descriptions.size()))
+        .setVertexAttributeDescriptions(attribute_descriptions);
 
-    VkGraphicsPipelineCreateInfo pipelineInfo{};
-    pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
-    pipelineInfo.stageCount = static_cast<uint32_t>(shaderStages.size());
-    pipelineInfo.pStages = shaderStages.data();
-    pipelineInfo.pVertexInputState = &vertexInputInfo;
-    pipelineInfo.pInputAssemblyState = &config.m_inputAssemblyInfo;
-    pipelineInfo.pViewportState = &config.m_viewportInfo;
-    pipelineInfo.pRasterizationState = &config.m_rasterizationInfo;
-    pipelineInfo.pMultisampleState = &config.m_multisampleInfo;
-    pipelineInfo.pColorBlendState = &config.m_colorBlendInfo;
-    pipelineInfo.pDepthStencilState = &config.m_depthStencilInfo;
-    pipelineInfo.pDynamicState = &config.m_dynamicStateInfo;
-    pipelineInfo.layout = config.m_pipelineLayout;
-    pipelineInfo.renderPass = config.m_renderPass;
-    pipelineInfo.subpass = config.m_subpass;
-    pipelineInfo.basePipelineIndex = -1;
-    pipelineInfo.basePipelineHandle = nullptr;
-    auto err = m_deviceFuncs->vkCreateGraphicsPipelines(m_window->device(), VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &m_graphicsPipeline);
+    std::array<vk::PipelineShaderStageCreateInfo, 2> shader_stages{vert_shader_stage_info, frag_shader_stage_info};
+
+    vk::GraphicsPipelineCreateInfo pipeline_info;
+    pipeline_info
+        .setStageCount(static_cast<uint32_t>(shader_stages.size()))
+        .setStages(shader_stages)
+        .setPVertexInputState(&vertex_input_info)
+        .setPInputAssemblyState(&config.input_assembly_info_)
+        .setPViewportState(&config.viewport_info_)
+        .setPRasterizationState(&config.rasterization_info_)
+        .setPMultisampleState(&config.multisample_info_)
+        .setPColorBlendState(&config.color_blend_info_)
+        .setPDepthStencilState(&config.depth_stencil_info_)
+        .setPDynamicState(&config.dynamic_state_info_)
+        .setLayout(config.pipeline_layout_)
+        .setRenderPass(config.render_pass_)
+        .setSubpass(config.subpass_)
+        .setBasePipelineIndex(-1)
+        .setBasePipelineHandle(nullptr);
+    graphics_pipeline_ = engine_->Device().createGraphicsPipeline(nullptr, pipeline_info).value;
 }
 
-std::vector<char> OdysseyPipeline::readFile(const std::string& path) {
+std::vector<char> OdysseyPipeline::ReadFile(const std::string& path) {
     std::ifstream file(path, std::ios::ate | std::ios::binary);
     if (!file.is_open()) {
-        throw std::runtime_error("Failed to open file: " + path + "");
+        throw std::runtime_error("Failed to open file: " + path + ".");
     }
-    auto fileSize = static_cast<std::streamsize>(file.tellg());
-    std::vector<char> buffer(fileSize);
+    auto file_size = static_cast<std::streamsize>(file.tellg());
+    std::vector<char> buffer(file_size);
     file.seekg(0);
-    file.read(buffer.data(), fileSize);
+    file.read(buffer.data(), file_size);
     file.close();
     return buffer;
 }
 
-void OdysseyPipeline::createShaderModule(const std::vector<char>& code, VkShaderModule* shaderModule) {
-    VkShaderModuleCreateInfo createInfo{};
-    createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
-    createInfo.codeSize = code.size();
-    createInfo.pCode = reinterpret_cast<const uint32_t*>(code.data());
-    m_deviceFuncs->vkCreateShaderModule(m_window->device(), &createInfo, nullptr, shaderModule);
+vk::ShaderModule OdysseyPipeline::CreateShaderModule(const std::vector<char>& code) {
+    vk::ShaderModuleCreateInfo create_info;
+    create_info.setCodeSize(code.size());
+    create_info.pCode = reinterpret_cast<const uint32_t*>(code.data());
+    return engine_->Device().createShaderModule(create_info);
 }
 
 }  // namespace odyssey

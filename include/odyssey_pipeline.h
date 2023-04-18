@@ -1,67 +1,71 @@
 /**
- * @file odysseyPipeline.h
+ * @file odyssey_pipeline.h
  * @author liuyulvv (liuyulvv@outlook.com)
  * @date 2023-04-09
  */
 
-#if !defined(odysseyPipeline_H_)
-#define odysseyPipeline_H_
+#if !defined(ODYSSEY_ODYSSEY_PIPELINE_H_)
+#define ODYSSEY_ODYSSEY_PIPELINE_H_
 
-#include <vulkan/vulkan.h>
-
-#include <QVulkanDeviceFunctions>
+#include <memory>
 #include <string>
 #include <vector>
 
-namespace odyssey {
+#include "odyssey_engine.h"
 
-class OdysseyWindow;
+#if defined(_WIN32)
+#if !defined(VK_USE_PLATFORM_WIN32_KHR)
+#define VK_USE_PLATFORM_WIN32_KHR
+#endif  // VK_USE_PLATFORM_WIN32_KHR
+#endif
+#include "vulkan/vulkan.hpp"
+
+namespace odyssey {
 
 struct PipelineConfigInfo {
     PipelineConfigInfo() = default;
 
-    VkPipelineViewportStateCreateInfo m_viewportInfo{};
-    VkPipelineInputAssemblyStateCreateInfo m_inputAssemblyInfo{};
-    VkPipelineRasterizationStateCreateInfo m_rasterizationInfo{};
-    VkPipelineMultisampleStateCreateInfo m_multisampleInfo{};
-    VkPipelineColorBlendAttachmentState m_colorBlendAttachment{};
-    VkPipelineColorBlendStateCreateInfo m_colorBlendInfo{};
-    VkPipelineDepthStencilStateCreateInfo m_depthStencilInfo{};
-    std::vector<VkDynamicState> m_dynamicStates{};
-    VkPipelineDynamicStateCreateInfo m_dynamicStateInfo{};
-    VkPipelineLayout m_pipelineLayout{nullptr};
-    VkRenderPass m_renderPass{nullptr};
-    uint32_t m_subpass{0};
+    vk::PipelineViewportStateCreateInfo viewport_info_{};
+    vk::PipelineInputAssemblyStateCreateInfo input_assembly_info_{};
+    vk::PipelineRasterizationStateCreateInfo rasterization_info_{};
+    vk::PipelineMultisampleStateCreateInfo multisample_info_{};
+    vk::PipelineColorBlendAttachmentState color_blend_attachment_{};
+    vk::PipelineColorBlendStateCreateInfo color_blend_info_{};
+    vk::PipelineDepthStencilStateCreateInfo depth_stencil_info_{};
+    std::vector<vk::DynamicState> dynamic_states_{};
+    vk::PipelineDynamicStateCreateInfo dynamic_state_info_{};
+    vk::PipelineLayout pipeline_layout_{nullptr};
+    vk::RenderPass render_pass_{nullptr};
+    uint32_t subpass_{0};
 };
 
 class OdysseyPipeline {
 public:
-    OdysseyPipeline(OdysseyWindow* window, QVulkanDeviceFunctions* deviceFuncs, const std::string& vertexShaderPath, const std::string& fragmentShaderPath, const PipelineConfigInfo& config);
+    OdysseyPipeline(OdysseyEngine* engine, const std::string& vertex_shader_path, const std::string& fragment_shader_path, const PipelineConfigInfo& config);
     ~OdysseyPipeline();
 
     OdysseyPipeline() = delete;
-    OdysseyPipeline(const OdysseyPipeline& odysseyPipeline) = delete;
-    OdysseyPipeline(OdysseyPipeline&& odysseyPipeline) = delete;
-    OdysseyPipeline& operator=(const OdysseyPipeline& odysseyPipeline) = delete;
-    OdysseyPipeline& operator=(OdysseyPipeline&& odysseyPipeline) = delete;
+    OdysseyPipeline(const OdysseyPipeline& odyssey_pipeline) = delete;
+    OdysseyPipeline(OdysseyPipeline&& odyssey_pipeline) = delete;
+    OdysseyPipeline& operator=(const OdysseyPipeline& odyssey_pipeline) = delete;
+    OdysseyPipeline& operator=(OdysseyPipeline&& odyssey_pipeline) = delete;
 
 public:
-    static PipelineConfigInfo defaultPipelineConfigInfo(VkPrimitiveTopology primitiveTopology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST);
-    void bind(const VkCommandBuffer& buffer);
+    static PipelineConfigInfo DefaultPipelineConfigInfo(vk::PrimitiveTopology primitive_topology = vk::PrimitiveTopology::eTriangleList, float line_width = 1.0F);
+    void Bind(const vk::CommandBuffer& buffer);
 
 private:
-    void createGraphicsPipeline(const std::string& vertShaderPath, const std::string& fragShaderPath, const PipelineConfigInfo& config);
-    static std::vector<char> readFile(const std::string& path);
-    void createShaderModule(const std::vector<char>& code, VkShaderModule* shaderModule);
+    void CreateGraphicsPipeline(const std::string& vertex_shader_path, const std::string& fragment_shader_path, const PipelineConfigInfo& config);
+    static std::vector<char> ReadFile(const std::string& path);
+    vk::ShaderModule CreateShaderModule(const std::vector<char>& code);
 
 private:
-    OdysseyWindow* m_window{};
-    QVulkanDeviceFunctions* m_deviceFuncs{};
-    VkPipeline m_graphicsPipeline{};
-    VkShaderModule m_vertShaderModule{};
-    VkShaderModule m_fragShaderModule{};
+    std::shared_ptr<OdysseyEngine> engine_;
+    vk::Pipeline graphics_pipeline_{};
+    vk::ShaderModule vert_shader_module_{};
+    vk::ShaderModule frag_shader_module_{};
 };
 
 }  // namespace odyssey
 
-#endif  // odysseyPipeline_H_
+#endif  // ODYSSEY_ODYSSEY_PIPELINE_H_

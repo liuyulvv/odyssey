@@ -4,33 +4,46 @@
  * @date 2023-04-09
  */
 
-#if !defined(ODYSSEY_WINDOW_H_)
-#define ODYSSEY_WINDOW_H_
+#if !defined(ODYSSEY_ODYSSEY_WINDOW_H_)
+#define ODYSSEY_ODYSSEY_WINDOW_H_
 
-#include <vulkan/vulkan.h>
+#include <qpa/qplatformnativeinterface.h>
 
-#include <QVulkanInstance>
-#include <QVulkanWindow>
-#include <QVulkanWindowRenderer>
+#include <QWindow>
+#include <string>
+
+#if defined(_WIN32)
+#if !defined(VK_USE_PLATFORM_WIN32_KHR)
+#define VK_USE_PLATFORM_WIN32_KHR
+#endif  // VK_USE_PLATFORM_WIN32_KHR
+#endif
+#include "vulkan/vulkan.hpp"
 
 namespace odyssey {
 
-class OdysseyWindow : public QVulkanWindow {
+class OdysseyWindow : public QWindow {
 public:
-    OdysseyWindow();
+    OdysseyWindow(int width, int height, const std::string& window_name);
     ~OdysseyWindow() = default;
-    OdysseyWindow(const OdysseyWindow& odysseyWindow) = delete;
-    OdysseyWindow(OdysseyWindow&& odysseyWindow) = delete;
-    OdysseyWindow& operator=(const OdysseyWindow& odysseyWindow) = delete;
-    OdysseyWindow& operator=(OdysseyWindow&& odysseyWindow) = delete;
+
+    OdysseyWindow() = delete;
+    OdysseyWindow(const OdysseyWindow& odyssey_window) = delete;
+    OdysseyWindow(OdysseyWindow&& odyssey_window) = delete;
+    OdysseyWindow& operator=(const OdysseyWindow& odyssey_window) = delete;
+    OdysseyWindow& operator=(OdysseyWindow&& odyssey_window) = delete;
 
 public:
-    QVulkanWindowRenderer* createRenderer() override;
+    vk::Extent2D GetExtent();
+
+#if defined(_WIN32)
+    vk::Win32SurfaceCreateInfoKHR GetSurfaceInfo();
+#endif
 
 private:
-    QVulkanInstance* m_instance{nullptr};
+    vk::SurfaceKHR surface_{};
+    std::string window_name_;
 };
 
 }  // namespace odyssey
 
-#endif  // ODYSSEY_WINDOW_H_
+#endif  // ODYSSEY_ODYSSEY_WINDOW_H_
