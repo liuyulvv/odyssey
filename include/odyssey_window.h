@@ -10,7 +10,6 @@
 #include <qpa/qplatformnativeinterface.h>
 
 #include <QWindow>
-#include <string>
 
 #if defined(_WIN32)
 #if !defined(VK_USE_PLATFORM_WIN32_KHR)
@@ -23,10 +22,9 @@ namespace odyssey {
 
 class OdysseyWindow : public QWindow {
 public:
-    OdysseyWindow(int width, int height, const std::string& window_name);
+    OdysseyWindow() = default;
     ~OdysseyWindow() = default;
 
-    OdysseyWindow() = delete;
     OdysseyWindow(const OdysseyWindow& odyssey_window) = delete;
     OdysseyWindow(OdysseyWindow&& odyssey_window) = delete;
     OdysseyWindow& operator=(const OdysseyWindow& odyssey_window) = delete;
@@ -41,7 +39,6 @@ public:
 
 private:
     vk::SurfaceKHR surface_{};
-    std::string window_name_;
 };
 
 }  // namespace odyssey

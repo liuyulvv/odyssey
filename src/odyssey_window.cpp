@@ -12,21 +12,13 @@
 
 namespace odyssey {
 
-OdysseyWindow::OdysseyWindow(int width, int height, const std::string& window_name) : window_name_(window_name) {
-    // QWidget::setAttribute(Qt::WA_PaintOnScreen);
-    // setFocusPolicy(Qt::WheelFocus);
-    // setMouseTracking(true);
-    // setWindowTitle(window_name);
-    resize(width, height);
-    show();
-}
-
 #if defined(_WIN32)
 vk::Win32SurfaceCreateInfoKHR OdysseyWindow::GetSurfaceInfo() {
-    vk::Win32SurfaceCreateInfoKHR surface_info{};
+    auto wid = winId();
     auto* platform_interface = QGuiApplication::platformNativeInterface();
     auto* handle = platform_interface->nativeResourceForWindow("handle", this);
     auto* hwnd = static_cast<HWND>(handle);
+    vk::Win32SurfaceCreateInfoKHR surface_info{};
     surface_info.setHwnd(hwnd);
     surface_info.setHinstance(GetModuleHandle(nullptr));
     return surface_info;
