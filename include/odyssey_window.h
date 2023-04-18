@@ -7,10 +7,16 @@
 #if !defined(ODYSSEY_ODYSSEY_WINDOW_H_)
 #define ODYSSEY_ODYSSEY_WINDOW_H_
 
-#include <QWidget>
+#include <qpa/qplatformnativeinterface.h>
+
 #include <QWindow>
 #include <string>
 
+#if defined(_WIN32)
+#if !defined(VK_USE_PLATFORM_WIN32_KHR)
+#define VK_USE_PLATFORM_WIN32_KHR
+#endif  // VK_USE_PLATFORM_WIN32_KHR
+#endif
 #include "vulkan/vulkan.hpp"
 
 namespace odyssey {
@@ -18,7 +24,7 @@ namespace odyssey {
 class OdysseyWindow : public QWindow {
 public:
     OdysseyWindow(int width, int height, const std::string& window_name);
-    ~OdysseyWindow();
+    ~OdysseyWindow() = default;
 
     OdysseyWindow() = delete;
     OdysseyWindow(const OdysseyWindow& odyssey_window) = delete;
@@ -26,24 +32,16 @@ public:
     OdysseyWindow& operator=(const OdysseyWindow& odyssey_window) = delete;
     OdysseyWindow& operator=(OdysseyWindow&& odyssey_window) = delete;
 
-// public:
-//     QPaintEngine* paintEngine() const;
-//     void paintEvent(QPaintEvent* event) override;
-//     void resizeEvent(QResizeEvent* event) override;
-
 public:
-    bool ShouldClose() const;
-    static void PollEvents();
-    static vk::Extent2D GetExtent();
-    vk::SurfaceKHR GetSurface() const;
+    vk::Extent2D GetExtent();
+
+#if defined(_WIN32)
+    vk::Win32SurfaceCreateInfoKHR GetSurfaceInfo();
+#endif
 
 private:
     vk::SurfaceKHR surface_{};
-    static int width_;
-    static int height_;
     std::string window_name_;
-    static double mouse_x_;
-    static double mouse_y_;
 };
 
 }  // namespace odyssey

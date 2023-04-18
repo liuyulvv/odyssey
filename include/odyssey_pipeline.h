@@ -12,6 +12,12 @@
 #include <vector>
 
 #include "odyssey_engine.h"
+
+#if defined(_WIN32)
+#if !defined(VK_USE_PLATFORM_WIN32_KHR)
+#define VK_USE_PLATFORM_WIN32_KHR
+#endif  // VK_USE_PLATFORM_WIN32_KHR
+#endif
 #include "vulkan/vulkan.hpp"
 
 namespace odyssey {
@@ -35,7 +41,7 @@ struct PipelineConfigInfo {
 
 class OdysseyPipeline {
 public:
-    OdysseyPipeline(std::shared_ptr<OdysseyEngine> engine, const std::string& vertex_shader_path, const std::string& fragment_shader_path, const PipelineConfigInfo& config);
+    OdysseyPipeline(OdysseyEngine* engine, const std::string& vertex_shader_path, const std::string& fragment_shader_path, const PipelineConfigInfo& config);
     ~OdysseyPipeline();
 
     OdysseyPipeline() = delete;

@@ -20,6 +20,12 @@
 
 #include "glm/glm.hpp"
 #include "odyssey_engine.h"
+
+#if defined(_WIN32)
+#if !defined(VK_USE_PLATFORM_WIN32_KHR)
+#define VK_USE_PLATFORM_WIN32_KHR
+#endif  // VK_USE_PLATFORM_WIN32_KHR
+#endif
 #include "vulkan/vulkan.hpp"
 
 namespace odyssey {
@@ -34,7 +40,7 @@ public:
     };
 
 public:
-    OdysseyModel(std::shared_ptr<OdysseyEngine> engine, const std::vector<Vertex>& vertices);
+    OdysseyModel(OdysseyEngine* engine, const std::vector<Vertex>& vertices);
     ~OdysseyModel();
 
     OdysseyModel() = delete;
@@ -51,7 +57,7 @@ private:
     void CreateVertexBuffer(const std::vector<Vertex>& vertices);
 
 private:
-    std::shared_ptr<OdysseyEngine> engine_;
+    OdysseyEngine* engine_;
     vk::Buffer vertex_buffer_{};
     vk::DeviceMemory vertex_buffer_memory_{};
     uint32_t vertex_count_{0};

@@ -10,12 +10,11 @@
 #include <fstream>
 #include <stdexcept>
 
-#include "fmt/format.h"
 #include "odyssey_model.h"
 
 namespace odyssey {
 
-OdysseyPipeline::OdysseyPipeline(std::shared_ptr<OdysseyEngine> engine, const std::string& vertex_shader_path, const std::string& fragment_shader_path, const PipelineConfigInfo& config) : engine_(std::move(engine)) {
+OdysseyPipeline::OdysseyPipeline(OdysseyEngine* engine, const std::string& vertex_shader_path, const std::string& fragment_shader_path, const PipelineConfigInfo& config) : engine_(engine) {
     CreateGraphicsPipeline(vertex_shader_path, fragment_shader_path, config);
 }
 
@@ -150,7 +149,7 @@ void OdysseyPipeline::CreateGraphicsPipeline(const std::string& vertex_shader_pa
 std::vector<char> OdysseyPipeline::ReadFile(const std::string& path) {
     std::ifstream file(path, std::ios::ate | std::ios::binary);
     if (!file.is_open()) {
-        throw std::runtime_error(fmt::format("Failed to open file: {}.", path));
+        throw std::runtime_error("Failed to open file: " + path + ".");
     }
     auto file_size = static_cast<std::streamsize>(file.tellg());
     std::vector<char> buffer(file_size);

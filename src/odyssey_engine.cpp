@@ -12,19 +12,37 @@
 #include <unordered_set>
 #include <vector>
 
-#include "fmt/format.h"
+#include "odyssey_model.h"
+#include "odyssey_pipeline.h"
+#include "odyssey_swap_chain.h"
 
 namespace odyssey {
 
-OdysseyEngine::OdysseyEngine(vk::SurfaceKHR surface) : surface_(surface) {
+#if defined(_WIN32)
+OdysseyEngine::OdysseyEngine(const vk::Win32SurfaceCreateInfoKHR& surface_info, int width, int height) {
     CreateInstance();
+    surface_ = instance_.createWin32SurfaceKHR(surface_info);
     SetupDebugMessenger();
     PickPhysicalDevice();
     CreateLogicalDevice();
     CreateCommandPool();
+    RecreateSwapChain(width, height);
+    CreateCommandBuffers();
+
+    std::vector<OdysseyModel::Vertex> vertices{
+        {{0.0F, 0.0F}, {1.0F, 0.0F, 0.0F, 1.0F}},
+        {{0.5F, 0.5F}, {0.0F, 1.0F, 0.0F, 1.0F}},
+        {{0.5F, -0.5F}, {0.0F, 0.0F, 1.0F, 1.0F}},
+        {{-0.5F, -0.5F}, {1.0F, 0.0F, 0.0F, 1.0F}},
+        {{-0.5F, 0.5F}, {0.0F, 1.0F, 0.0F, 1.0F}},
+        {{1.0F, 1.0F}, {0.0F, 0.0F, 1.0F, 1.0F}},
+    };
+    model_ = std::make_unique<OdysseyModel>(this, vertices);
 }
+#endif
 
 OdysseyEngine::~OdysseyEngine() {
+    device_.destroyPipelineLayout(pipeline_layout_);
     device_.destroyCommandPool(command_pool_);
     device_.destroy();
     if (enable_validation_layers_) {
@@ -165,6 +183,55 @@ void OdysseyEngine::EndSingleTimeCommands(vk::CommandBuffer& command_buffer) {
     device_.freeCommandBuffers(command_pool_, command_buffer);
 }
 
+uint32_t OdysseyEngine::AcquireNextImage() {
+    return swap_chain_->AcquireNextImage();
+}
+
+void OdysseyEngine::RecordCommandBuffer(uint32_t image_index) {
+    vk::CommandBufferBeginInfo begin_info{};
+    command_buffers_[image_index].begin(begin_info);
+
+    vk::RenderPassBeginInfo render_pass_info{};
+    render_pass_info
+        .setRenderPass(swap_chain_->GetRenderPass())
+        .setFramebuffer(swap_chain_->GetFrameBuffer(image_index));
+    render_pass_info.renderArea
+        .setOffset({0, 0})
+        .setExtent(swap_chain_->GetSwapChainExtent());
+    std::array<vk::ClearValue, 2> clear_values{};
+    clear_values[0].setColor({0.17F, 0.17F, 0.17F, 1.0F});
+    clear_values[1].setDepthStencil({1.0F, 0});
+    render_pass_info
+        .setClearValueCount(static_cast<uint32_t>(clear_values.size()))
+        .setClearValues(clear_values);
+
+    command_buffers_[image_index].beginRenderPass(render_pass_info, vk::SubpassContents::eInline);
+
+    vk::Viewport viewport{};
+    viewport
+        .setX(0.0F)
+        .setY(0.0F)
+        .setWidth(static_cast<float>(swap_chain_->GetSwapChainExtent().width))
+        .setHeight(static_cast<float>(swap_chain_->GetSwapChainExtent().height))
+        .setMinDepth(0.0F)
+        .setMaxDepth(1.0F);
+    vk::Rect2D scissor{{0, 0}, swap_chain_->GetSwapChainExtent()};
+
+    command_buffers_[image_index].setViewport(0, viewport);
+    command_buffers_[image_index].setScissor(0, scissor);
+
+    pipeline_line_->Bind(command_buffers_[image_index]);
+    model_->Bind(command_buffers_[image_index]);
+    model_->Draw(command_buffers_[image_index]);
+
+    command_buffers_[image_index].endRenderPass();
+    command_buffers_[image_index].end();
+}
+
+void OdysseyEngine::SubmitCommandBuffers(uint32_t image_index) {
+    swap_chain_->SubmitCommandBuffers(command_buffers_[image_index], image_index);
+}
+
 void OdysseyEngine::CreateInstance() {
     if (enable_validation_layers_ && !CheckValidationLayerSupport()) {
         throw std::runtime_error("Validation layers requested, but not available.");
@@ -263,6 +330,43 @@ void OdysseyEngine::CreateCommandPool() {
     command_pool_ = device_.createCommandPool(pool_info);
 }
 
+void OdysseyEngine::CreatePipelineLayout() {
+    vk::PipelineLayoutCreateInfo pipeline_info;
+    pipeline_info
+        .setSetLayoutCount(0)
+        .setPSetLayouts(nullptr)
+        .setPushConstantRangeCount(0)
+        .setPPushConstantRanges(nullptr);
+    pipeline_layout_ = device_.createPipelineLayout(pipeline_info);
+    if (!pipeline_layout_) {
+        throw std::runtime_error("Failed to create pipeline layout.");
+    }
+}
+
+void OdysseyEngine::RecreateSwapChain(int width, int height) {
+    device_.waitIdle();
+    swap_chain_.reset(nullptr);
+    swap_chain_ = std::make_unique<OdysseySwapChain>(this, width, height);
+    pipeline_line_ = CreatePipeline("shaders/shader.vert.spv", "shaders/shader.frag.spv", vk::PrimitiveTopology::eTriangleList, 1.0F);
+}
+
+std::unique_ptr<OdysseyPipeline> OdysseyEngine::CreatePipeline(const std::string& vert_shader_path, const std::string& frag_shader_path, vk::PrimitiveTopology primitive_topology, float line_width) {
+    auto pipeline_config = OdysseyPipeline::DefaultPipelineConfigInfo(primitive_topology, line_width);
+    pipeline_config.render_pass_ = swap_chain_->GetRenderPass();
+    pipeline_config.pipeline_layout_ = pipeline_layout_;
+    return std::make_unique<OdysseyPipeline>(this, vert_shader_path, frag_shader_path, pipeline_config);
+}
+
+void OdysseyEngine::CreateCommandBuffers() {
+    command_buffers_.resize(swap_chain_->GetImageCount());
+    vk::CommandBufferAllocateInfo alloc_info{};
+    alloc_info
+        .setLevel(vk::CommandBufferLevel::ePrimary)
+        .setCommandPool(command_pool_)
+        .setCommandBufferCount(static_cast<uint32_t>(command_buffers_.size()));
+    command_buffers_ = device_.allocateCommandBuffers(alloc_info);
+}
+
 bool OdysseyEngine::CheckValidationLayerSupport() {
     auto available_layers = vk::enumerateInstanceLayerProperties();
     for (const auto& layer_name : validation_layers_) {
@@ -289,7 +393,7 @@ void OdysseyEngine::CheckExtensionsSupport() {
     auto required_extensions = GetRequiredExtensions();
     for (const auto& required : required_extensions) {
         if (!available.contains(required)) {
-            throw std::runtime_error(fmt::format("Missing required extension: {}.", required));
+            throw std::runtime_error("Missing required extension: " + std::string(required) + ".");
         }
     }
 }
@@ -400,12 +504,14 @@ VKAPI_ATTR VkBool32 VKAPI_CALL OdysseyEngine::DebugCallback(VkDebugUtilsMessageS
         switch (message_severity) {
             case VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT: {
                 severity = "WARN";
-                std::cerr << fmt::format("[{}] Validation layer({}): {}", severity, type, message) << std::endl;
+                std::cerr << "[" << severity << "]"
+                          << " Validation layer(" << type << "): " << message << std::endl;
                 break;
             }
             case VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT: {
                 severity = "ERROR";
-                std::cerr << fmt::format("[{}] Validation layer({}): {}", severity, type, message) << std::endl;
+                std::cerr << "[" << severity << "]"
+                          << " Validation layer(" << type << "): " << message << std::endl;
                 break;
             }
             default: {

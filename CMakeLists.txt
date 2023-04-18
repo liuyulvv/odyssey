@@ -17,7 +17,7 @@ if(NOT ${IS_DEBUG_BUILD})
 endif()
 
 if (MSVC)
-    add_compile_options(/W4)
+    add_compile_options(/W3)
     set(CMAKE_CXX_FLAGS /utf-8)
     set(Vulkan_SDK "D:/VulkanSDK/1.3.236.0")
     set(CMAKE_PREFIX_PATH "D:/Qt/6.5.0/msvc2019_64/lib/cmake")
@@ -52,16 +52,6 @@ foreach(shader IN LISTS shaders)
 endforeach()
 add_custom_target(shaders ALL DEPENDS ${spv_shaders})
 
-# GLFW
-set(GLFW_LIBRARY_TYPE "SHARED" CACHE STRING "" FORCE)
-set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
-set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
-set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
-add_subdirectory(glfw)
-
-# FMT
-add_subdirectory(fmt)
-
 # GLM
 add_subdirectory(glm)
 
@@ -71,8 +61,6 @@ file(GLOB IMGUI_SRCS RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" "${CMAKE_CURRENT_SOU
 include_directories(
     ${Vulkan_INCLUDE_DIRS}
     "include"
-    "glfw/include"
-    "fmt/include"
     "glm"
     ${Qt6Gui_PRIVATE_INCLUDE_DIRS}
 )
@@ -88,8 +76,6 @@ if (MSVC)
     target_link_libraries(${PROJECT_NAME} 
     PRIVATE  
         ${Vulkan_LIBRARIES}
-        glfw3dll
-        fmt::fmt
         Qt6::Core
         Qt6::Gui
         Qt6::Widgets
@@ -99,8 +85,6 @@ elseif (APPLE)
     target_link_libraries(${PROJECT_NAME} 
     PRIVATE  
         ${Vulkan_LIBRARIES}
-        glfw
-        fmt::fmt
         Qt6::Core
         Qt6::Gui
         Qt6::Widgets

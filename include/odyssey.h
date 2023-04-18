@@ -15,6 +15,12 @@
 #include "odyssey_pipeline.h"
 #include "odyssey_swap_chain.h"
 #include "odyssey_window.h"
+
+#if defined(_WIN32)
+#if !defined(VK_USE_PLATFORM_WIN32_KHR)
+#define VK_USE_PLATFORM_WIN32_KHR
+#endif  // VK_USE_PLATFORM_WIN32_KHR
+#endif
 #include "vulkan/vulkan.hpp"
 
 namespace odyssey {
@@ -22,7 +28,7 @@ namespace odyssey {
 class Odyssey {
 public:
     Odyssey();
-    ~Odyssey();
+    ~Odyssey() = default;
     Odyssey(const Odyssey& odyssey) = delete;
     Odyssey(Odyssey&& odyssey) = delete;
     Odyssey& operator=(const Odyssey& odyssey) = delete;
@@ -32,14 +38,7 @@ public:
     void Run();
 
 private:
-    void MainLoop();
-    void CreatePipelineLayout();
-    std::unique_ptr<OdysseyPipeline> CreatePipeline(const std::string& vert_shader_path, const std::string& frag_shader_path, vk::PrimitiveTopology primitive_topology, float line_width);
-    void CreateCommandBuffers();
     void Draw();
-    void LoadModel();
-    void RecreateSwapChain();
-    void RecordCommandBuffer(uint32_t image_index);
 
 public:
     static constexpr int WIDTH{800};
@@ -48,11 +47,6 @@ public:
 private:
     std::shared_ptr<OdysseyWindow> window_{};
     std::shared_ptr<OdysseyEngine> engine_{};
-    std::unique_ptr<OdysseySwapChain> swap_chain_{};
-    std::unique_ptr<OdysseyPipeline> pipeline_line_{};
-    vk::PipelineLayout pipeline_layout_{};
-    std::vector<vk::CommandBuffer> command_buffers_{};
-    std::unique_ptr<OdysseyModel> model_{};
 };
 
 }  // namespace odyssey
