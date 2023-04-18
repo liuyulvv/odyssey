@@ -19,13 +19,17 @@
 namespace odyssey {
 
 Odyssey::Odyssey() : window_(new OdysseyWindow()) {
+    setMinimumHeight(600);
+    setMinimumWidth(800);
     auto* wrapper = QWidget::createWindowContainer(window_);
-    engine_ = new OdysseyEngine(window_->GetSurfaceInfo(), window_->width(), window_->height());
     wrapper->setFocusPolicy(Qt::StrongFocus);
     wrapper->setFocus();
     QVBoxLayout* layout = new QVBoxLayout;
     layout->addWidget(wrapper, 0);
     setLayout(layout);
+    engine_ = new OdysseyEngine(window_->GetSurfaceInfo(), window_->width(), window_->height());
+    show();
+    resize(800, 600);
 }
 
 Odyssey::~Odyssey() {
