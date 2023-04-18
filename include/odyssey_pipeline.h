@@ -60,7 +60,7 @@ private:
     vk::ShaderModule CreateShaderModule(const std::vector<char>& code);
 
 private:
-    std::shared_ptr<OdysseyEngine> engine_;
+    OdysseyEngine* engine_;
     vk::Pipeline graphics_pipeline_{};
     vk::ShaderModule vert_shader_module_{};
     vk::ShaderModule frag_shader_module_{};

@@ -26,6 +26,7 @@ OdysseyEngine::OdysseyEngine(const vk::Win32SurfaceCreateInfoKHR& surface_info, 
     PickPhysicalDevice();
     CreateLogicalDevice();
     CreateCommandPool();
+    CreatePipelineLayout();
     RecreateSwapChain(width, height);
     CreateCommandBuffers();
 
@@ -42,6 +43,11 @@ OdysseyEngine::OdysseyEngine(const vk::Win32SurfaceCreateInfoKHR& surface_info, 
 #endif
 
 OdysseyEngine::~OdysseyEngine() {
+    device_.waitIdle();
+    model_.reset();
+    swap_chain_.reset();
+    pipeline_line_.reset();
+    device_.freeCommandBuffers(command_pool_, command_buffers_);
     device_.destroyPipelineLayout(pipeline_layout_);
     device_.destroyCommandPool(command_pool_);
     device_.destroy();
