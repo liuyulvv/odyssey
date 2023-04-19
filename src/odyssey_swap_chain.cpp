@@ -22,8 +22,8 @@ OdysseySwapChain::OdysseySwapChain(OdysseyEngine* engine, int width, int height)
 }
 
 OdysseySwapChain::~OdysseySwapChain() {
-    for (auto image_view : m_swapChainImageViews) {
-        m_engine->device().destroyImageView(image_view);
+    for (auto imageView : m_swapChainImageViews) {
+        m_engine->device().destroyImageView(imageView);
     }
     m_swapChainImageViews.clear();
     if (m_swapChain) {

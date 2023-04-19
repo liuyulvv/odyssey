@@ -10,6 +10,7 @@
 #include <memory>
 #include <vector>
 
+#include "odyssey_model.h"
 #include "odyssey_window.h"
 
 #if defined(_WIN32)
@@ -23,7 +24,6 @@ namespace odyssey {
 
 class OdysseyPipeline;
 class OdysseySwapChain;
-class OdysseyModel;
 
 struct QueueFamilyIndices {
     uint32_t graphicsFamily;
@@ -74,6 +74,8 @@ public:
     uint32_t acquireNextImage();
     void recordCommandBuffer(uint32_t imageIndex);
     void submitCommandBuffers(uint32_t imageIndex);
+    void loadModel(const std::vector<OdysseyModel::Vertex>& vertices);
+    void clearModel();
 
 private:
     void createInstance();
@@ -129,7 +131,7 @@ private:
     std::unique_ptr<OdysseySwapChain> m_swapChain{};
     std::unique_ptr<OdysseyPipeline> m_pipelineLine{};
     std::vector<vk::CommandBuffer> m_commandBuffers{};
-    std::unique_ptr<OdysseyModel> m_model{};
+    std::vector<std::unique_ptr<OdysseyModel>> m_models{};
 };
 
 }  // namespace odyssey

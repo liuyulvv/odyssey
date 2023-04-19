@@ -9,6 +9,8 @@
 
 #include <QWidget>
 
+#include "odyssey_model.h"
+
 namespace odyssey {
 
 class OdysseyWindow;
@@ -33,6 +35,8 @@ private:
 private:
     OdysseyWindow* m_window{nullptr};
     OdysseyEngine* m_engine{nullptr};
+
+    std::vector<OdysseyModel::Vertex> m_vertices;
 };
 
 }  // namespace odyssey

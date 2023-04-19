@@ -9,7 +9,11 @@
 
 #include <qpa/qplatformnativeinterface.h>
 
+#include <QMouseEvent>
 #include <QWindow>
+#include <functional>
+
+#include "odyssey_mouse_event.h"
 
 #if defined(_WIN32)
 #if !defined(VK_USE_PLATFORM_WIN32_KHR)
@@ -32,13 +36,21 @@ public:
 
 public:
     vk::Extent2D getExtent();
-
 #if defined(_WIN32)
     vk::Win32SurfaceCreateInfoKHR getSurfaceInfo();
 #endif
 
+public:
+    void setMouseCallback(const std::function<void(OdysseyMouseEvent)>& callback);
+
+private:
+    void mouseDoubleClickEvent(QMouseEvent* event);
+    void mousePressEvent(QMouseEvent* event);
+    void mouseMoveEvent(QMouseEvent* event);
+
 private:
     vk::SurfaceKHR m_surface{};
+    std::function<void(OdysseyMouseEvent)> mouseCallback{};
 };
 
 }  // namespace odyssey

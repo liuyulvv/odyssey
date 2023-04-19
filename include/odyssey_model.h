@@ -19,7 +19,6 @@
 #include <vector>
 
 #include "glm/glm.hpp"
-#include "odyssey_engine.h"
 
 #if defined(_WIN32)
 #if !defined(VK_USE_PLATFORM_WIN32_KHR)
@@ -29,6 +28,8 @@
 #include "vulkan/vulkan.hpp"
 
 namespace odyssey {
+
+class OdysseyEngine;
 
 class OdysseyModel {
 public:
@@ -57,7 +58,7 @@ private:
     void createVertexBuffer(const std::vector<Vertex>& vertices);
 
 private:
-    OdysseyEngine* m_engine;
+    OdysseyEngine* m_engine{nullptr};
     vk::Buffer m_vertexBuffer{};
     vk::DeviceMemory m_vertexBufferMemory{};
     uint32_t m_vertexCount{0};

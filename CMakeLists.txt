@@ -61,6 +61,7 @@ file(GLOB SRCS RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" "${CMAKE_CURRENT_SOURCE_DI
 include_directories(
     ${Vulkan_INCLUDE_DIRS}
     "include"
+    "include/event"
     "glm"
     ${Qt6Gui_PRIVATE_INCLUDE_DIRS}
 )

@@ -10,6 +10,8 @@
 #include <cstddef>
 #include <cstring>
 
+#include "odyssey_engine.h"
+
 namespace odyssey {
 
 OdysseyModel::OdysseyModel(OdysseyEngine* engine, const std::vector<Vertex>& vertices) : m_engine(engine) {

@@ -12,7 +12,6 @@
 #include <unordered_set>
 #include <vector>
 
-#include "odyssey_model.h"
 #include "odyssey_pipeline.h"
 #include "odyssey_swap_chain.h"
 
@@ -29,22 +28,12 @@ OdysseyEngine::OdysseyEngine(const vk::Win32SurfaceCreateInfoKHR& surfaceInfo, i
     createPipelineLayout();
     recreateSwapChain(width, height);
     createCommandBuffers();
-
-    std::vector<OdysseyModel::Vertex> vertices{
-        {{0.0F, 0.0F}, {1.0F, 0.0F, 0.0F, 1.0F}},
-        {{0.5F, 0.5F}, {0.0F, 1.0F, 0.0F, 1.0F}},
-        {{0.5F, -0.5F}, {0.0F, 0.0F, 1.0F, 1.0F}},
-        {{-0.5F, -0.5F}, {1.0F, 0.0F, 0.0F, 1.0F}},
-        {{-0.5F, 0.5F}, {0.0F, 1.0F, 0.0F, 1.0F}},
-        {{1.0F, 1.0F}, {0.0F, 0.0F, 1.0F, 1.0F}},
-    };
-    m_model = std::make_unique<OdysseyModel>(this, vertices);
 }
 #endif
 
 OdysseyEngine::~OdysseyEngine() {
     m_device.waitIdle();
-    m_model.reset();
+    clearModel();
     m_swapChain.reset();
     m_pipelineLine.reset();
     m_device.freeCommandBuffers(m_commandPool, m_commandBuffers);
@@ -227,8 +216,11 @@ void OdysseyEngine::recordCommandBuffer(uint32_t imageIndex) {
     m_commandBuffers[imageIndex].setScissor(0, scissor);
 
     m_pipelineLine->bind(m_commandBuffers[imageIndex]);
-    m_model->bind(m_commandBuffers[imageIndex]);
-    m_model->draw(m_commandBuffers[imageIndex]);
+
+    for (auto& model : m_models) {
+        model->bind(m_commandBuffers[imageIndex]);
+        model->draw(m_commandBuffers[imageIndex]);
+    }
 
     m_commandBuffers[imageIndex].endRenderPass();
     m_commandBuffers[imageIndex].end();
@@ -236,6 +228,17 @@ void OdysseyEngine::recordCommandBuffer(uint32_t imageIndex) {
 
 void OdysseyEngine::submitCommandBuffers(uint32_t imageIndex) {
     m_swapChain->submitCommandBuffers(m_commandBuffers[imageIndex], imageIndex);
+}
+
+void OdysseyEngine::loadModel(const std::vector<OdysseyModel::Vertex>& vertices) {
+    m_models.push_back(std::make_unique<OdysseyModel>(this, vertices));
+}
+
+void OdysseyEngine::clearModel() {
+    for (auto& model : m_models) {
+        model.reset();
+    }
+    m_models.clear();
 }
 
 void OdysseyEngine::createInstance() {
@@ -272,7 +275,7 @@ void OdysseyEngine::createInstance() {
     m_instance = vk::createInstance(createInfo);
 }
 
-void OdysseyEngine::setupDebugMessenger(){
+void OdysseyEngine::setupDebugMessenger() {
     if (!m_enableValidationLayers) {
         return;
     }
@@ -353,7 +356,7 @@ void OdysseyEngine::recreateSwapChain(int width, int height) {
     m_device.waitIdle();
     m_swapChain.reset(nullptr);
     m_swapChain = std::make_unique<OdysseySwapChain>(this, width, height);
-    m_pipelineLine = createPipeline("shaders/shader.vert.spv", "shaders/shader.frag.spv", vk::PrimitiveTopology::eTriangleList, 1.0F);
+    m_pipelineLine = createPipeline("shaders/shader.vert.spv", "shaders/shader.frag.spv", vk::PrimitiveTopology::eLineStrip, 1.0F);
 }
 
 std::unique_ptr<OdysseyPipeline> OdysseyEngine::createPipeline(const std::string& vertShaderPath, const std::string& fragShaderPath, vk::PrimitiveTopology primitiveTopology, float lineWidth) {
