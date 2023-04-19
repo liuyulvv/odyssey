@@ -49,7 +49,6 @@ private:
     void mouseMoveEvent(QMouseEvent* event);
 
 private:
-    vk::SurfaceKHR m_surface{};
     std::function<void(OdysseyMouseEvent)> mouseCallback{};
 };
 
