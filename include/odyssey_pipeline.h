@@ -25,45 +25,45 @@ namespace odyssey {
 struct PipelineConfigInfo {
     PipelineConfigInfo() = default;
 
-    vk::PipelineViewportStateCreateInfo viewport_info_{};
-    vk::PipelineInputAssemblyStateCreateInfo input_assembly_info_{};
-    vk::PipelineRasterizationStateCreateInfo rasterization_info_{};
-    vk::PipelineMultisampleStateCreateInfo multisample_info_{};
-    vk::PipelineColorBlendAttachmentState color_blend_attachment_{};
-    vk::PipelineColorBlendStateCreateInfo color_blend_info_{};
-    vk::PipelineDepthStencilStateCreateInfo depth_stencil_info_{};
-    std::vector<vk::DynamicState> dynamic_states_{};
-    vk::PipelineDynamicStateCreateInfo dynamic_state_info_{};
-    vk::PipelineLayout pipeline_layout_{nullptr};
-    vk::RenderPass render_pass_{nullptr};
-    uint32_t subpass_{0};
+    vk::PipelineViewportStateCreateInfo viewportInfo{};
+    vk::PipelineInputAssemblyStateCreateInfo inputAssemblyInfo{};
+    vk::PipelineRasterizationStateCreateInfo rasterizationInfo{};
+    vk::PipelineMultisampleStateCreateInfo multisampleInfo{};
+    vk::PipelineColorBlendAttachmentState colorBlendAttachment{};
+    vk::PipelineColorBlendStateCreateInfo colorBlendInfo{};
+    vk::PipelineDepthStencilStateCreateInfo depthStencilInfo{};
+    std::vector<vk::DynamicState> dynamicStates{};
+    vk::PipelineDynamicStateCreateInfo dynamicStateInfo{};
+    vk::PipelineLayout pipelineLayout{nullptr};
+    vk::RenderPass renderPass{nullptr};
+    uint32_t subpass{0};
 };
 
 class OdysseyPipeline {
 public:
-    OdysseyPipeline(OdysseyEngine* engine, const std::string& vertex_shader_path, const std::string& fragment_shader_path, const PipelineConfigInfo& config);
+    OdysseyPipeline(OdysseyEngine* engine, const std::string& vertShaderPath, const std::string& fragShaderPath, const PipelineConfigInfo& config);
     ~OdysseyPipeline();
 
     OdysseyPipeline() = delete;
-    OdysseyPipeline(const OdysseyPipeline& odyssey_pipeline) = delete;
-    OdysseyPipeline(OdysseyPipeline&& odyssey_pipeline) = delete;
-    OdysseyPipeline& operator=(const OdysseyPipeline& odyssey_pipeline) = delete;
-    OdysseyPipeline& operator=(OdysseyPipeline&& odyssey_pipeline) = delete;
+    OdysseyPipeline(const OdysseyPipeline& odysseyPipeline) = delete;
+    OdysseyPipeline(OdysseyPipeline&& odysseyPipeline) = delete;
+    OdysseyPipeline& operator=(const OdysseyPipeline& odysseyPipeline) = delete;
+    OdysseyPipeline& operator=(OdysseyPipeline&& odysseyPipeline) = delete;
 
 public:
-    static PipelineConfigInfo DefaultPipelineConfigInfo(vk::PrimitiveTopology primitive_topology = vk::PrimitiveTopology::eTriangleList, float line_width = 1.0F);
-    void Bind(const vk::CommandBuffer& buffer);
+    static PipelineConfigInfo defaultPipelineConfigInfo(vk::PrimitiveTopology primitiveTopology = vk::PrimitiveTopology::eTriangleList, float lineWidth = 1.0F);
+    void bind(const vk::CommandBuffer& buffer);
 
 private:
-    void CreateGraphicsPipeline(const std::string& vertex_shader_path, const std::string& fragment_shader_path, const PipelineConfigInfo& config);
-    static std::vector<char> ReadFile(const std::string& path);
-    vk::ShaderModule CreateShaderModule(const std::vector<char>& code);
+    void createGraphicsPipeline(const std::string& vertShaderPath, const std::string& fragShaderPath, const PipelineConfigInfo& config);
+    static std::vector<char> readFile(const std::string& path);
+    vk::ShaderModule createShaderModule(const std::vector<char>& code);
 
 private:
-    OdysseyEngine* engine_;
-    vk::Pipeline graphics_pipeline_{};
-    vk::ShaderModule vert_shader_module_{};
-    vk::ShaderModule frag_shader_module_{};
+    OdysseyEngine* m_engine;
+    vk::Pipeline m_graphicsPipeline{};
+    vk::ShaderModule vertShaderModule{};
+    vk::ShaderModule fragShaderModule{};
 };
 
 }  // namespace odyssey

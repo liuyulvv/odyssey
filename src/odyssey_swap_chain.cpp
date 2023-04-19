@@ -11,162 +11,162 @@
 
 namespace odyssey {
 
-OdysseySwapChain::OdysseySwapChain(OdysseyEngine* engine, int width, int height) : engine_(engine) {
-    window_extent_.setWidth(width);
-    window_extent_.setHeight(height);
-    CreateSwapChain();
-    CreateRenderPass();
-    CreateDepthResources();
-    CreateFrameBuffers();
-    CreateSyncObjects();
+OdysseySwapChain::OdysseySwapChain(OdysseyEngine* engine, int width, int height) : m_engine(engine) {
+    m_windowExtent.setWidth(width);
+    m_windowExtent.setHeight(height);
+    createSwapChain();
+    createRenderPass();
+    createDepthResources();
+    createFrameBuffers();
+    createSyncObjects();
 }
 
 OdysseySwapChain::~OdysseySwapChain() {
-    for (auto image_view : swap_chain_image_views_) {
-        engine_->Device().destroyImageView(image_view);
+    for (auto image_view : m_swapChainImageViews) {
+        m_engine->device().destroyImageView(image_view);
     }
-    swap_chain_image_views_.clear();
-    if (swap_chain_) {
-        engine_->Device().destroySwapchainKHR(swap_chain_);
-        swap_chain_ = nullptr;
+    m_swapChainImageViews.clear();
+    if (m_swapChain) {
+        m_engine->device().destroySwapchainKHR(m_swapChain);
+        m_swapChain = nullptr;
     }
-    for (size_t i = 0; i < depth_images_.size(); ++i) {
-        engine_->Device().destroyImageView(depth_image_views_[i]);
-        engine_->Device().destroyImage(depth_images_[i]);
-        engine_->Device().freeMemory(depth_image_memories_[i]);
+    for (size_t i = 0; i < m_depthImages.size(); ++i) {
+        m_engine->device().destroyImageView(m_depthImageViews[i]);
+        m_engine->device().destroyImage(m_depthImages[i]);
+        m_engine->device().freeMemory(m_depthImageMemories[i]);
     }
-    for (auto& framebuffer : swap_chain_frame_buffers_) {
-        engine_->Device().destroyFramebuffer(framebuffer);
+    for (auto& framebuffer : m_swapChainFrameBuffers) {
+        m_engine->device().destroyFramebuffer(framebuffer);
     }
-    for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT_; ++i) {
-        engine_->Device().destroySemaphore(render_finished_semaphores_[i]);
-        engine_->Device().destroySemaphore(image_available_semaphores_[i]);
-        engine_->Device().destroyFence(in_flight_fences_[i]);
+    for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i) {
+        m_engine->device().destroySemaphore(m_renderFinishedSemaphores[i]);
+        m_engine->device().destroySemaphore(m_imageAvailableSemaphores[i]);
+        m_engine->device().destroyFence(m_inFlightFences[i]);
     }
-    engine_->Device().destroyRenderPass(render_pass_);
+    m_engine->device().destroyRenderPass(m_renderPass);
 }
 
-const vk::Format& OdysseySwapChain::GetSwapChainImageFormat() const {
-    return swap_chain_image_format_;
+const vk::Format& OdysseySwapChain::getSwapChainImageFormat() const {
+    return m_swapChainImageFormat;
 }
 
-size_t OdysseySwapChain::GetImageCount() const {
-    return swap_chain_images_.size();
+size_t OdysseySwapChain::getImageCount() const {
+    return m_swapChainImages.size();
 }
 
-vk::Extent2D OdysseySwapChain::GetSwapChainExtent() const {
-    return swap_chain_extent_;
+vk::Extent2D OdysseySwapChain::getSwapChainExtent() const {
+    return m_swapChainExtent;
 }
 
-const vk::Framebuffer& OdysseySwapChain::GetFrameBuffer(size_t index) const {
-    return swap_chain_frame_buffers_[index];
+const vk::Framebuffer& OdysseySwapChain::getFrameBuffer(size_t index) const {
+    return m_swapChainFrameBuffers[index];
 }
 
-const vk::ImageView& OdysseySwapChain::GetImageView(size_t index) const {
-    return swap_chain_image_views_[index];
+const vk::ImageView& OdysseySwapChain::getImageView(size_t index) const {
+    return m_swapChainImageViews[index];
 }
 
-const vk::RenderPass& OdysseySwapChain::GetRenderPass() const {
-    return render_pass_;
+const vk::RenderPass& OdysseySwapChain::getRenderPass() const {
+    return m_renderPass;
 }
 
-uint32_t OdysseySwapChain::GetWidth() const {
-    return swap_chain_extent_.width;
+uint32_t OdysseySwapChain::getWidth() const {
+    return m_swapChainExtent.width;
 }
 
-uint32_t OdysseySwapChain::GetHeight() const {
-    return swap_chain_extent_.height;
+uint32_t OdysseySwapChain::getHeight() const {
+    return m_swapChainExtent.height;
 }
 
-float OdysseySwapChain::GetExtentAspectRatio() const {
-    return static_cast<float>(swap_chain_extent_.width) / static_cast<float>(swap_chain_extent_.height);
+float OdysseySwapChain::getExtentAspectRatio() const {
+    return static_cast<float>(m_swapChainExtent.width) / static_cast<float>(m_swapChainExtent.height);
 }
 
-uint32_t OdysseySwapChain::AcquireNextImage() {
-    engine_->Device().waitForFences(in_flight_fences_[current_frame_], true, (std::numeric_limits<uint64_t>::max)());
-    return engine_->Device().acquireNextImageKHR(swap_chain_, (std::numeric_limits<uint64_t>::max)(), image_available_semaphores_[current_frame_], nullptr).value;
+uint32_t OdysseySwapChain::acquireNextImage() {
+    m_engine->device().waitForFences(m_inFlightFences[m_currentFrame], true, (std::numeric_limits<uint64_t>::max)());
+    return m_engine->device().acquireNextImageKHR(m_swapChain, (std::numeric_limits<uint64_t>::max)(), m_imageAvailableSemaphores[m_currentFrame], nullptr).value;
 }
 
-void OdysseySwapChain::SubmitCommandBuffers(const vk::CommandBuffer& buffer, uint32_t image_index) {
-    if (images_in_flight_[image_index]) {
-        engine_->Device().waitForFences(images_in_flight_[image_index], true, (std::numeric_limits<uint64_t>::max)());
+void OdysseySwapChain::submitCommandBuffers(const vk::CommandBuffer& buffer, uint32_t imageIndex) {
+    if (m_imagesInFlight[imageIndex]) {
+        m_engine->device().waitForFences(m_imagesInFlight[imageIndex], true, (std::numeric_limits<uint64_t>::max)());
     }
-    images_in_flight_[image_index] = in_flight_fences_[current_frame_];
+    m_imagesInFlight[imageIndex] = m_inFlightFences[m_currentFrame];
 
-    vk::SubmitInfo submit_info;
-    vk::PipelineStageFlags wait_dst_stage_mask = vk::PipelineStageFlagBits::eColorAttachmentOutput;
-    submit_info
+    vk::SubmitInfo submitInfo;
+    vk::PipelineStageFlags waitDstStageMask = vk::PipelineStageFlagBits::eColorAttachmentOutput;
+    submitInfo
         .setWaitSemaphoreCount(1)
-        .setWaitSemaphores(image_available_semaphores_[current_frame_])
-        .setWaitDstStageMask(wait_dst_stage_mask)
+        .setWaitSemaphores(m_imageAvailableSemaphores[m_currentFrame])
+        .setWaitDstStageMask(waitDstStageMask)
         .setCommandBufferCount(1)
         .setCommandBuffers(buffer)
         .setSignalSemaphoreCount(1)
-        .setSignalSemaphores(render_finished_semaphores_[current_frame_]);
+        .setSignalSemaphores(m_renderFinishedSemaphores[m_currentFrame]);
 
-    engine_->Device().resetFences(in_flight_fences_[current_frame_]);
+    m_engine->device().resetFences(m_inFlightFences[m_currentFrame]);
 
-    engine_->GetGraphicsQueue().submit(submit_info, in_flight_fences_[current_frame_]);
+    m_engine->getGraphicsQueue().submit(submitInfo, m_inFlightFences[m_currentFrame]);
 
-    vk::PresentInfoKHR present_info;
-    present_info
+    vk::PresentInfoKHR presentInfo;
+    presentInfo
         .setWaitSemaphoreCount(1)
-        .setWaitSemaphores(render_finished_semaphores_[current_frame_])
+        .setWaitSemaphores(m_renderFinishedSemaphores[m_currentFrame])
         .setSwapchainCount(1)
-        .setSwapchains(swap_chain_)
-        .setImageIndices(image_index);
+        .setSwapchains(m_swapChain)
+        .setImageIndices(imageIndex);
 
-    engine_->GetPresentQueue().presentKHR(present_info);
-    current_frame_ = (current_frame_ + 1) % MAX_FRAMES_IN_FLIGHT_;
+    m_engine->getPresentQueue().presentKHR(presentInfo);
+    m_currentFrame = (m_currentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
 }
 
-void OdysseySwapChain::CreateSwapChain() {
-    auto swap_chain_support = engine_->GetSwapChainSupport();
-    auto surface_format = ChooseSwapSurfaceFormat(swap_chain_support.formats_);
-    swap_chain_image_format_ = surface_format.format;
-    auto present_mode = ChooseSwapPresentMode(swap_chain_support.present_modes_);
-    auto extent = ChooseSwapExtent(swap_chain_support.capabilities_);
-    swap_chain_extent_ = extent;
-    uint32_t image_count = swap_chain_support.capabilities_.minImageCount + 1;
-    if (swap_chain_support.capabilities_.maxImageCount > 0 && image_count > swap_chain_support.capabilities_.maxImageCount) {
-        image_count = swap_chain_support.capabilities_.maxImageCount;
+void OdysseySwapChain::createSwapChain() {
+    auto swapChainSupport = m_engine->getSwapChainSupport();
+    auto surfaceFormat = chooseSwapSurfaceFormat(swapChainSupport.formats);
+    m_swapChainImageFormat = surfaceFormat.format;
+    auto presentMode = chooseSwapPresentMode(swapChainSupport.presentModes);
+    auto extent = chooseSwapExtent(swapChainSupport.capabilities);
+    m_swapChainExtent = extent;
+    uint32_t imageCount = swapChainSupport.capabilities.minImageCount + 1;
+    if (swapChainSupport.capabilities.maxImageCount > 0 && imageCount > swapChainSupport.capabilities.maxImageCount) {
+        imageCount = swapChainSupport.capabilities.maxImageCount;
     }
-    vk::SwapchainCreateInfoKHR create_info{};
-    create_info
-        .setSurface(engine_->Surface())
-        .setMinImageCount(image_count)
-        .setImageFormat(surface_format.format)
-        .setImageColorSpace(surface_format.colorSpace)
+    vk::SwapchainCreateInfoKHR createinfo{};
+    createinfo
+        .setSurface(m_engine->surface())
+        .setMinImageCount(imageCount)
+        .setImageFormat(surfaceFormat.format)
+        .setImageColorSpace(surfaceFormat.colorSpace)
         .setImageExtent(extent)
         .setImageArrayLayers(1)
         .setImageUsage(vk::ImageUsageFlagBits::eColorAttachment)
-        .setPreTransform(swap_chain_support.capabilities_.currentTransform)
+        .setPreTransform(swapChainSupport.capabilities.currentTransform)
         .setCompositeAlpha(vk::CompositeAlphaFlagBitsKHR::eOpaque)
-        .setPresentMode(present_mode)
+        .setPresentMode(presentMode)
         .setClipped(true);
-    auto indices = engine_->FindPhysicalQueueFamilies();
-    if (indices.graphics_family_ != indices.present_family_) {
-        std::array<uint32_t, 2> queue_family_indices{indices.graphics_family_, indices.present_family_};
-        create_info
+    auto indices = m_engine->findPhysicalQueueFamilies();
+    if (indices.graphicsFamily != indices.presentFamily) {
+        std::array<uint32_t, 2> queueFamilyIndices{indices.graphicsFamily, indices.presentFamily};
+        createinfo
             .setImageSharingMode(vk::SharingMode::eConcurrent)
-            .setQueueFamilyIndices(queue_family_indices);
+            .setQueueFamilyIndices(queueFamilyIndices);
     } else {
-        create_info
+        createinfo
             .setImageSharingMode(vk::SharingMode::eExclusive)
-            .setQueueFamilyIndices(indices.graphics_family_);
+            .setQueueFamilyIndices(indices.graphicsFamily);
     }
-    swap_chain_ = engine_->Device().createSwapchainKHR(create_info);
-    swap_chain_images_ = engine_->Device().getSwapchainImagesKHR(swap_chain_);
-    swap_chain_image_views_.resize(swap_chain_images_.size());
-    for (size_t i = 0; i < swap_chain_images_.size(); ++i) {
-        swap_chain_image_views_[i] = engine_->CreateImageView(swap_chain_images_[i], swap_chain_image_format_, vk::ImageAspectFlagBits::eColor);
+    m_swapChain = m_engine->device().createSwapchainKHR(createinfo);
+    m_swapChainImages = m_engine->device().getSwapchainImagesKHR(m_swapChain);
+    m_swapChainImageViews.resize(m_swapChainImages.size());
+    for (size_t i = 0; i < m_swapChainImages.size(); ++i) {
+        m_swapChainImageViews[i] = m_engine->createImageView(m_swapChainImages[i], m_swapChainImageFormat, vk::ImageAspectFlagBits::eColor);
     }
 }
 
-void OdysseySwapChain::CreateRenderPass() {
-    vk::AttachmentDescription depth_attachment{};
-    depth_attachment
-        .setFormat(FindDepthFormat())
+void OdysseySwapChain::createRenderPass() {
+    vk::AttachmentDescription depthAttachment{};
+    depthAttachment
+        .setFormat(findDepthFormat())
         .setSamples(vk::SampleCountFlagBits::e1)
         .setLoadOp(vk::AttachmentLoadOp::eClear)
         .setStoreOp(vk::AttachmentStoreOp::eDontCare)
@@ -174,14 +174,14 @@ void OdysseySwapChain::CreateRenderPass() {
         .setStencilStoreOp(vk::AttachmentStoreOp::eDontCare)
         .setInitialLayout(vk::ImageLayout::eUndefined)
         .setFinalLayout(vk::ImageLayout::eDepthStencilAttachmentOptimal);
-    vk::AttachmentReference depth_attachment_reference;
-    depth_attachment_reference
+    vk::AttachmentReference depthAttachmentReference;
+    depthAttachmentReference
         .setAttachment(1)
         .setLayout(vk::ImageLayout::eDepthStencilAttachmentOptimal);
 
-    vk::AttachmentDescription color_attachment;
-    color_attachment
-        .setFormat(GetSwapChainImageFormat())
+    vk::AttachmentDescription colorAttachment;
+    colorAttachment
+        .setFormat(getSwapChainImageFormat())
         .setSamples(vk::SampleCountFlagBits::e1)
         .setLoadOp(vk::AttachmentLoadOp::eClear)
         .setStoreOp(vk::AttachmentStoreOp::eStore)
@@ -189,8 +189,8 @@ void OdysseySwapChain::CreateRenderPass() {
         .setStencilStoreOp(vk::AttachmentStoreOp::eDontCare)
         .setInitialLayout(vk::ImageLayout::eUndefined)
         .setFinalLayout(vk::ImageLayout::ePresentSrcKHR);
-    vk::AttachmentReference color_attachment_reference;
-    color_attachment_reference
+    vk::AttachmentReference colorAttachmentReference;
+    colorAttachmentReference
         .setAttachment(0)
         .setLayout(vk::ImageLayout::eColorAttachmentOptimal);
 
@@ -198,8 +198,8 @@ void OdysseySwapChain::CreateRenderPass() {
     subpass
         .setPipelineBindPoint(vk::PipelineBindPoint::eGraphics)
         .setColorAttachmentCount(1)
-        .setColorAttachments(color_attachment_reference)
-        .setPDepthStencilAttachment(&depth_attachment_reference);
+        .setColorAttachments(colorAttachmentReference)
+        .setPDepthStencilAttachment(&depthAttachmentReference);
 
     vk::SubpassDependency dependency;
     dependency
@@ -210,95 +210,93 @@ void OdysseySwapChain::CreateRenderPass() {
         .setDstStageMask(vk::PipelineStageFlagBits::eColorAttachmentOutput | vk::PipelineStageFlagBits::eEarlyFragmentTests)
         .setDstAccessMask(vk::AccessFlagBits::eColorAttachmentWrite | vk::AccessFlagBits::eDepthStencilAttachmentWrite);
 
-    std::array<vk::AttachmentDescription, 2> attachments{color_attachment, depth_attachment};
+    std::array<vk::AttachmentDescription, 2> attachments{colorAttachment, depthAttachment};
 
-    vk::RenderPassCreateInfo render_pass_info;
-    render_pass_info
+    vk::RenderPassCreateInfo renderPassInfo;
+    renderPassInfo
         .setAttachmentCount(static_cast<uint32_t>(attachments.size()))
         .setAttachments(attachments)
         .setSubpassCount(1)
         .setSubpasses(subpass)
         .setDependencyCount(1)
         .setDependencies(dependency);
-    render_pass_ = engine_->Device().createRenderPass(render_pass_info);
+    m_renderPass = m_engine->device().createRenderPass(renderPassInfo);
 }
 
-void OdysseySwapChain::CreateDepthResources() {
-    auto depth_format = FindDepthFormat();
-    auto swap_chain_extent = GetSwapChainExtent();
-    depth_images_.resize(GetImageCount());
-    depth_image_memories_.resize(GetImageCount());
-    depth_image_views_.resize(GetImageCount());
-    for (size_t i = 0; i < depth_images_.size(); ++i) {
-        engine_->CreateImage(swap_chain_extent.width, swap_chain_extent.height, depth_format, vk::ImageTiling::eOptimal, vk::ImageUsageFlagBits::eDepthStencilAttachment, vk::MemoryPropertyFlagBits::eDeviceLocal, depth_images_[i], depth_image_memories_[i]);
-        depth_image_views_[i] = engine_->CreateImageView(depth_images_[i], depth_format, vk::ImageAspectFlagBits::eDepth);
+void OdysseySwapChain::createDepthResources() {
+    auto depthFormat = findDepthFormat();
+    auto swapChainExtent = getSwapChainExtent();
+    m_depthImages.resize(getImageCount());
+    m_depthImageMemories.resize(getImageCount());
+    m_depthImageViews.resize(getImageCount());
+    for (size_t i = 0; i < m_depthImages.size(); ++i) {
+        m_engine->createImage(swapChainExtent.width, swapChainExtent.height, depthFormat, vk::ImageTiling::eOptimal, vk::ImageUsageFlagBits::eDepthStencilAttachment, vk::MemoryPropertyFlagBits::eDeviceLocal, m_depthImages[i], m_depthImageMemories[i]);
+        m_depthImageViews[i] = m_engine->createImageView(m_depthImages[i], depthFormat, vk::ImageAspectFlagBits::eDepth);
     }
 }
 
-void OdysseySwapChain::CreateFrameBuffers() {
-    swap_chain_frame_buffers_.resize(GetImageCount());
-    for (size_t i = 0; i < GetImageCount(); ++i) {
-        std::array<vk::ImageView, 2> attachments{swap_chain_image_views_[i], depth_image_views_[i]};
-        auto swap_chain_extent = GetSwapChainExtent();
-        vk::FramebufferCreateInfo framebuffer_info{};
-        framebuffer_info
-            .setRenderPass(render_pass_)
+void OdysseySwapChain::createFrameBuffers() {
+    m_swapChainFrameBuffers.resize(getImageCount());
+    for (size_t i = 0; i < getImageCount(); ++i) {
+        std::array<vk::ImageView, 2> attachments{m_swapChainImageViews[i], m_depthImageViews[i]};
+        auto swapChainExtent = getSwapChainExtent();
+        vk::FramebufferCreateInfo framebufferInfo{};
+        framebufferInfo
+            .setRenderPass(m_renderPass)
             .setAttachmentCount(static_cast<uint32_t>(attachments.size()))
             .setAttachments(attachments)
-            .setWidth(swap_chain_extent.width)
-            .setHeight(swap_chain_extent.height)
+            .setWidth(swapChainExtent.width)
+            .setHeight(swapChainExtent.height)
             .setLayers(1);
-
-        swap_chain_frame_buffers_[i] = engine_->Device().createFramebuffer(framebuffer_info);
+        m_swapChainFrameBuffers[i] = m_engine->device().createFramebuffer(framebufferInfo);
     }
 }
 
-void OdysseySwapChain::CreateSyncObjects() {
-    image_available_semaphores_.resize(MAX_FRAMES_IN_FLIGHT_);
-    render_finished_semaphores_.resize(MAX_FRAMES_IN_FLIGHT_);
-    in_flight_fences_.resize(MAX_FRAMES_IN_FLIGHT_);
-    images_in_flight_.resize(GetImageCount());
-
-    vk::SemaphoreCreateInfo semaphore_info{};
-    vk::FenceCreateInfo fence_info{};
-    fence_info.setFlags(vk::FenceCreateFlagBits::eSignaled);
-    for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT_; ++i) {
-        image_available_semaphores_[i] = engine_->Device().createSemaphore(semaphore_info);
-        render_finished_semaphores_[i] = engine_->Device().createSemaphore(semaphore_info);
-        in_flight_fences_[i] = engine_->Device().createFence(fence_info);
+void OdysseySwapChain::createSyncObjects() {
+    m_imageAvailableSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
+    m_renderFinishedSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
+    m_inFlightFences.resize(MAX_FRAMES_IN_FLIGHT);
+    m_imagesInFlight.resize(getImageCount());
+    vk::SemaphoreCreateInfo semaphoreInfo{};
+    vk::FenceCreateInfo fenceInfo{};
+    fenceInfo.setFlags(vk::FenceCreateFlagBits::eSignaled);
+    for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i) {
+        m_imageAvailableSemaphores[i] = m_engine->device().createSemaphore(semaphoreInfo);
+        m_renderFinishedSemaphores[i] = m_engine->device().createSemaphore(semaphoreInfo);
+        m_inFlightFences[i] = m_engine->device().createFence(fenceInfo);
     }
 }
 
-vk::SurfaceFormatKHR OdysseySwapChain::ChooseSwapSurfaceFormat(const std::vector<vk::SurfaceFormatKHR>& available_formats) {
-    for (const auto& available_format : available_formats) {
-        if (available_format.format == vk::Format::eR8G8B8A8Srgb && available_format.colorSpace == vk::ColorSpaceKHR::eSrgbNonlinear) {
-            return available_format;
+vk::SurfaceFormatKHR OdysseySwapChain::chooseSwapSurfaceFormat(const std::vector<vk::SurfaceFormatKHR>& availableFormats) {
+    for (const auto& availableFormat : availableFormats) {
+        if (availableFormat.format == vk::Format::eR8G8B8A8Srgb && availableFormat.colorSpace == vk::ColorSpaceKHR::eSrgbNonlinear) {
+            return availableFormat;
         }
     }
-    return available_formats[0];
+    return availableFormats[0];
 }
 
-vk::PresentModeKHR OdysseySwapChain::ChooseSwapPresentMode(const std::vector<vk::PresentModeKHR>& available_present_modes) {
-    for (const auto& available_present_mode : available_present_modes) {
-        if (available_present_mode == vk::PresentModeKHR::eMailbox) {
-            return available_present_mode;
+vk::PresentModeKHR OdysseySwapChain::chooseSwapPresentMode(const std::vector<vk::PresentModeKHR>& availablePresentModes) {
+    for (const auto& availablePresentMode : availablePresentModes) {
+        if (availablePresentMode == vk::PresentModeKHR::eMailbox) {
+            return availablePresentMode;
         }
     }
     return vk::PresentModeKHR::eFifo;
 }
 
-vk::Extent2D OdysseySwapChain::ChooseSwapExtent(const vk::SurfaceCapabilitiesKHR& capabilities) {
+vk::Extent2D OdysseySwapChain::chooseSwapExtent(const vk::SurfaceCapabilitiesKHR& capabilities) {
     if (capabilities.currentExtent.width != (std::numeric_limits<uint32_t>::max)()) {
         return capabilities.currentExtent;
     }
-    vk::Extent2D actual_extent = window_extent_;
-    actual_extent.width = (std::max)(capabilities.minImageExtent.width, (std::min)(capabilities.maxImageExtent.width, actual_extent.width));
-    actual_extent.height = (std::max)(capabilities.minImageExtent.height, (std::min)(capabilities.maxImageExtent.height, actual_extent.height));
-    return actual_extent;
+    vk::Extent2D actualExtent = m_windowExtent;
+    actualExtent.width = (std::max)(capabilities.minImageExtent.width, (std::min)(capabilities.maxImageExtent.width, actualExtent.width));
+    actualExtent.height = (std::max)(capabilities.minImageExtent.height, (std::min)(capabilities.maxImageExtent.height, actualExtent.height));
+    return actualExtent;
 }
 
-vk::Format OdysseySwapChain::FindDepthFormat() const {
-    return engine_->FindSupportedFormat({vk::Format::eD32Sfloat, vk::Format::eD32SfloatS8Uint, vk::Format::eD24UnormS8Uint}, vk::ImageTiling::eOptimal, vk::FormatFeatureFlagBits::eDepthStencilAttachment);
+vk::Format OdysseySwapChain::findDepthFormat() const {
+    return m_engine->findSupportedFormat({vk::Format::eD32Sfloat, vk::Format::eD32SfloatS8Uint, vk::Format::eD24UnormS8Uint}, vk::ImageTiling::eOptimal, vk::FormatFeatureFlagBits::eDepthStencilAttachment);
 }
 
 }  // namespace odyssey

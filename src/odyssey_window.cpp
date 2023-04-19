@@ -13,19 +13,19 @@
 namespace odyssey {
 
 #if defined(_WIN32)
-vk::Win32SurfaceCreateInfoKHR OdysseyWindow::GetSurfaceInfo() {
+vk::Win32SurfaceCreateInfoKHR OdysseyWindow::getSurfaceInfo() {
     auto wid = winId();
-    auto* platform_interface = QGuiApplication::platformNativeInterface();
-    auto* handle = platform_interface->nativeResourceForWindow("handle", this);
+    auto* platformInterface = QGuiApplication::platformNativeInterface();
+    auto* handle = platformInterface->nativeResourceForWindow("handle", this);
     auto* hwnd = static_cast<HWND>(handle);
-    vk::Win32SurfaceCreateInfoKHR surface_info{};
-    surface_info.setHwnd(hwnd);
-    surface_info.setHinstance(GetModuleHandle(nullptr));
-    return surface_info;
+    vk::Win32SurfaceCreateInfoKHR surfaceInfo{};
+    surfaceInfo.setHwnd(hwnd);
+    surfaceInfo.setHinstance(GetModuleHandle(nullptr));
+    return surfaceInfo;
 }
 #endif
 
-vk::Extent2D OdysseyWindow::GetExtent() {
+vk::Extent2D OdysseyWindow::getExtent() {
     return {static_cast<uint32_t>(width()), static_cast<uint32_t>(height())};
 }
 

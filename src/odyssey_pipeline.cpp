@@ -14,34 +14,34 @@
 
 namespace odyssey {
 
-OdysseyPipeline::OdysseyPipeline(OdysseyEngine* engine, const std::string& vertex_shader_path, const std::string& fragment_shader_path, const PipelineConfigInfo& config) : engine_(engine) {
-    CreateGraphicsPipeline(vertex_shader_path, fragment_shader_path, config);
+OdysseyPipeline::OdysseyPipeline(OdysseyEngine* engine, const std::string& vertShaderPath, const std::string& fragShaderPath, const PipelineConfigInfo& config) : m_engine(engine) {
+    createGraphicsPipeline(vertShaderPath, fragShaderPath, config);
 }
 
 OdysseyPipeline::~OdysseyPipeline() {
-    engine_->Device().destroyShaderModule(vert_shader_module_);
-    engine_->Device().destroyShaderModule(frag_shader_module_);
-    engine_->Device().destroyPipeline(graphics_pipeline_);
+    m_engine->device().destroyShaderModule(vertShaderModule);
+    m_engine->device().destroyShaderModule(fragShaderModule);
+    m_engine->device().destroyPipeline(m_graphicsPipeline);
 }
 
-PipelineConfigInfo OdysseyPipeline::DefaultPipelineConfigInfo(vk::PrimitiveTopology primitive_topology, float line_width) {
+PipelineConfigInfo OdysseyPipeline::defaultPipelineConfigInfo(vk::PrimitiveTopology primitiveTopology, float lineWidth) {
     PipelineConfigInfo config{};
 
-    config.viewport_info_
+    config.viewportInfo
         .setViewportCount(1)
         .setPViewports(nullptr)
         .setScissorCount(1)
         .setPScissors(nullptr);
 
-    config.input_assembly_info_
-        .setTopology(primitive_topology)
+    config.inputAssemblyInfo
+        .setTopology(primitiveTopology)
         .setPrimitiveRestartEnable(false);
 
-    config.rasterization_info_
+    config.rasterizationInfo
         .setDepthClampEnable(false)
         .setRasterizerDiscardEnable(false)
         .setPolygonMode(vk::PolygonMode::eFill)
-        .setLineWidth(line_width)
+        .setLineWidth(lineWidth)
         .setCullMode(vk::CullModeFlagBits::eNone)
         .setFrontFace(vk::FrontFace::eClockwise)
         .setDepthBiasEnable(false)
@@ -49,7 +49,7 @@ PipelineConfigInfo OdysseyPipeline::DefaultPipelineConfigInfo(vk::PrimitiveTopol
         .setDepthBiasClamp(0.0F)
         .setDepthBiasSlopeFactor(0.0F);
 
-    config.multisample_info_
+    config.multisampleInfo
         .setSampleShadingEnable(false)
         .setRasterizationSamples(vk::SampleCountFlagBits::e1)
         .setMinSampleShading(1.0F)
@@ -57,7 +57,7 @@ PipelineConfigInfo OdysseyPipeline::DefaultPipelineConfigInfo(vk::PrimitiveTopol
         .setAlphaToCoverageEnable(false)
         .setAlphaToOneEnable(false);
 
-    config.color_blend_attachment_
+    config.colorBlendAttachment
         .setColorWriteMask(vk::ColorComponentFlagBits::eR | vk::ColorComponentFlagBits::eG | vk::ColorComponentFlagBits::eB | vk::ColorComponentFlagBits::eA)
         .setBlendEnable(false)
         .setSrcColorBlendFactor(vk::BlendFactor::eOne)
@@ -67,14 +67,14 @@ PipelineConfigInfo OdysseyPipeline::DefaultPipelineConfigInfo(vk::PrimitiveTopol
         .setDstAlphaBlendFactor(vk::BlendFactor::eZero)
         .setAlphaBlendOp(vk::BlendOp::eAdd);
 
-    config.color_blend_info_
+    config.colorBlendInfo
         .setLogicOpEnable(false)
         .setLogicOp(vk::LogicOp::eCopy)
         .setAttachmentCount(1)
-        .setAttachments(config.color_blend_attachment_)
+        .setAttachments(config.colorBlendAttachment)
         .setBlendConstants({0.0F, 0.0F, 0.0F, 0.0F});
 
-    config.depth_stencil_info_
+    config.depthStencilInfo
         .setDepthTestEnable(true)
         .setDepthWriteEnable(true)
         .setDepthCompareOp(vk::CompareOp::eLess)
@@ -85,85 +85,85 @@ PipelineConfigInfo OdysseyPipeline::DefaultPipelineConfigInfo(vk::PrimitiveTopol
         .setFront({})
         .setBack({});
 
-    config.dynamic_states_ = {vk::DynamicState::eViewport, vk::DynamicState::eScissor};
-    config.dynamic_state_info_
-        .setDynamicStateCount(static_cast<uint32_t>(config.dynamic_states_.size()))
-        .setDynamicStates(config.dynamic_states_);
+    config.dynamicStates = {vk::DynamicState::eViewport, vk::DynamicState::eScissor};
+    config.dynamicStateInfo
+        .setDynamicStateCount(static_cast<uint32_t>(config.dynamicStates.size()))
+        .setDynamicStates(config.dynamicStates);
 
     return config;
 }
 
-void OdysseyPipeline::Bind(const vk::CommandBuffer& buffer) {
-    buffer.bindPipeline(vk::PipelineBindPoint::eGraphics, graphics_pipeline_);
+void OdysseyPipeline::bind(const vk::CommandBuffer& buffer) {
+    buffer.bindPipeline(vk::PipelineBindPoint::eGraphics, m_graphicsPipeline);
 }
 
-void OdysseyPipeline::CreateGraphicsPipeline(const std::string& vertex_shader_path, const std::string& fragment_shader_path, const PipelineConfigInfo& config) {
-    auto vert_shader_code = ReadFile(vertex_shader_path);
-    auto frag_shader_code = ReadFile(fragment_shader_path);
-    vert_shader_module_ = CreateShaderModule(vert_shader_code);
-    frag_shader_module_ = CreateShaderModule(frag_shader_code);
+void OdysseyPipeline::createGraphicsPipeline(const std::string& vertShaderPath, const std::string& fragShaderPath, const PipelineConfigInfo& config) {
+    auto vertShaderCode = readFile(vertShaderPath);
+    auto fragShaderCode = readFile(fragShaderPath);
+    vertShaderModule = createShaderModule(vertShaderCode);
+    fragShaderModule = createShaderModule(fragShaderCode);
 
-    vk::PipelineShaderStageCreateInfo vert_shader_stage_info;
-    vert_shader_stage_info
+    vk::PipelineShaderStageCreateInfo vertShaderStageInfo;
+    vertShaderStageInfo
         .setStage(vk::ShaderStageFlagBits::eVertex)
-        .setModule(vert_shader_module_)
+        .setModule(vertShaderModule)
         .setPName("main");
 
-    vk::PipelineShaderStageCreateInfo frag_shader_stage_info;
-    frag_shader_stage_info
+    vk::PipelineShaderStageCreateInfo fragShaderStageInfo;
+    fragShaderStageInfo
         .setStage(vk::ShaderStageFlagBits::eFragment)
-        .setModule(frag_shader_module_)
+        .setModule(fragShaderModule)
         .setPName("main");
 
-    vk::PipelineVertexInputStateCreateInfo vertex_input_info;
-    auto binding_descriptions = OdysseyModel::Vertex::GetBindingDescriptions();
-    auto attribute_descriptions = OdysseyModel::Vertex::GetAttributeDescriptions();
-    vertex_input_info
-        .setVertexBindingDescriptionCount(static_cast<uint32_t>(binding_descriptions.size()))
-        .setVertexBindingDescriptions(binding_descriptions)
-        .setVertexAttributeDescriptionCount(static_cast<uint32_t>(attribute_descriptions.size()))
-        .setVertexAttributeDescriptions(attribute_descriptions);
+    vk::PipelineVertexInputStateCreateInfo vertexInputInfo;
+    auto bindingDescriptions = OdysseyModel::Vertex::getBindingDescriptions();
+    auto attributeDescriptions = OdysseyModel::Vertex::getAttributeDescriptions();
+    vertexInputInfo
+        .setVertexBindingDescriptionCount(static_cast<uint32_t>(bindingDescriptions.size()))
+        .setVertexBindingDescriptions(bindingDescriptions)
+        .setVertexAttributeDescriptionCount(static_cast<uint32_t>(attributeDescriptions.size()))
+        .setVertexAttributeDescriptions(attributeDescriptions);
 
-    std::array<vk::PipelineShaderStageCreateInfo, 2> shader_stages{vert_shader_stage_info, frag_shader_stage_info};
+    std::array<vk::PipelineShaderStageCreateInfo, 2> shaderStages{vertShaderStageInfo, fragShaderStageInfo};
 
-    vk::GraphicsPipelineCreateInfo pipeline_info;
-    pipeline_info
-        .setStageCount(static_cast<uint32_t>(shader_stages.size()))
-        .setStages(shader_stages)
-        .setPVertexInputState(&vertex_input_info)
-        .setPInputAssemblyState(&config.input_assembly_info_)
-        .setPViewportState(&config.viewport_info_)
-        .setPRasterizationState(&config.rasterization_info_)
-        .setPMultisampleState(&config.multisample_info_)
-        .setPColorBlendState(&config.color_blend_info_)
-        .setPDepthStencilState(&config.depth_stencil_info_)
-        .setPDynamicState(&config.dynamic_state_info_)
-        .setLayout(config.pipeline_layout_)
-        .setRenderPass(config.render_pass_)
-        .setSubpass(config.subpass_)
+    vk::GraphicsPipelineCreateInfo pipelineInfo;
+    pipelineInfo
+        .setStageCount(static_cast<uint32_t>(shaderStages.size()))
+        .setStages(shaderStages)
+        .setPVertexInputState(&vertexInputInfo)
+        .setPInputAssemblyState(&config.inputAssemblyInfo)
+        .setPViewportState(&config.viewportInfo)
+        .setPRasterizationState(&config.rasterizationInfo)
+        .setPMultisampleState(&config.multisampleInfo)
+        .setPColorBlendState(&config.colorBlendInfo)
+        .setPDepthStencilState(&config.depthStencilInfo)
+        .setPDynamicState(&config.dynamicStateInfo)
+        .setLayout(config.pipelineLayout)
+        .setRenderPass(config.renderPass)
+        .setSubpass(config.subpass)
         .setBasePipelineIndex(-1)
         .setBasePipelineHandle(nullptr);
-    graphics_pipeline_ = engine_->Device().createGraphicsPipeline(nullptr, pipeline_info).value;
+    m_graphicsPipeline = m_engine->device().createGraphicsPipeline(nullptr, pipelineInfo).value;
 }
 
-std::vector<char> OdysseyPipeline::ReadFile(const std::string& path) {
+std::vector<char> OdysseyPipeline::readFile(const std::string& path) {
     std::ifstream file(path, std::ios::ate | std::ios::binary);
     if (!file.is_open()) {
         throw std::runtime_error("Failed to open file: " + path + ".");
     }
-    auto file_size = static_cast<std::streamsize>(file.tellg());
-    std::vector<char> buffer(file_size);
+    auto fileSize = static_cast<std::streamsize>(file.tellg());
+    std::vector<char> buffer(fileSize);
     file.seekg(0);
-    file.read(buffer.data(), file_size);
+    file.read(buffer.data(), fileSize);
     file.close();
     return buffer;
 }
 
-vk::ShaderModule OdysseyPipeline::CreateShaderModule(const std::vector<char>& code) {
-    vk::ShaderModuleCreateInfo create_info;
-    create_info.setCodeSize(code.size());
-    create_info.pCode = reinterpret_cast<const uint32_t*>(code.data());
-    return engine_->Device().createShaderModule(create_info);
+vk::ShaderModule OdysseyPipeline::createShaderModule(const std::vector<char>& code) {
+    vk::ShaderModuleCreateInfo createInfo{};
+    createInfo.setCodeSize(code.size());
+    createInfo.pCode = reinterpret_cast<const uint32_t*>(code.data());
+    return m_engine->device().createShaderModule(createInfo);
 }
 
 }  // namespace odyssey

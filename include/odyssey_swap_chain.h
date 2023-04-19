@@ -26,58 +26,58 @@ public:
     ~OdysseySwapChain();
 
     OdysseySwapChain() = delete;
-    OdysseySwapChain(const OdysseySwapChain& odyssey_swap_chain) = delete;
-    OdysseySwapChain(OdysseySwapChain&& odyssey_swap_chain) = delete;
-    OdysseySwapChain& operator=(const OdysseySwapChain& odyssey_swap_chain) = delete;
-    OdysseySwapChain& operator=(OdysseySwapChain&& odyssey_swap_chain) = delete;
+    OdysseySwapChain(const OdysseySwapChain& odysseySwapChain) = delete;
+    OdysseySwapChain(OdysseySwapChain&& odysseySwapChain) = delete;
+    OdysseySwapChain& operator=(const OdysseySwapChain& odysseySwapChain) = delete;
+    OdysseySwapChain& operator=(OdysseySwapChain&& odysseySwapChain) = delete;
 
 public:
-    const vk::Format& GetSwapChainImageFormat() const;
-    size_t GetImageCount() const;
-    vk::Extent2D GetSwapChainExtent() const;
-    const vk::Framebuffer& GetFrameBuffer(size_t index) const;
-    const vk::ImageView& GetImageView(size_t index) const;
-    const vk::RenderPass& GetRenderPass() const;
-    uint32_t GetWidth() const;
-    uint32_t GetHeight() const;
-    float GetExtentAspectRatio() const;
-    uint32_t AcquireNextImage();
-    void SubmitCommandBuffers(const vk::CommandBuffer& buffers, uint32_t image_index);
+    const vk::Format& getSwapChainImageFormat() const;
+    size_t getImageCount() const;
+    vk::Extent2D getSwapChainExtent() const;
+    const vk::Framebuffer& getFrameBuffer(size_t index) const;
+    const vk::ImageView& getImageView(size_t index) const;
+    const vk::RenderPass& getRenderPass() const;
+    uint32_t getWidth() const;
+    uint32_t getHeight() const;
+    float getExtentAspectRatio() const;
+    uint32_t acquireNextImage();
+    void submitCommandBuffers(const vk::CommandBuffer& buffers, uint32_t imageIndex);
 
 private:
-    void CreateSwapChain();
-    void CreateRenderPass();
-    void CreateDepthResources();
-    void CreateFrameBuffers();
-    void CreateSyncObjects();
+    void createSwapChain();
+    void createRenderPass();
+    void createDepthResources();
+    void createFrameBuffers();
+    void createSyncObjects();
 
 private:
-    static vk::SurfaceFormatKHR ChooseSwapSurfaceFormat(const std::vector<vk::SurfaceFormatKHR>& available_formats);
-    static vk::PresentModeKHR ChooseSwapPresentMode(const std::vector<vk::PresentModeKHR>& available_present_modes);
-    vk::Extent2D ChooseSwapExtent(const vk::SurfaceCapabilitiesKHR& capabilities);
-    vk::Format FindDepthFormat() const;
+    static vk::SurfaceFormatKHR chooseSwapSurfaceFormat(const std::vector<vk::SurfaceFormatKHR>& availableFormats);
+    static vk::PresentModeKHR chooseSwapPresentMode(const std::vector<vk::PresentModeKHR>& availablePresentModes);
+    vk::Extent2D chooseSwapExtent(const vk::SurfaceCapabilitiesKHR& capabilities);
+    vk::Format findDepthFormat() const;
 
 public:
-    static constexpr int MAX_FRAMES_IN_FLIGHT_{2};
+    static constexpr int MAX_FRAMES_IN_FLIGHT{2};
 
 private:
-    OdysseyEngine* engine_;
-    vk::Extent2D window_extent_;
-    vk::Format swap_chain_image_format_{};
-    vk::Extent2D swap_chain_extent_{};
-    vk::SwapchainKHR swap_chain_{};
-    std::vector<vk::Image> swap_chain_images_{};
-    std::vector<vk::ImageView> swap_chain_image_views_{};
-    vk::RenderPass render_pass_{};
-    std::vector<vk::Image> depth_images_{};
-    std::vector<vk::DeviceMemory> depth_image_memories_{};
-    std::vector<vk::ImageView> depth_image_views_{};
-    std::vector<vk::Framebuffer> swap_chain_frame_buffers_{};
-    std::vector<vk::Semaphore> image_available_semaphores_{};
-    std::vector<vk::Semaphore> render_finished_semaphores_{};
-    std::vector<vk::Fence> in_flight_fences_{};
-    std::vector<vk::Fence> images_in_flight_{};
-    size_t current_frame_{0};
+    OdysseyEngine* m_engine{nullptr};
+    vk::Extent2D m_windowExtent{};
+    vk::Format m_swapChainImageFormat{};
+    vk::Extent2D m_swapChainExtent{};
+    vk::SwapchainKHR m_swapChain{};
+    std::vector<vk::Image> m_swapChainImages{};
+    std::vector<vk::ImageView> m_swapChainImageViews{};
+    vk::RenderPass m_renderPass{};
+    std::vector<vk::Image> m_depthImages{};
+    std::vector<vk::DeviceMemory> m_depthImageMemories{};
+    std::vector<vk::ImageView> m_depthImageViews{};
+    std::vector<vk::Framebuffer> m_swapChainFrameBuffers{};
+    std::vector<vk::Semaphore> m_imageAvailableSemaphores{};
+    std::vector<vk::Semaphore> m_renderFinishedSemaphores{};
+    std::vector<vk::Fence> m_inFlightFences{};
+    std::vector<vk::Fence> m_imagesInFlight{};
+    size_t m_currentFrame{0};
 };
 
 }  // namespace odyssey

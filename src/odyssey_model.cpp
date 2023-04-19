@@ -12,60 +12,60 @@
 
 namespace odyssey {
 
-OdysseyModel::OdysseyModel(OdysseyEngine* engine, const std::vector<Vertex>& vertices) : engine_(engine) {
-    CreateVertexBuffer(vertices);
+OdysseyModel::OdysseyModel(OdysseyEngine* engine, const std::vector<Vertex>& vertices) : m_engine(engine) {
+    createVertexBuffer(vertices);
 }
 
 OdysseyModel::~OdysseyModel() {
-    engine_->Device().destroyBuffer(vertex_buffer_);
-    engine_->Device().freeMemory(vertex_buffer_memory_);
+    m_engine->device().destroyBuffer(m_vertexBuffer);
+    m_engine->device().freeMemory(m_vertexBufferMemory);
 }
 
-void OdysseyModel::Bind(vk::CommandBuffer& command_buffer) const {
-    std::array<vk::Buffer, 1> buffers{vertex_buffer_};
-    command_buffer.bindVertexBuffers(0, buffers, {0});
+void OdysseyModel::bind(vk::CommandBuffer& commandBuffer) const {
+    std::array<vk::Buffer, 1> buffers{m_vertexBuffer};
+    commandBuffer.bindVertexBuffers(0, buffers, {0});
 }
 
-void OdysseyModel::Draw(vk::CommandBuffer& command_buffer) const {
-    command_buffer.draw(vertex_count_, 1, 0, 0);
+void OdysseyModel::draw(vk::CommandBuffer& commandBuffer) const {
+    commandBuffer.draw(m_vertexCount, 1, 0, 0);
 }
 
-void OdysseyModel::CreateVertexBuffer(const std::vector<Vertex>& vertices) {
-    vertex_count_ = static_cast<uint32_t>(vertices.size());
-    vk::DeviceSize buffer_size = sizeof(vertices[0]) * vertex_count_;
-    engine_->CreateBuffer(
-        buffer_size,
+void OdysseyModel::createVertexBuffer(const std::vector<Vertex>& vertices) {
+    m_vertexCount = static_cast<uint32_t>(vertices.size());
+    vk::DeviceSize bufferSize = sizeof(vertices[0]) * m_vertexCount;
+    m_engine->createBuffer(
+        bufferSize,
         vk::BufferUsageFlagBits::eVertexBuffer,
         vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent,
-        vertex_buffer_,
-        vertex_buffer_memory_);
-    auto* data = engine_->Device().mapMemory(vertex_buffer_memory_, 0, buffer_size);
-    memcpy(data, vertices.data(), buffer_size);
-    engine_->Device().unmapMemory(vertex_buffer_memory_);
+        m_vertexBuffer,
+        m_vertexBufferMemory);
+    auto* data = m_engine->device().mapMemory(m_vertexBufferMemory, 0, bufferSize);
+    memcpy(data, vertices.data(), bufferSize);
+    m_engine->device().unmapMemory(m_vertexBufferMemory);
 }
 
-std::vector<vk::VertexInputBindingDescription> OdysseyModel::Vertex::GetBindingDescriptions() {
-    std::vector<vk::VertexInputBindingDescription> binding_descriptions(1);
-    binding_descriptions.at(0)
+std::vector<vk::VertexInputBindingDescription> OdysseyModel::Vertex::getBindingDescriptions() {
+    std::vector<vk::VertexInputBindingDescription> bindingDescriptions(1);
+    bindingDescriptions.at(0)
         .setBinding(0)
         .setStride(sizeof(Vertex))
         .setInputRate(vk::VertexInputRate::eVertex);
-    return binding_descriptions;
+    return bindingDescriptions;
 }
 
-std::vector<vk::VertexInputAttributeDescription> OdysseyModel::Vertex::GetAttributeDescriptions() {
-    std::vector<vk::VertexInputAttributeDescription> attribute_descriptions(2);
-    attribute_descriptions.at(0)
+std::vector<vk::VertexInputAttributeDescription> OdysseyModel::Vertex::getAttributeDescriptions() {
+    std::vector<vk::VertexInputAttributeDescription> attributeDescriptions(2);
+    attributeDescriptions.at(0)
         .setBinding(0)
         .setLocation(0)
         .setFormat(vk::Format::eR32G32Sfloat)
-        .setOffset(offsetof(Vertex, position_));
-    attribute_descriptions.at(1)
+        .setOffset(offsetof(Vertex, position));
+    attributeDescriptions.at(1)
         .setBinding(0)
         .setLocation(1)
         .setFormat(vk::Format::eR32G32B32A32Sfloat)
-        .setOffset(offsetof(Vertex, color_));
-    return attribute_descriptions;
+        .setOffset(offsetof(Vertex, color));
+    return attributeDescriptions;
 }
 
 }  // namespace odyssey

@@ -18,42 +18,42 @@
 
 namespace odyssey {
 
-Odyssey::Odyssey() : window_(new OdysseyWindow()) {
+Odyssey::Odyssey() : m_window(new OdysseyWindow()) {
     setMinimumHeight(600);
     setMinimumWidth(800);
-    auto* wrapper = QWidget::createWindowContainer(window_);
+    auto* wrapper = QWidget::createWindowContainer(m_window);
     wrapper->setFocusPolicy(Qt::StrongFocus);
     wrapper->setFocus();
     QVBoxLayout* layout = new QVBoxLayout;
     layout->addWidget(wrapper, 0);
     setLayout(layout);
-    engine_ = new OdysseyEngine(window_->GetSurfaceInfo(), window_->width(), window_->height());
+    m_engine = new OdysseyEngine(m_window->getSurfaceInfo(), m_window->width(), m_window->height());
     show();
-    resize(800, 600);
+    draw();
 }
 
 Odyssey::~Odyssey() {
-    delete engine_;
-    delete window_;
+    delete m_engine;
+    delete m_window;
 }
 
 void Odyssey::paintEvent(QPaintEvent* event) {
-    Draw();
+    draw();
 }
 
 void Odyssey::resizeEvent(QResizeEvent* event) {
-    Draw();
+    draw();
 }
 
-void Odyssey::Draw() {
+void Odyssey::draw() {
     try {
-        if (engine_) {
-            auto image_index = engine_->AcquireNextImage();
-            engine_->RecordCommandBuffer(image_index);
-            engine_->SubmitCommandBuffers(image_index);
+        if (m_engine) {
+            auto imageIndex = m_engine->acquireNextImage();
+            m_engine->recordCommandBuffer(imageIndex);
+            m_engine->submitCommandBuffers(imageIndex);
         }
     } catch ([[maybe_unused]] const vk::OutOfDateKHRError& e) {
-        engine_->RecreateSwapChain(window_->width(), window_->height());
+        m_engine->recreateSwapChain(m_window->width(), m_window->height());
     }
 }
 

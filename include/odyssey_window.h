@@ -25,20 +25,20 @@ public:
     OdysseyWindow() = default;
     ~OdysseyWindow() = default;
 
-    OdysseyWindow(const OdysseyWindow& odyssey_window) = delete;
-    OdysseyWindow(OdysseyWindow&& odyssey_window) = delete;
-    OdysseyWindow& operator=(const OdysseyWindow& odyssey_window) = delete;
-    OdysseyWindow& operator=(OdysseyWindow&& odyssey_window) = delete;
+    OdysseyWindow(const OdysseyWindow& odysseyWindow) = delete;
+    OdysseyWindow(OdysseyWindow&& odysseyWindow) = delete;
+    OdysseyWindow& operator=(const OdysseyWindow& odysseyWindow) = delete;
+    OdysseyWindow& operator=(OdysseyWindow&& odysseyWindow) = delete;
 
 public:
-    vk::Extent2D GetExtent();
+    vk::Extent2D getExtent();
 
 #if defined(_WIN32)
-    vk::Win32SurfaceCreateInfoKHR GetSurfaceInfo();
+    vk::Win32SurfaceCreateInfoKHR getSurfaceInfo();
 #endif
 
 private:
-    vk::SurfaceKHR surface_{};
+    vk::SurfaceKHR m_surface{};
 };
 
 }  // namespace odyssey

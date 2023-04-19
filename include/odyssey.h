@@ -28,11 +28,11 @@ public:
     void resizeEvent(QResizeEvent* event);
 
 private:
-    void Draw();
+    void draw();
 
 private:
-    OdysseyWindow* window_{nullptr};
-    OdysseyEngine* engine_{nullptr};
+    OdysseyWindow* m_window{nullptr};
+    OdysseyEngine* m_engine{nullptr};
 };
 
 }  // namespace odyssey

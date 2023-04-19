@@ -33,10 +33,10 @@ namespace odyssey {
 class OdysseyModel {
 public:
     struct Vertex {
-        glm::vec2 position_;
-        glm::vec4 color_;
-        static std::vector<vk::VertexInputBindingDescription> GetBindingDescriptions();
-        static std::vector<vk::VertexInputAttributeDescription> GetAttributeDescriptions();
+        glm::vec2 position;
+        glm::vec4 color;
+        static std::vector<vk::VertexInputBindingDescription> getBindingDescriptions();
+        static std::vector<vk::VertexInputAttributeDescription> getAttributeDescriptions();
     };
 
 public:
@@ -44,23 +44,23 @@ public:
     ~OdysseyModel();
 
     OdysseyModel() = delete;
-    OdysseyModel(const OdysseyModel& odyssey_model) = delete;
-    OdysseyModel(OdysseyModel&& odyssey_model) = delete;
-    OdysseyModel& operator=(const OdysseyModel& odyssey_model) = delete;
-    OdysseyModel& operator=(OdysseyModel&& odyssey_model) = delete;
+    OdysseyModel(const OdysseyModel& odysseyModel) = delete;
+    OdysseyModel(OdysseyModel&& odysseyModel) = delete;
+    OdysseyModel& operator=(const OdysseyModel& odysseyModel) = delete;
+    OdysseyModel& operator=(OdysseyModel&& odysseyModel) = delete;
 
 public:
-    void Bind(vk::CommandBuffer& command_buffer) const;
-    void Draw(vk::CommandBuffer& command_buffer) const;
+    void bind(vk::CommandBuffer& commandBuffer) const;
+    void draw(vk::CommandBuffer& commandBuffer) const;
 
 private:
-    void CreateVertexBuffer(const std::vector<Vertex>& vertices);
+    void createVertexBuffer(const std::vector<Vertex>& vertices);
 
 private:
-    OdysseyEngine* engine_;
-    vk::Buffer vertex_buffer_{};
-    vk::DeviceMemory vertex_buffer_memory_{};
-    uint32_t vertex_count_{0};
+    OdysseyEngine* m_engine;
+    vk::Buffer m_vertexBuffer{};
+    vk::DeviceMemory m_vertexBufferMemory{};
+    uint32_t m_vertexCount{0};
 };
 
 }  // namespace odyssey

@@ -13,6 +13,6 @@
 
 int main(int argc, char* argv[]) {
     QApplication app(argc, argv);
-    odyssey::Odyssey odyssey_app;
+    odyssey::Odyssey odysseyApp;
     return app.exec();
 }

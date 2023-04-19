@@ -26,110 +26,110 @@ class OdysseySwapChain;
 class OdysseyModel;
 
 struct QueueFamilyIndices {
-    uint32_t graphics_family_;
-    uint32_t present_family_;
+    uint32_t graphicsFamily;
+    uint32_t presentFamily;
 
-    bool has_graphics_family_ = false;
-    bool has_present_family_ = false;
+    bool hasGraphicsFamily = false;
+    bool hasPresentFamily = false;
 
     operator bool() {
-        return has_graphics_family_ && has_present_family_;
+        return hasGraphicsFamily && hasPresentFamily;
     }
 };
 
 struct SwapChainSupportDetails {
-    vk::SurfaceCapabilitiesKHR capabilities_;
-    std::vector<vk::SurfaceFormatKHR> formats_;
-    std::vector<vk::PresentModeKHR> present_modes_;
+    vk::SurfaceCapabilitiesKHR capabilities;
+    std::vector<vk::SurfaceFormatKHR> formats;
+    std::vector<vk::PresentModeKHR> presentModes;
 };
 
 class OdysseyEngine {
 public:
 #if defined(_WIN32)
-    explicit OdysseyEngine(const vk::Win32SurfaceCreateInfoKHR& surface_info, int width, int height);
+    explicit OdysseyEngine(const vk::Win32SurfaceCreateInfoKHR& surfaceInfo, int width, int height);
 #endif
     ~OdysseyEngine();
-    OdysseyEngine(const OdysseyEngine& odyssey_engine) = delete;
-    OdysseyEngine(OdysseyEngine&& odyssey_engine) = delete;
-    OdysseyEngine& operator=(const OdysseyEngine& odyssey_engine) = delete;
-    OdysseyEngine& operator=(OdysseyEngine&& odyssey_engine) = delete;
+    OdysseyEngine(const OdysseyEngine& odysseyEngine) = delete;
+    OdysseyEngine(OdysseyEngine&& odysseyEngine) = delete;
+    OdysseyEngine& operator=(const OdysseyEngine& odysseyEngine) = delete;
+    OdysseyEngine& operator=(OdysseyEngine&& odysseyEngine) = delete;
 
 public:
-    const vk::Device& Device() const;
-    const vk::SurfaceKHR& Surface() const;
-    const vk::Instance& Instance() const;
-    const vk::PhysicalDevice& PhysicalDevice() const;
-    SwapChainSupportDetails GetSwapChainSupport() const;
-    QueueFamilyIndices FindPhysicalQueueFamilies() const;
-    vk::ImageView CreateImageView(vk::Image& image, vk::Format format, vk::ImageAspectFlags aspect_flags);
-    vk::Format FindSupportedFormat(const std::vector<vk::Format>& candidates, vk::ImageTiling tiling, vk::FormatFeatureFlags features) const;
-    void CreateImage(uint32_t width, uint32_t height, vk::Format format, vk::ImageTiling tiling, vk::ImageUsageFlags usage, vk::MemoryPropertyFlags properties, vk::Image& image, vk::DeviceMemory& memory);
-    const vk::Queue& GetGraphicsQueue() const;
-    const vk::Queue& GetPresentQueue() const;
-    const vk::CommandPool& GetCommandPool() const;
-    void CreateBuffer(vk::DeviceSize size, vk::BufferUsageFlags usage, vk::MemoryPropertyFlags properties, vk::Buffer& buffer, vk::DeviceMemory& memory);
-    vk::CommandBuffer BeginSingleTimeCommands();
-    void EndSingleTimeCommands(vk::CommandBuffer& command_buffer);
-    void RecreateSwapChain(int width, int height);
-    uint32_t AcquireNextImage();
-    void RecordCommandBuffer(uint32_t image_index);
-    void SubmitCommandBuffers(uint32_t image_index);
+    const vk::Device& device() const;
+    const vk::SurfaceKHR& surface() const;
+    const vk::Instance& instance() const;
+    const vk::PhysicalDevice& physicalDevice() const;
+    SwapChainSupportDetails getSwapChainSupport() const;
+    QueueFamilyIndices findPhysicalQueueFamilies() const;
+    vk::ImageView createImageView(vk::Image& image, vk::Format format, vk::ImageAspectFlags aspectFlags);
+    vk::Format findSupportedFormat(const std::vector<vk::Format>& candidates, vk::ImageTiling tiling, vk::FormatFeatureFlags features) const;
+    void createImage(uint32_t width, uint32_t height, vk::Format format, vk::ImageTiling tiling, vk::ImageUsageFlags usage, vk::MemoryPropertyFlags properties, vk::Image& image, vk::DeviceMemory& memory);
+    const vk::Queue& getGraphicsQueue() const;
+    const vk::Queue& getPresentQueue() const;
+    const vk::CommandPool& getCommandPool() const;
+    void createBuffer(vk::DeviceSize size, vk::BufferUsageFlags usage, vk::MemoryPropertyFlags properties, vk::Buffer& buffer, vk::DeviceMemory& memory);
+    vk::CommandBuffer beginSingleTimeCommands();
+    void endSingleTimeCommands(vk::CommandBuffer& commandBuffer);
+    void recreateSwapChain(int width, int height);
+    uint32_t acquireNextImage();
+    void recordCommandBuffer(uint32_t imageIndex);
+    void submitCommandBuffers(uint32_t imageIndex);
 
 private:
-    void CreateInstance();
-    void SetupDebugMessenger();
-    void PickPhysicalDevice();
-    void CreateLogicalDevice();
-    void CreateCommandPool();
-    void CreatePipelineLayout();
-    std::unique_ptr<OdysseyPipeline> CreatePipeline(const std::string& vert_shader_path, const std::string& frag_shader_path, vk::PrimitiveTopology primitive_topology, float line_width);
-    void CreateCommandBuffers();
+    void createInstance();
+    void setupDebugMessenger();
+    void pickPhysicalDevice();
+    void createLogicalDevice();
+    void createCommandPool();
+    void createPipelineLayout();
+    std::unique_ptr<OdysseyPipeline> createPipeline(const std::string& vertShaderPath, const std::string& fragShaderPath, vk::PrimitiveTopology primitiveTopology, float lineWidth);
+    void createCommandBuffers();
 
 private:
-    bool CheckValidationLayerSupport();
-    void CheckExtensionsSupport();
-    std::vector<const char*> GetRequiredExtensions() const;
-    static void PopulateDebugMessengerCreateInfo(vk::DebugUtilsMessengerCreateInfoEXT& create_info);
-    bool IsPhysicalDeviceSuitable(const vk::PhysicalDevice& device);
-    QueueFamilyIndices FindQueueFamilies(const vk::PhysicalDevice& device) const;
-    SwapChainSupportDetails QuerySwapChainSupport(const vk::PhysicalDevice& device) const;
-    uint32_t FindMemoryType(uint32_t type_filter, vk::MemoryPropertyFlags properties);
+    bool checkValidationLayerSupport();
+    void checkExtensionsSupport();
+    std::vector<const char*> getRequiredExtensions() const;
+    static void populateDebugMessengerCreateInfo(vk::DebugUtilsMessengerCreateInfoEXT& createInfo);
+    bool isPhysicalDeviceSuitable(const vk::PhysicalDevice& device);
+    QueueFamilyIndices findQueueFamilies(const vk::PhysicalDevice& device) const;
+    SwapChainSupportDetails querySwapChainSupport(const vk::PhysicalDevice& device) const;
+    uint32_t findMemoryType(uint32_t typeFilter, vk::MemoryPropertyFlags properties);
 
 private:
 #if defined(NODEBUG)
-    bool enable_validation_layers_ = false;
+    bool m_enableValidationLayers = false;
 #else
-    bool enable_validation_layers_ = true;
-    std::vector<const char*> validation_layers_{"VK_LAYER_KHRONOS_validation"};
-    static VKAPI_ATTR VkBool32 VKAPI_CALL DebugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT message_severity,
-                                                        VkDebugUtilsMessageTypeFlagsEXT message_type,
-                                                        const VkDebugUtilsMessengerCallbackDataEXT* callback_data,
-                                                        void* user_data);
-    vk::DebugUtilsMessengerEXT debug_utils_messenger_;
+    bool m_enableValidationLayers = true;
+    std::vector<const char*> m_validationLayers_{"VK_LAYER_KHRONOS_validation"};
+    static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
+                                                        VkDebugUtilsMessageTypeFlagsEXT messageType,
+                                                        const VkDebugUtilsMessengerCallbackDataEXT* callbackData,
+                                                        void* userData);
+    vk::DebugUtilsMessengerEXT m_debugUtilsMessenger;
 #endif  // NODEBUG
 
 private:
-    vk::Instance instance_{};
-    vk::SurfaceKHR surface_{};
-    vk::PhysicalDevice physical_{};
+    vk::Instance m_instance{};
+    vk::SurfaceKHR m_surface{};
+    vk::PhysicalDevice m_physical{};
 
 private:
 #if defined(_WIN32)
-    std::vector<const char*> device_extensions_ = {"VK_KHR_swapchain"};
+    std::vector<const char*> m_deviceExtensions = {"VK_KHR_swapchain"};
 #else
-    std::vector<const char*> device_extensions_ = {"VK_KHR_portability_subset", "VK_KHR_swapchain"};
+    std::vector<const char*> m_deviceExtensions = {"VK_KHR_portability_subset", "VK_KHR_swapchain"};
 #endif
 
 private:
-    vk::Device device_{};
-    vk::Queue graphics_queue_{};
-    vk::Queue present_queue_{};
-    vk::CommandPool command_pool_{};
-    vk::PipelineLayout pipeline_layout_{};
-    std::unique_ptr<OdysseySwapChain> swap_chain_{};
-    std::unique_ptr<OdysseyPipeline> pipeline_line_{};
-    std::vector<vk::CommandBuffer> command_buffers_{};
-    std::unique_ptr<OdysseyModel> model_{};
+    vk::Device m_device{};
+    vk::Queue m_graphicsQueue{};
+    vk::Queue m_presentQueue{};
+    vk::CommandPool m_commandPool{};
+    vk::PipelineLayout m_pipelineLayout{};
+    std::unique_ptr<OdysseySwapChain> m_swapChain{};
+    std::unique_ptr<OdysseyPipeline> m_pipelineLine{};
+    std::vector<vk::CommandBuffer> m_commandBuffers{};
+    std::unique_ptr<OdysseyModel> m_model{};
 };
 
 }  // namespace odyssey
