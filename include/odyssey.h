@@ -1,11 +1,10 @@
+#pragma once
+
 /**
  * @file odyssey.h
  * @author liuyulvv (liuyulvv@outlook.com)
  * @date 2023-04-09
  */
-
-#if !defined(ODYSSEY_ODYSSEY_H_)
-#define ODYSSEY_ODYSSEY_H_
 
 #include <QWidget>
 
@@ -40,5 +39,3 @@ private:
 };
 
 }  // namespace odyssey
-
-#endif  // ODYSSEY_ODYSSEY_H_

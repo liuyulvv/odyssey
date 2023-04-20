@@ -1,11 +1,10 @@
+#pragma once
+
 /**
  * @file odyssey_mouse_event.h
  * @author liuyulvv (liuyulvv@outlook.com)
  * @date 2023-04-19
  */
-
-#if !defined(ODYSSEY_MOUSE_EVENT_H_)
-#define ODYSSEY_MOUSE_EVENT_H_
 
 namespace odyssey {
 
@@ -37,5 +36,3 @@ static void screenToWorld(int screenX, int screenY, int width, int height, float
 }
 
 }  // namespace odyssey
-
-#endif  // ODYSSEY_MOUSE_EVENT_H_

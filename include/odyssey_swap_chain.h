@@ -1,11 +1,10 @@
+#pragma once
+
 /**
  * @file odyssey_swap_chain.h
  * @author liuyulvv (liuyulvv@outlook.com)
  * @date 2023-04-10
  */
-
-#if !defined(ODYSSEY_ODYSSEY_SWAP_CHAIN_H_)
-#define ODYSSEY_ODYSSEY_SWAP_CHAIN_H_
 
 #include <vector>
 
@@ -81,5 +80,3 @@ private:
 };
 
 }  // namespace odyssey
-
-#endif  // ODYSSEY_ODYSSEY_SWAP_CHAIN_H_

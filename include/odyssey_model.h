@@ -1,11 +1,10 @@
+#pragma once
+
 /**
  * @file odyssey_model.h
  * @author liuyulvv (liuyulvv@outlook.com)
  * @date 2023-04-11
  */
-
-#if !defined(ODYSSEY_ODYSSEY_MODEL_H_)
-#define ODYSSEY_ODYSSEY_MODEL_H_
 
 #if !defined(GLM_FORCE_RADIANS)
 #define GLM_FORCE_RADIANS
@@ -65,5 +64,3 @@ private:
 };
 
 }  // namespace odyssey
-
-#endif  // ODYSSEY_ODYSSEY_MODEL_H_

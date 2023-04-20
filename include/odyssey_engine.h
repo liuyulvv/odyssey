@@ -1,11 +1,10 @@
+#pragma once
+
 /**
  * @file odyssey_engine.h
  * @author liuyulvv (liuyulvv@outlook.com)
  * @date 2023-04-09
  */
-
-#if !defined(ODYSSEY_ODYSSEY_ENGINE_H_)
-#define ODYSSEY_ODYSSEY_ENGINE_H_
 
 #include <memory>
 #include <vector>
@@ -135,5 +134,3 @@ private:
 };
 
 }  // namespace odyssey
-
-#endif  // ODYSSEY_ODYSSEY_ENGINE_H_

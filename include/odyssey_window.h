@@ -1,11 +1,10 @@
+#pragma once
+
 /**
  * @file odyssey_window.h
  * @author liuyulvv (liuyulvv@outlook.com)
  * @date 2023-04-09
  */
-
-#if !defined(ODYSSEY_ODYSSEY_WINDOW_H_)
-#define ODYSSEY_ODYSSEY_WINDOW_H_
 
 #include <qpa/qplatformnativeinterface.h>
 
@@ -53,5 +52,3 @@ private:
 };
 
 }  // namespace odyssey
-
-#endif  // ODYSSEY_ODYSSEY_WINDOW_H_
