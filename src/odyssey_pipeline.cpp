@@ -10,18 +10,19 @@
 #include <fstream>
 #include <stdexcept>
 
+#include "odyssey_device.h"
 #include "odyssey_model.h"
 
 namespace odyssey {
 
-OdysseyPipeline::OdysseyPipeline(OdysseyEngine* engine, const std::string& vertShaderPath, const std::string& fragShaderPath, const PipelineConfigInfo& config) : m_engine(engine) {
+OdysseyPipeline::OdysseyPipeline(OdysseyDevice* device, const std::string& vertShaderPath, const std::string& fragShaderPath, const PipelineConfigInfo& config) : m_device(device) {
     createGraphicsPipeline(vertShaderPath, fragShaderPath, config);
 }
 
 OdysseyPipeline::~OdysseyPipeline() {
-    m_engine->device().destroyShaderModule(vertShaderModule);
-    m_engine->device().destroyShaderModule(fragShaderModule);
-    m_engine->device().destroyPipeline(m_graphicsPipeline);
+    m_device->device().destroyShaderModule(vertShaderModule);
+    m_device->device().destroyShaderModule(fragShaderModule);
+    m_device->device().destroyPipeline(m_graphicsPipeline);
 }
 
 PipelineConfigInfo OdysseyPipeline::defaultPipelineConfigInfo(vk::PrimitiveTopology primitiveTopology, float lineWidth) {
@@ -143,7 +144,7 @@ void OdysseyPipeline::createGraphicsPipeline(const std::string& vertShaderPath, 
         .setSubpass(config.subpass)
         .setBasePipelineIndex(-1)
         .setBasePipelineHandle(nullptr);
-    m_graphicsPipeline = m_engine->device().createGraphicsPipeline(nullptr, pipelineInfo).value;
+    m_graphicsPipeline = m_device->device().createGraphicsPipeline(nullptr, pipelineInfo).value;
 }
 
 std::vector<char> OdysseyPipeline::readFile(const std::string& path) {
@@ -163,7 +164,7 @@ vk::ShaderModule OdysseyPipeline::createShaderModule(const std::vector<char>& co
     vk::ShaderModuleCreateInfo createInfo{};
     createInfo.setCodeSize(code.size());
     createInfo.pCode = reinterpret_cast<const uint32_t*>(code.data());
-    return m_engine->device().createShaderModule(createInfo);
+    return m_device->device().createShaderModule(createInfo);
 }
 
 }  // namespace odyssey

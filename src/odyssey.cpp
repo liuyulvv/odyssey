@@ -13,8 +13,9 @@
 #include <array>
 #include <stdexcept>
 
-#include "odyssey_engine.h"
-#include "odyssey_mouse_event.h"
+#include "odyssey_device.h"
+#include "odyssey_render.h"
+#include "odyssey_render_system.h"
 #include "odyssey_window.h"
 
 namespace odyssey {
@@ -28,25 +29,23 @@ Odyssey::Odyssey() : m_window(new OdysseyWindow()) {
     QVBoxLayout* layout = new QVBoxLayout;
     layout->addWidget(wrapper, 0);
     setLayout(layout);
-    m_engine = new OdysseyEngine(m_window->getSurfaceInfo(), m_window->width(), m_window->height());
+    m_device = new OdysseyDevice(m_window->getSurfaceInfo(), m_window->width(), m_window->height());
+    m_render = new OdysseyRender(m_window, m_device);
+    m_renderSystem = new OdysseyRenderSystem(m_device, m_render->getSwapChainRenderPass());
     show();
     draw();
 
-    m_window->setMouseCallback([this](OdysseyMouseEvent event) {
-        if (event.type == OdysseyMouseEventType::LEFT_DOUBLE) {
-        } else if (event.type == OdysseyMouseEventType::LEFT) {
-            this->m_vertices.push_back({{event.position.worldX, event.position.worldY}, {1.0F, 0.0F, 0.0F, 1.0F}});
-        } else if (event.type == OdysseyMouseEventType::RIGHT) {
-            m_engine->loadModel(this->m_vertices);
-            this->m_vertices.clear();
-            update();
-        }
+    loadObject({
+        {{0.F, -0.5F}, {1.F, 0.F, 0.F, 1.F}},
+        {{-0.5F, 0.5F}, {0.F, 1.F, 0.F, 1.F}},
+        {{0.5F, 0.5F}, {0.F, 0.F, 1.F, 1.F}},
     });
 }
 
 Odyssey::~Odyssey() {
-    delete m_engine;
-    delete m_window;
+    for (auto& object : m_objects) {
+        object.model.reset();
+    }
 }
 
 void Odyssey::paintEvent(QPaintEvent* event) {
@@ -58,15 +57,23 @@ void Odyssey::resizeEvent(QResizeEvent* event) {
 }
 
 void Odyssey::draw() {
-    try {
-        if (m_engine) {
-            auto imageIndex = m_engine->acquireNextImage();
-            m_engine->recordCommandBuffer(imageIndex);
-            m_engine->submitCommandBuffers(imageIndex);
-        }
-    } catch ([[maybe_unused]] const vk::OutOfDateKHRError& e) {
-        m_engine->recreateSwapChain(m_window->width(), m_window->height());
+    if (auto commandBuffer = m_render->beginFrame()) {
+        m_render->beginSwapChainRenderPass(commandBuffer);
+        m_renderSystem->renderObjects(commandBuffer, m_objects);
+        m_render->endSwapChainRenderPass(commandBuffer);
+        m_render->endFrame();
+        update();
     }
+}
+
+void Odyssey::loadObject(const std::vector<OdysseyModel::Vertex>& vertices) {
+    auto object = OdysseyObject::createObject();
+    object.model = std::make_shared<OdysseyModel>(m_device, vertices);
+    object.color = {1.F, 0.F, 0.F, 1.F};
+    object.transform2D.translation.x = 0.2F;
+    object.transform2D.scale = {2.F, 0.5F};
+    object.transform2D.rotation = 0.25F * glm::two_pi<float>();
+    m_objects.push_back(std::move(object));
 }
 
 }  // namespace odyssey

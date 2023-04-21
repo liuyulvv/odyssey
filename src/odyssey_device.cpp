@@ -1,10 +1,10 @@
 /**
- * @file odyssey_engine.cpp
+ * @file odyssey_device.cpp
  * @author liuyulvv (liuyulvv@outlook.com)
  * @date 2023-04-09
  */
 
-#include "odyssey_engine.h"
+#include "odyssey_device.h"
 
 #include <iostream>
 #include <stdexcept>
@@ -18,26 +18,18 @@
 namespace odyssey {
 
 #if defined(_WIN32)
-OdysseyEngine::OdysseyEngine(const vk::Win32SurfaceCreateInfoKHR& surfaceInfo, int width, int height) {
+OdysseyDevice::OdysseyDevice(const vk::Win32SurfaceCreateInfoKHR& surfaceInfo, int width, int height) {
     createInstance();
     m_surface = m_instance.createWin32SurfaceKHR(surfaceInfo);
     setupDebugMessenger();
     pickPhysicalDevice();
     createLogicalDevice();
     createCommandPool();
-    createPipelineLayout();
-    recreateSwapChain(width, height);
-    createCommandBuffers();
 }
 #endif
 
-OdysseyEngine::~OdysseyEngine() {
+OdysseyDevice::~OdysseyDevice() {
     m_device.waitIdle();
-    clearModel();
-    m_swapChain.reset();
-    m_pipelineLine.reset();
-    m_device.freeCommandBuffers(m_commandPool, m_commandBuffers);
-    m_device.destroyPipelineLayout(m_pipelineLayout);
     m_device.destroyCommandPool(m_commandPool);
     m_device.destroy();
     if (m_enableValidationLayers) {
@@ -47,31 +39,23 @@ OdysseyEngine::~OdysseyEngine() {
     m_instance.destroy();
 }
 
-const vk::Device& OdysseyEngine::device() const {
+const vk::Device& OdysseyDevice::device() const {
     return m_device;
 }
 
-const vk::SurfaceKHR& OdysseyEngine::surface() const {
+const vk::SurfaceKHR& OdysseyDevice::surface() const {
     return m_surface;
 }
 
-const vk::Instance& OdysseyEngine::instance() const {
-    return m_instance;
-}
-
-const vk::PhysicalDevice& OdysseyEngine::physicalDevice() const {
-    return m_physical;
-}
-
-SwapChainSupportDetails OdysseyEngine::getSwapChainSupport() const {
+SwapChainSupportDetails OdysseyDevice::getSwapChainSupport() const {
     return querySwapChainSupport(m_physical);
 }
 
-QueueFamilyIndices OdysseyEngine::findPhysicalQueueFamilies() const {
+QueueFamilyIndices OdysseyDevice::findPhysicalQueueFamilies() const {
     return findQueueFamilies(m_physical);
 }
 
-vk::ImageView OdysseyEngine::createImageView(vk::Image& image, vk::Format format, vk::ImageAspectFlags aspectFlags) {
+vk::ImageView OdysseyDevice::createImageView(vk::Image& image, vk::Format format, vk::ImageAspectFlags aspectFlags) {
     vk::ImageViewCreateInfo viewInfo{};
     viewInfo
         .setImage(image)
@@ -87,7 +71,7 @@ vk::ImageView OdysseyEngine::createImageView(vk::Image& image, vk::Format format
     return m_device.createImageView(viewInfo);
 }
 
-vk::Format OdysseyEngine::findSupportedFormat(const std::vector<vk::Format>& candidates, vk::ImageTiling tiling, vk::FormatFeatureFlags features) const {
+vk::Format OdysseyDevice::findSupportedFormat(const std::vector<vk::Format>& candidates, vk::ImageTiling tiling, vk::FormatFeatureFlags features) const {
     for (const auto& format : candidates) {
         auto properties = m_physical.getFormatProperties(format);
         if (tiling == vk::ImageTiling::eLinear && (properties.linearTilingFeatures & features) == features) {
@@ -99,7 +83,7 @@ vk::Format OdysseyEngine::findSupportedFormat(const std::vector<vk::Format>& can
     throw std::runtime_error("No supported format found.");
 }
 
-void OdysseyEngine::createImage(uint32_t width, uint32_t height, vk::Format format, vk::ImageTiling tiling, vk::ImageUsageFlags usage, vk::MemoryPropertyFlags properties, vk::Image& image, vk::DeviceMemory& memory) {
+void OdysseyDevice::createImage(uint32_t width, uint32_t height, vk::Format format, vk::ImageTiling tiling, vk::ImageUsageFlags usage, vk::MemoryPropertyFlags properties, vk::Image& image, vk::DeviceMemory& memory) {
     vk::ImageCreateInfo imageInfo{};
     imageInfo
         .setImageType(vk::ImageType::e2D)
@@ -125,19 +109,19 @@ void OdysseyEngine::createImage(uint32_t width, uint32_t height, vk::Format form
     m_device.bindImageMemory(image, memory, 0);
 }
 
-const vk::Queue& OdysseyEngine::getGraphicsQueue() const {
+const vk::Queue& OdysseyDevice::getGraphicsQueue() const {
     return m_graphicsQueue;
 }
 
-const vk::Queue& OdysseyEngine::getPresentQueue() const {
+const vk::Queue& OdysseyDevice::getPresentQueue() const {
     return m_presentQueue;
 }
 
-const vk::CommandPool& OdysseyEngine::getCommandPool() const {
+const vk::CommandPool& OdysseyDevice::getCommandPool() const {
     return m_commandPool;
 }
 
-void OdysseyEngine::createBuffer(vk::DeviceSize size, vk::BufferUsageFlags usage, vk::MemoryPropertyFlags properties, vk::Buffer& buffer, vk::DeviceMemory& memory) {
+void OdysseyDevice::createBuffer(vk::DeviceSize size, vk::BufferUsageFlags usage, vk::MemoryPropertyFlags properties, vk::Buffer& buffer, vk::DeviceMemory& memory) {
     vk::BufferCreateInfo bufferInfo{};
     bufferInfo
         .setFlags(vk::BufferCreateFlags())
@@ -154,94 +138,7 @@ void OdysseyEngine::createBuffer(vk::DeviceSize size, vk::BufferUsageFlags usage
     m_device.bindBufferMemory(buffer, memory, 0);
 }
 
-vk::CommandBuffer OdysseyEngine::beginSingleTimeCommands() {
-    vk::CommandBufferAllocateInfo allocateInfo;
-    allocateInfo
-        .setLevel(vk::CommandBufferLevel::ePrimary)
-        .setCommandPool(m_commandPool)
-        .setCommandBufferCount(1);
-    auto commandBuffer = m_device.allocateCommandBuffers(allocateInfo);
-    vk::CommandBufferBeginInfo beginInfo;
-    beginInfo.setFlags(vk::CommandBufferUsageFlagBits::eOneTimeSubmit);
-    commandBuffer.at(0).begin(beginInfo);
-    return commandBuffer.at(0);
-}
-
-void OdysseyEngine::endSingleTimeCommands(vk::CommandBuffer& commandBuffer) {
-    commandBuffer.end();
-    vk::SubmitInfo submitInfo{};
-    submitInfo
-        .setCommandBufferCount(1)
-        .setCommandBuffers(commandBuffer);
-    m_graphicsQueue.submit(submitInfo);
-    m_graphicsQueue.waitIdle();
-    m_device.freeCommandBuffers(m_commandPool, commandBuffer);
-}
-
-uint32_t OdysseyEngine::acquireNextImage() {
-    return m_swapChain->acquireNextImage();
-}
-
-void OdysseyEngine::recordCommandBuffer(uint32_t imageIndex) {
-    vk::CommandBufferBeginInfo beginInfo{};
-    m_commandBuffers[imageIndex].begin(beginInfo);
-
-    vk::RenderPassBeginInfo renderPassInfo{};
-    renderPassInfo
-        .setRenderPass(m_swapChain->getRenderPass())
-        .setFramebuffer(m_swapChain->getFrameBuffer(imageIndex));
-    renderPassInfo.renderArea
-        .setOffset({0, 0})
-        .setExtent(m_swapChain->getSwapChainExtent());
-    std::array<vk::ClearValue, 2> clearValues{};
-    clearValues[0].setColor({0.17F, 0.17F, 0.17F, 1.0F});
-    clearValues[1].setDepthStencil({1.0F, 0});
-    renderPassInfo
-        .setClearValueCount(static_cast<uint32_t>(clearValues.size()))
-        .setClearValues(clearValues);
-
-    m_commandBuffers[imageIndex].beginRenderPass(renderPassInfo, vk::SubpassContents::eInline);
-
-    vk::Viewport viewport{};
-    viewport
-        .setX(0.0F)
-        .setY(0.0F)
-        .setWidth(static_cast<float>(m_swapChain->getSwapChainExtent().width))
-        .setHeight(static_cast<float>(m_swapChain->getSwapChainExtent().height))
-        .setMinDepth(0.0F)
-        .setMaxDepth(1.0F);
-    vk::Rect2D scissor{{0, 0}, m_swapChain->getSwapChainExtent()};
-
-    m_commandBuffers[imageIndex].setViewport(0, viewport);
-    m_commandBuffers[imageIndex].setScissor(0, scissor);
-
-    m_pipelineLine->bind(m_commandBuffers[imageIndex]);
-
-    for (auto& model : m_models) {
-        model->bind(m_commandBuffers[imageIndex]);
-        model->draw(m_commandBuffers[imageIndex]);
-    }
-
-    m_commandBuffers[imageIndex].endRenderPass();
-    m_commandBuffers[imageIndex].end();
-}
-
-void OdysseyEngine::submitCommandBuffers(uint32_t imageIndex) {
-    m_swapChain->submitCommandBuffers(m_commandBuffers[imageIndex], imageIndex);
-}
-
-void OdysseyEngine::loadModel(const std::vector<OdysseyModel::Vertex>& vertices) {
-    m_models.push_back(std::make_unique<OdysseyModel>(this, vertices));
-}
-
-void OdysseyEngine::clearModel() {
-    for (auto& model : m_models) {
-        model.reset();
-    }
-    m_models.clear();
-}
-
-void OdysseyEngine::createInstance() {
+void OdysseyDevice::createInstance() {
     if (m_enableValidationLayers && !checkValidationLayerSupport()) {
         throw std::runtime_error("Validation layers requested, but not available.");
     }
@@ -275,7 +172,7 @@ void OdysseyEngine::createInstance() {
     m_instance = vk::createInstance(createInfo);
 }
 
-void OdysseyEngine::setupDebugMessenger() {
+void OdysseyDevice::setupDebugMessenger() {
     if (!m_enableValidationLayers) {
         return;
     }
@@ -284,7 +181,7 @@ void OdysseyEngine::setupDebugMessenger() {
     m_debugUtilsMessenger = m_instance.createDebugUtilsMessengerEXT(debugCreateInfo, nullptr, vk::DispatchLoaderDynamic(m_instance, reinterpret_cast<PFN_vkGetInstanceProcAddr>(m_instance.getProcAddr("vkGetInstanceProcAddr"))));
 }
 
-void OdysseyEngine::pickPhysicalDevice() {
+void OdysseyDevice::pickPhysicalDevice() {
     auto devices = m_instance.enumeratePhysicalDevices();
     for (const auto& device : devices) {
         if (isPhysicalDeviceSuitable(device)) {
@@ -295,7 +192,7 @@ void OdysseyEngine::pickPhysicalDevice() {
     throw std::runtime_error("Failed to find a suitable GPU.");
 }
 
-void OdysseyEngine::createLogicalDevice() {
+void OdysseyDevice::createLogicalDevice() {
     auto indices = findQueueFamilies(m_physical);
     auto queuePriority = 1.0F;
     std::vector<vk::DeviceQueueCreateInfo> queueCreateInfos;
@@ -330,7 +227,7 @@ void OdysseyEngine::createLogicalDevice() {
     m_presentQueue = m_device.getQueue(indices.presentFamily, 0);
 }
 
-void OdysseyEngine::createCommandPool() {
+void OdysseyDevice::createCommandPool() {
     auto queueFamilyIndices = findQueueFamilies(m_physical);
     vk::CommandPoolCreateInfo poolInfo{};
     poolInfo
@@ -339,44 +236,7 @@ void OdysseyEngine::createCommandPool() {
     m_commandPool = m_device.createCommandPool(poolInfo);
 }
 
-void OdysseyEngine::createPipelineLayout() {
-    vk::PipelineLayoutCreateInfo pipelineInfo{};
-    pipelineInfo
-        .setSetLayoutCount(0)
-        .setPSetLayouts(nullptr)
-        .setPushConstantRangeCount(0)
-        .setPPushConstantRanges(nullptr);
-    m_pipelineLayout = m_device.createPipelineLayout(pipelineInfo);
-    if (!m_pipelineLayout) {
-        throw std::runtime_error("Failed to create pipeline layout.");
-    }
-}
-
-void OdysseyEngine::recreateSwapChain(int width, int height) {
-    m_device.waitIdle();
-    m_swapChain.reset(nullptr);
-    m_swapChain = std::make_unique<OdysseySwapChain>(this, width, height);
-    m_pipelineLine = createPipeline("shaders/shader.vert.spv", "shaders/shader.frag.spv", vk::PrimitiveTopology::eLineStrip, 1.0F);
-}
-
-std::unique_ptr<OdysseyPipeline> OdysseyEngine::createPipeline(const std::string& vertShaderPath, const std::string& fragShaderPath, vk::PrimitiveTopology primitiveTopology, float lineWidth) {
-    auto pipelineConfig = OdysseyPipeline::defaultPipelineConfigInfo(primitiveTopology, lineWidth);
-    pipelineConfig.renderPass = m_swapChain->getRenderPass();
-    pipelineConfig.pipelineLayout = m_pipelineLayout;
-    return std::make_unique<OdysseyPipeline>(this, vertShaderPath, fragShaderPath, pipelineConfig);
-}
-
-void OdysseyEngine::createCommandBuffers() {
-    m_commandBuffers.resize(m_swapChain->getImageCount());
-    vk::CommandBufferAllocateInfo allocInfo{};
-    allocInfo
-        .setLevel(vk::CommandBufferLevel::ePrimary)
-        .setCommandPool(m_commandPool)
-        .setCommandBufferCount(static_cast<uint32_t>(m_commandBuffers.size()));
-    m_commandBuffers = m_device.allocateCommandBuffers(allocInfo);
-}
-
-bool OdysseyEngine::checkValidationLayerSupport() {
+bool OdysseyDevice::checkValidationLayerSupport() {
     auto availableLayers = vk::enumerateInstanceLayerProperties();
     for (const auto& layerName : m_validationLayers_) {
         bool layerFound = false;
@@ -392,7 +252,7 @@ bool OdysseyEngine::checkValidationLayerSupport() {
     return true;
 }
 
-void OdysseyEngine::checkExtensionsSupport() {
+void OdysseyDevice::checkExtensionsSupport() {
     auto extensions = vk::enumerateInstanceExtensionProperties();
     std::unordered_set<std::string> available;
     for (const auto& extension : extensions) {
@@ -406,7 +266,7 @@ void OdysseyEngine::checkExtensionsSupport() {
     }
 }
 
-std::vector<const char*> OdysseyEngine::getRequiredExtensions() const {
+std::vector<const char*> OdysseyDevice::getRequiredExtensions() const {
 #if defined(_WIN32)
     std::vector<const char*> extensions{"VK_KHR_surface", "VK_KHR_win32_surface"};
 #endif
@@ -418,7 +278,7 @@ std::vector<const char*> OdysseyEngine::getRequiredExtensions() const {
     return extensions;
 }
 
-void OdysseyEngine::populateDebugMessengerCreateInfo(vk::DebugUtilsMessengerCreateInfoEXT& createInfo) {
+void OdysseyDevice::populateDebugMessengerCreateInfo(vk::DebugUtilsMessengerCreateInfoEXT& createInfo) {
     createInfo
         .setMessageSeverity(vk::DebugUtilsMessageSeverityFlagBitsEXT::eVerbose |
                             vk::DebugUtilsMessageSeverityFlagBitsEXT::eWarning |
@@ -432,7 +292,7 @@ void OdysseyEngine::populateDebugMessengerCreateInfo(vk::DebugUtilsMessengerCrea
         .setPUserData(nullptr);
 }
 
-bool OdysseyEngine::isPhysicalDeviceSuitable(const vk::PhysicalDevice& device) {
+bool OdysseyDevice::isPhysicalDeviceSuitable(const vk::PhysicalDevice& device) {
     auto indices = findQueueFamilies(device);
     auto availableExtensions = device.enumerateDeviceExtensionProperties();
     std::unordered_set<std::string> requiredExtensions{m_deviceExtensions.begin(), m_deviceExtensions.end()};
@@ -449,7 +309,7 @@ bool OdysseyEngine::isPhysicalDeviceSuitable(const vk::PhysicalDevice& device) {
     return indices && extensionsSupported && swapchainAdequate && supportedFeatures.samplerAnisotropy;
 }
 
-QueueFamilyIndices OdysseyEngine::findQueueFamilies(const vk::PhysicalDevice& device) const {
+QueueFamilyIndices OdysseyDevice::findQueueFamilies(const vk::PhysicalDevice& device) const {
     QueueFamilyIndices indices;
     auto properties = device.getQueueFamilyProperties();
     for (size_t i = 0; i < properties.size(); ++i) {
@@ -469,7 +329,7 @@ QueueFamilyIndices OdysseyEngine::findQueueFamilies(const vk::PhysicalDevice& de
     return indices;
 }
 
-SwapChainSupportDetails OdysseyEngine::querySwapChainSupport(const vk::PhysicalDevice& device) const {
+SwapChainSupportDetails OdysseyDevice::querySwapChainSupport(const vk::PhysicalDevice& device) const {
     SwapChainSupportDetails details{};
     details.capabilities = device.getSurfaceCapabilitiesKHR(m_surface);
     details.formats = device.getSurfaceFormatsKHR(m_surface);
@@ -477,7 +337,7 @@ SwapChainSupportDetails OdysseyEngine::querySwapChainSupport(const vk::PhysicalD
     return details;
 }
 
-uint32_t OdysseyEngine::findMemoryType(uint32_t type_filter, vk::MemoryPropertyFlags properties) {
+uint32_t OdysseyDevice::findMemoryType(uint32_t type_filter, vk::MemoryPropertyFlags properties) {
     vk::PhysicalDeviceMemoryProperties memoryProperties{};
     m_physical.getMemoryProperties(&memoryProperties);
     for (uint32_t i = 0; i < memoryProperties.memoryTypeCount; ++i) {
@@ -490,7 +350,7 @@ uint32_t OdysseyEngine::findMemoryType(uint32_t type_filter, vk::MemoryPropertyF
 
 #if !defined(NODEBUG)
 
-VKAPI_ATTR VkBool32 VKAPI_CALL OdysseyEngine::debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity, VkDebugUtilsMessageTypeFlagsEXT messageType, const VkDebugUtilsMessengerCallbackDataEXT* callbackData, [[maybe_unused]] void* userData) {
+VKAPI_ATTR VkBool32 VKAPI_CALL OdysseyDevice::debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity, VkDebugUtilsMessageTypeFlagsEXT messageType, const VkDebugUtilsMessengerCallbackDataEXT* callbackData, [[maybe_unused]] void* userData) {
     std::string message(callbackData->pMessage);
     std::string type;
     std::string severity;

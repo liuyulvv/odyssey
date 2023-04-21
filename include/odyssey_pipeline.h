@@ -10,16 +10,11 @@
 #include <string>
 #include <vector>
 
-#include "odyssey_engine.h"
-
-#if defined(_WIN32)
-#if !defined(VK_USE_PLATFORM_WIN32_KHR)
-#define VK_USE_PLATFORM_WIN32_KHR
-#endif  // VK_USE_PLATFORM_WIN32_KHR
-#endif
-#include "vulkan/vulkan.hpp"
+#include "odyssey_header.h"
 
 namespace odyssey {
+
+class OdysseyDevice;
 
 struct PipelineConfigInfo {
     PipelineConfigInfo() = default;
@@ -40,7 +35,7 @@ struct PipelineConfigInfo {
 
 class OdysseyPipeline {
 public:
-    OdysseyPipeline(OdysseyEngine* engine, const std::string& vertShaderPath, const std::string& fragShaderPath, const PipelineConfigInfo& config);
+    OdysseyPipeline(OdysseyDevice* device, const std::string& vertShaderPath, const std::string& fragShaderPath, const PipelineConfigInfo& config);
     ~OdysseyPipeline();
 
     OdysseyPipeline() = delete;
@@ -59,7 +54,7 @@ private:
     vk::ShaderModule createShaderModule(const std::vector<char>& code);
 
 private:
-    OdysseyEngine* m_engine;
+    OdysseyDevice* m_device;
     vk::Pipeline m_graphicsPipeline{};
     vk::ShaderModule vertShaderModule{};
     vk::ShaderModule fragShaderModule{};

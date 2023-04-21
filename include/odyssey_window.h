@@ -12,14 +12,8 @@
 #include <QWindow>
 #include <functional>
 
+#include "odyssey_header.h"
 #include "odyssey_mouse_event.h"
-
-#if defined(_WIN32)
-#if !defined(VK_USE_PLATFORM_WIN32_KHR)
-#define VK_USE_PLATFORM_WIN32_KHR
-#endif  // VK_USE_PLATFORM_WIN32_KHR
-#endif
-#include "vulkan/vulkan.hpp"
 
 namespace odyssey {
 

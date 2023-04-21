@@ -6,29 +6,14 @@
  * @date 2023-04-11
  */
 
-#if !defined(GLM_FORCE_RADIANS)
-#define GLM_FORCE_RADIANS
-#endif  // GLM_FORCE_RADIANS
-
-#if !defined(GLM_DEPTH_ZERO_TO_ONE)
-#define GLM_DEPTH_ZERO_TO_ONE
-#endif  // GLM_DEPTH_ZERO_TO_ONE
-
 #include <memory>
 #include <vector>
 
-#include "glm/glm.hpp"
-
-#if defined(_WIN32)
-#if !defined(VK_USE_PLATFORM_WIN32_KHR)
-#define VK_USE_PLATFORM_WIN32_KHR
-#endif  // VK_USE_PLATFORM_WIN32_KHR
-#endif
-#include "vulkan/vulkan.hpp"
+#include "odyssey_header.h"
 
 namespace odyssey {
 
-class OdysseyEngine;
+class OdysseyDevice;
 
 class OdysseyModel {
 public:
@@ -40,7 +25,7 @@ public:
     };
 
 public:
-    OdysseyModel(OdysseyEngine* engine, const std::vector<Vertex>& vertices);
+    OdysseyModel(OdysseyDevice* device, const std::vector<Vertex>& vertices);
     ~OdysseyModel();
 
     OdysseyModel() = delete;
@@ -57,7 +42,7 @@ private:
     void createVertexBuffer(const std::vector<Vertex>& vertices);
 
 private:
-    OdysseyEngine* m_engine{nullptr};
+    OdysseyDevice* m_device{};
     vk::Buffer m_vertexBuffer{};
     vk::DeviceMemory m_vertexBufferMemory{};
     uint32_t m_vertexCount{0};

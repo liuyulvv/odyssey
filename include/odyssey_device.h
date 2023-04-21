@@ -1,7 +1,7 @@
 #pragma once
 
 /**
- * @file odyssey_engine.h
+ * @file odyssey_device.h
  * @author liuyulvv (liuyulvv@outlook.com)
  * @date 2023-04-09
  */
@@ -9,15 +9,10 @@
 #include <memory>
 #include <vector>
 
+#include "odyssey_header.h"
 #include "odyssey_model.h"
+#include "odyssey_object.h"
 #include "odyssey_window.h"
-
-#if defined(_WIN32)
-#if !defined(VK_USE_PLATFORM_WIN32_KHR)
-#define VK_USE_PLATFORM_WIN32_KHR
-#endif  // VK_USE_PLATFORM_WIN32_KHR
-#endif
-#include "vulkan/vulkan.hpp"
 
 namespace odyssey {
 
@@ -42,22 +37,26 @@ struct SwapChainSupportDetails {
     std::vector<vk::PresentModeKHR> presentModes;
 };
 
-class OdysseyEngine {
+struct PushConstantData {
+    glm::mat2 transform{1.F};
+    glm::vec2 offset;
+    alignas(16) glm::vec4 color;
+};
+
+class OdysseyDevice {
 public:
 #if defined(_WIN32)
-    explicit OdysseyEngine(const vk::Win32SurfaceCreateInfoKHR& surfaceInfo, int width, int height);
+    explicit OdysseyDevice(const vk::Win32SurfaceCreateInfoKHR& surfaceInfo, int width, int height);
 #endif
-    ~OdysseyEngine();
-    OdysseyEngine(const OdysseyEngine& odysseyEngine) = delete;
-    OdysseyEngine(OdysseyEngine&& odysseyEngine) = delete;
-    OdysseyEngine& operator=(const OdysseyEngine& odysseyEngine) = delete;
-    OdysseyEngine& operator=(OdysseyEngine&& odysseyEngine) = delete;
+    ~OdysseyDevice();
+    OdysseyDevice(const OdysseyDevice& odysseyDevice) = delete;
+    OdysseyDevice(OdysseyDevice&& odysseyDevice) = delete;
+    OdysseyDevice& operator=(const OdysseyDevice& odysseyDevice) = delete;
+    OdysseyDevice& operator=(OdysseyDevice&& odysseyDevice) = delete;
 
 public:
     const vk::Device& device() const;
     const vk::SurfaceKHR& surface() const;
-    const vk::Instance& instance() const;
-    const vk::PhysicalDevice& physicalDevice() const;
     SwapChainSupportDetails getSwapChainSupport() const;
     QueueFamilyIndices findPhysicalQueueFamilies() const;
     vk::ImageView createImageView(vk::Image& image, vk::Format format, vk::ImageAspectFlags aspectFlags);
@@ -67,14 +66,6 @@ public:
     const vk::Queue& getPresentQueue() const;
     const vk::CommandPool& getCommandPool() const;
     void createBuffer(vk::DeviceSize size, vk::BufferUsageFlags usage, vk::MemoryPropertyFlags properties, vk::Buffer& buffer, vk::DeviceMemory& memory);
-    vk::CommandBuffer beginSingleTimeCommands();
-    void endSingleTimeCommands(vk::CommandBuffer& commandBuffer);
-    void recreateSwapChain(int width, int height);
-    uint32_t acquireNextImage();
-    void recordCommandBuffer(uint32_t imageIndex);
-    void submitCommandBuffers(uint32_t imageIndex);
-    void loadModel(const std::vector<OdysseyModel::Vertex>& vertices);
-    void clearModel();
 
 private:
     void createInstance();
@@ -82,9 +73,6 @@ private:
     void pickPhysicalDevice();
     void createLogicalDevice();
     void createCommandPool();
-    void createPipelineLayout();
-    std::unique_ptr<OdysseyPipeline> createPipeline(const std::string& vertShaderPath, const std::string& fragShaderPath, vk::PrimitiveTopology primitiveTopology, float lineWidth);
-    void createCommandBuffers();
 
 private:
     bool checkValidationLayerSupport();
@@ -126,11 +114,6 @@ private:
     vk::Queue m_graphicsQueue{};
     vk::Queue m_presentQueue{};
     vk::CommandPool m_commandPool{};
-    vk::PipelineLayout m_pipelineLayout{};
-    std::unique_ptr<OdysseySwapChain> m_swapChain{};
-    std::unique_ptr<OdysseyPipeline> m_pipelineLine{};
-    std::vector<vk::CommandBuffer> m_commandBuffers{};
-    std::vector<std::unique_ptr<OdysseyModel>> m_models{};
 };
 
 }  // namespace odyssey

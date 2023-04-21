@@ -7,13 +7,17 @@
  */
 
 #include <QWidget>
+#include <memory>
 
 #include "odyssey_model.h"
+#include "odyssey_object.h"
 
 namespace odyssey {
 
 class OdysseyWindow;
-class OdysseyEngine;
+class OdysseyDevice;
+class OdysseyRender;
+class OdysseyRenderSystem;
 
 class Odyssey : public QWidget {
 public:
@@ -27,15 +31,17 @@ public:
 public:
     void paintEvent(QPaintEvent* event);
     void resizeEvent(QResizeEvent* event);
+    void loadObject(const std::vector<OdysseyModel::Vertex>& vertices);
 
 private:
     void draw();
 
 private:
-    OdysseyWindow* m_window{nullptr};
-    OdysseyEngine* m_engine{nullptr};
-
-    std::vector<OdysseyModel::Vertex> m_vertices;
+    OdysseyWindow* m_window{};
+    OdysseyDevice* m_device{};
+    OdysseyRender* m_render{};
+    std::vector<OdysseyObject> m_objects{};
+    OdysseyRenderSystem* m_renderSystem{};
 };
 
 }  // namespace odyssey

@@ -10,17 +10,18 @@
 #include <cstddef>
 #include <cstring>
 
-#include "odyssey_engine.h"
+#include "odyssey_device.h"
 
 namespace odyssey {
 
-OdysseyModel::OdysseyModel(OdysseyEngine* engine, const std::vector<Vertex>& vertices) : m_engine(engine) {
+OdysseyModel::OdysseyModel(OdysseyDevice* device, const std::vector<Vertex>& vertices) : m_device(device) {
     createVertexBuffer(vertices);
 }
 
 OdysseyModel::~OdysseyModel() {
-    m_engine->device().destroyBuffer(m_vertexBuffer);
-    m_engine->device().freeMemory(m_vertexBufferMemory);
+    m_device->device().waitIdle();
+    m_device->device().destroyBuffer(m_vertexBuffer);
+    m_device->device().freeMemory(m_vertexBufferMemory);
 }
 
 void OdysseyModel::bind(vk::CommandBuffer& commandBuffer) const {
@@ -35,15 +36,15 @@ void OdysseyModel::draw(vk::CommandBuffer& commandBuffer) const {
 void OdysseyModel::createVertexBuffer(const std::vector<Vertex>& vertices) {
     m_vertexCount = static_cast<uint32_t>(vertices.size());
     vk::DeviceSize bufferSize = sizeof(vertices[0]) * m_vertexCount;
-    m_engine->createBuffer(
+    m_device->createBuffer(
         bufferSize,
         vk::BufferUsageFlagBits::eVertexBuffer,
         vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent,
         m_vertexBuffer,
         m_vertexBufferMemory);
-    auto* data = m_engine->device().mapMemory(m_vertexBufferMemory, 0, bufferSize);
+    auto* data = m_device->device().mapMemory(m_vertexBufferMemory, 0, bufferSize);
     memcpy(data, vertices.data(), bufferSize);
-    m_engine->device().unmapMemory(m_vertexBufferMemory);
+    m_device->device().unmapMemory(m_vertexBufferMemory);
 }
 
 std::vector<vk::VertexInputBindingDescription> OdysseyModel::Vertex::getBindingDescriptions() {

@@ -8,20 +8,15 @@
 
 #include <vector>
 
-#include "odyssey_engine.h"
-
-#if defined(_WIN32)
-#if !defined(VK_USE_PLATFORM_WIN32_KHR)
-#define VK_USE_PLATFORM_WIN32_KHR
-#endif  // VK_USE_PLATFORM_WIN32_KHR
-#endif
-#include "vulkan/vulkan.hpp"
+#include "odyssey_header.h"
 
 namespace odyssey {
 
+class OdysseyDevice;
+
 class OdysseySwapChain {
 public:
-    OdysseySwapChain(OdysseyEngine* engine, int width, int height);
+    OdysseySwapChain(OdysseyDevice* device, int width, int height);
     ~OdysseySwapChain();
 
     OdysseySwapChain() = delete;
@@ -60,7 +55,7 @@ public:
     static constexpr int MAX_FRAMES_IN_FLIGHT{2};
 
 private:
-    OdysseyEngine* m_engine{nullptr};
+    OdysseyDevice* m_device{};
     vk::Extent2D m_windowExtent{};
     vk::Format m_swapChainImageFormat{};
     vk::Extent2D m_swapChainExtent{};
