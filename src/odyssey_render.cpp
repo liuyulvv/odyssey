@@ -33,6 +33,10 @@ vk::CommandBuffer OdysseyRender::getCurrentCommandBuffer() const {
     return m_commandBuffers[m_currentImageIndex];
 }
 
+float OdysseyRender::getAspectRatio() const {
+    return m_swapChain->getExtentAspectRatio();
+}
+
 vk::CommandBuffer OdysseyRender::beginFrame() {
     try {
         m_currentImageIndex = m_swapChain->acquireNextImage();

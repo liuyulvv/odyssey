@@ -13,6 +13,7 @@
 #include <array>
 #include <stdexcept>
 
+#include "odyssey_camera.h"
 #include "odyssey_device.h"
 #include "odyssey_render.h"
 #include "odyssey_render_system.h"
@@ -32,6 +33,7 @@ Odyssey::Odyssey() : m_window(new OdysseyWindow()) {
     m_device = new OdysseyDevice(m_window->getSurfaceInfo(), m_window->width(), m_window->height());
     m_render = new OdysseyRender(m_window, m_device);
     m_renderSystem = new OdysseyRenderSystem(m_device, m_render->getSwapChainRenderPass());
+    m_camera = new OdysseyCamera();
     show();
     draw();
     loadObject();
@@ -53,8 +55,11 @@ void Odyssey::resizeEvent(QResizeEvent* event) {
 
 void Odyssey::draw() {
     if (auto commandBuffer = m_render->beginFrame()) {
+        auto aspect = m_render->getAspectRatio();
+        // m_camera->setOrthographicProjection(-aspect, aspect, -1.0F, 1.0F, -1.0F, 1.0F);
+        m_camera->setPerspectiveProjection(glm::radians(50.0F), aspect, 0.1F, 10.0F);
         m_render->beginSwapChainRenderPass(commandBuffer);
-        m_renderSystem->renderObjects(commandBuffer, m_objects);
+        m_renderSystem->renderObjects(commandBuffer, m_objects, m_camera);
         m_render->endSwapChainRenderPass(commandBuffer);
         m_render->endFrame();
         update();
@@ -65,7 +70,7 @@ void Odyssey::loadObject() {
     auto model = createCubeModel(m_device, {0.0F, 0.0F, 0.0F});
     auto object = OdysseyObject::createObject();
     object.model = model;
-    object.transform.translation = {0.0F, 0.0F, 0.5F};
+    object.transform.translation = {0.0F, 0.0F, 2.5F};
     object.transform.scale = {0.5F, 0.5F, 0.5F};
     m_objects.push_back(std::move(object));
 }

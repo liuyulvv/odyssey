@@ -30,6 +30,7 @@ public:
     const vk::RenderPass& getSwapChainRenderPass() const;
     bool isFrameInProgress() const;
     vk::CommandBuffer getCurrentCommandBuffer() const;
+    float getAspectRatio() const;
 
 public:
     vk::CommandBuffer beginFrame();

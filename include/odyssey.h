@@ -18,6 +18,7 @@ class OdysseyWindow;
 class OdysseyDevice;
 class OdysseyRender;
 class OdysseyRenderSystem;
+class OdysseyCamera;
 
 class Odyssey : public QWidget {
 public:
@@ -43,6 +44,7 @@ private:
     OdysseyRender* m_render{};
     std::vector<OdysseyObject> m_objects{};
     OdysseyRenderSystem* m_renderSystem{};
+    OdysseyCamera* m_camera{};
 };
 
 }  // namespace odyssey

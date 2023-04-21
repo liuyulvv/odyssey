@@ -9,6 +9,7 @@
 #include <memory>
 #include <vector>
 
+#include "odyssey_camera.h"
 #include "odyssey_header.h"
 #include "odyssey_object.h"
 #include "odyssey_pipeline.h"
@@ -33,7 +34,7 @@ public:
     OdysseyRenderSystem& operator=(OdysseyRenderSystem&& odysseyRenderSystem) = default;
 
 public:
-    void renderObjects(vk::CommandBuffer commandBuffer, std::vector<OdysseyObject>& objects);
+    void renderObjects(vk::CommandBuffer commandBuffer, std::vector<OdysseyObject>& objects, OdysseyCamera* camera);
 
 private:
     void createPipelineLayout();
