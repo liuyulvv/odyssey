@@ -31,10 +31,11 @@ public:
 public:
     void paintEvent(QPaintEvent* event);
     void resizeEvent(QResizeEvent* event);
-    void loadObject(const std::vector<OdysseyModel::Vertex>& vertices);
+    void loadObject();
 
 private:
     void draw();
+    std::shared_ptr<OdysseyModel> createCubeModel(OdysseyDevice* device, glm::vec3 offset);
 
 private:
     OdysseyWindow* m_window{};

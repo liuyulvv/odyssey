@@ -23,11 +23,11 @@ OdysseyRenderSystem::~OdysseyRenderSystem() {
 void OdysseyRenderSystem::renderObjects(vk::CommandBuffer commandBuffer, std::vector<OdysseyObject>& objects) {
     m_pipelineLine->bind(commandBuffer);
     for (auto& object : objects) {
-        object.transform2D.rotation = glm::mod(object.transform2D.rotation + 0.01F, glm::two_pi<float>());
+        object.transform.rotation.y = glm::mod(object.transform.rotation.y + 0.001F, glm::two_pi<float>());
+        object.transform.rotation.x = glm::mod(object.transform.rotation.x + 0.001F, glm::two_pi<float>());
         PushConstantData push{};
-        push.offset = object.transform2D.translation;
         push.color = object.color;
-        push.transform = object.transform2D.mat2();
+        push.transform = object.transform.mat4();
         commandBuffer.pushConstants<PushConstantData>(m_pipelineLayout, vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eFragment, 0, push);
         object.model->bind(commandBuffer);
         object.model->draw(commandBuffer);

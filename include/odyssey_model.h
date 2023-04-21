@@ -18,8 +18,8 @@ class OdysseyDevice;
 class OdysseyModel {
 public:
     struct Vertex {
-        glm::vec2 position;
-        glm::vec4 color;
+        glm::vec3 position;
+        glm::vec3 color;
         static std::vector<vk::VertexInputBindingDescription> getBindingDescriptions();
         static std::vector<vk::VertexInputAttributeDescription> getAttributeDescriptions();
     };

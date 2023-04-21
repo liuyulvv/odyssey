@@ -37,12 +37,6 @@ struct SwapChainSupportDetails {
     std::vector<vk::PresentModeKHR> presentModes;
 };
 
-struct PushConstantData {
-    glm::mat2 transform{1.F};
-    glm::vec2 offset;
-    alignas(16) glm::vec4 color;
-};
-
 class OdysseyDevice {
 public:
 #if defined(_WIN32)
