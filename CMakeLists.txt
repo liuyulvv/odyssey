@@ -18,7 +18,6 @@ if(NOT ${IS_DEBUG_BUILD})
 endif()
 
 if (MSVC)
-    add_compile_options(/W3)
     set(CMAKE_CXX_FLAGS /utf-8)
     set(Vulkan_SDK "D:/VulkanSDK/1.3.236.0")
     set(CMAKE_PREFIX_PATH "D:/Qt/6.5.0/msvc2019_64/lib/cmake")
@@ -27,7 +26,7 @@ else()
         set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -framework Cocoa -framework IOKit")
     endif()
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++20")
-    add_compile_options(-Wall -Wextra -pedantic)
+    add_compile_options(-Wall -Wextra -pedantic -Werror)
 endif()
 
 find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets)
@@ -53,16 +52,24 @@ foreach(shader IN LISTS shaders)
 endforeach()
 add_custom_target(shaders ALL DEPENDS ${spv_shaders})
 
-# GLM
+# glm
 add_subdirectory(glm)
 
-file(GLOB SRCS RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp")
+# assimp
+option(ASSIMP_BUILD_TESTS "" OFF)
+option(ASSIMP_INSTALL "" OFF)
+add_subdirectory(assimp)
+
+file(GLOB_RECURSE SRCS RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp")
+
+message(STATUS ${SRCS})
 
 include_directories(
     ${Vulkan_INCLUDE_DIRS}
     "include"
     "include/event"
     "glm"
+    "assimp/include"
     ${Qt6Gui_PRIVATE_INCLUDE_DIRS}
 )
 
@@ -78,4 +85,16 @@ PRIVATE
     Qt6::Core
     Qt6::Gui
     Qt6::Widgets
+    assimp::assimp
 )
+
+if (MSVC)
+    target_compile_options(
+        assimp PRIVATE 
+        /EHsc /W4 /WX
+    )
+    target_compile_options(
+        ${PROJECT_NAME} PRIVATE 
+        /EHsc /W4 /WX
+    )
+endif()
