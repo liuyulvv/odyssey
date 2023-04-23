@@ -30,9 +30,4 @@ struct OdysseyMouseEvent {
     OdysseyMousePosition position;
 };
 
-static void screenToWorld(int screenX, int screenY, int width, int height, float& worldX, float& worldY) {
-    worldX = static_cast<float>(screenX) / width * 2.0F - 1.0F;
-    worldY = static_cast<float>(screenY) / height * 2.0F - 1.0F;
-}
-
 }  // namespace odyssey

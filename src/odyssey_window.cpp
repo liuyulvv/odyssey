@@ -15,7 +15,7 @@ namespace odyssey {
 
 #if defined(_WIN32)
 vk::Win32SurfaceCreateInfoKHR OdysseyWindow::getSurfaceInfo() {
-    auto wid = winId();
+    [[maybe_unused]] auto wid = winId();
     auto* platformInterface = QGuiApplication::platformNativeInterface();
     auto* handle = platformInterface->nativeResourceForWindow("handle", this);
     auto* hwnd = static_cast<HWND>(handle);
@@ -87,6 +87,11 @@ void OdysseyWindow::mouseMoveEvent(QMouseEvent* event) {
             mouseCallback(mouseEvent);
         }
     }
+}
+
+void OdysseyWindow::screenToWorld(int screenX, int screenY, int width, int height, float& worldX, float& worldY) {
+    worldX = static_cast<float>(screenX) / width * 2.0F - 1.0F;
+    worldY = static_cast<float>(screenY) / height * 2.0F - 1.0F;
 }
 
 }  // namespace odyssey

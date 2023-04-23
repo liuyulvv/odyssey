@@ -18,7 +18,7 @@
 namespace odyssey {
 
 #if defined(_WIN32)
-OdysseyDevice::OdysseyDevice(const vk::Win32SurfaceCreateInfoKHR& surfaceInfo, int width, int height) {
+OdysseyDevice::OdysseyDevice(const vk::Win32SurfaceCreateInfoKHR& surfaceInfo) {
     createInstance();
     m_surface = m_instance.createWin32SurfaceKHR(surfaceInfo);
     setupDebugMessenger();
@@ -136,6 +136,38 @@ void OdysseyDevice::createBuffer(vk::DeviceSize size, vk::BufferUsageFlags usage
         .setMemoryTypeIndex(findMemoryType(memoryRequirements.memoryTypeBits, properties));
     memory = m_device.allocateMemory(allocateInfo);
     m_device.bindBufferMemory(buffer, memory, 0);
+}
+
+void OdysseyDevice::copyBuffer(const vk::Buffer& src, vk::Buffer& dst, vk::DeviceSize size) {
+    auto commandBuffer = beginSingleTimeCommands();
+    vk::BufferCopy copyRegion;
+    copyRegion.setSize(size);
+    commandBuffer.copyBuffer(src, dst, 1, &copyRegion);
+    endSingleTimeCommands(commandBuffer);
+}
+
+vk::CommandBuffer OdysseyDevice::beginSingleTimeCommands() {
+    vk::CommandBufferAllocateInfo allocateInfo;
+    allocateInfo
+        .setLevel(vk::CommandBufferLevel::ePrimary)
+        .setCommandPool(m_commandPool)
+        .setCommandBufferCount(1);
+    auto commandBuffer = m_device.allocateCommandBuffers(allocateInfo);
+    vk::CommandBufferBeginInfo beginInfo;
+    beginInfo.setFlags(vk::CommandBufferUsageFlagBits::eOneTimeSubmit);
+    commandBuffer.at(0).begin(beginInfo);
+    return commandBuffer.at(0);
+}
+
+void OdysseyDevice::endSingleTimeCommands(vk::CommandBuffer commandBuffer) {
+    commandBuffer.end();
+    vk::SubmitInfo submitInfo{};
+    submitInfo
+        .setCommandBufferCount(1)
+        .setCommandBuffers(commandBuffer);
+    m_graphicsQueue.submit(submitInfo);
+    m_graphicsQueue.waitIdle();
+    m_device.freeCommandBuffers(m_commandPool, commandBuffer);
 }
 
 void OdysseyDevice::createInstance() {

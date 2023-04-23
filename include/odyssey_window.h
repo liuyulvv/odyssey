@@ -37,9 +37,12 @@ public:
     void setMouseCallback(const std::function<void(OdysseyMouseEvent)>& callback);
 
 private:
-    void mouseDoubleClickEvent(QMouseEvent* event);
-    void mousePressEvent(QMouseEvent* event);
-    void mouseMoveEvent(QMouseEvent* event);
+    virtual void mouseDoubleClickEvent(QMouseEvent* event) override;
+    virtual void mousePressEvent(QMouseEvent* event) override;
+    virtual void mouseMoveEvent(QMouseEvent* event) override;
+
+private:
+    static void screenToWorld(int screenX, int screenY, int width, int height, float& worldX, float& worldY); 
 
 private:
     std::function<void(OdysseyMouseEvent)> mouseCallback{};

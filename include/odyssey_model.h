@@ -24,8 +24,13 @@ public:
         static std::vector<vk::VertexInputAttributeDescription> getAttributeDescriptions();
     };
 
+    struct Builder {
+        std::vector<Vertex> vertices{};
+        std::vector<uint32_t> indices{};
+    };
+
 public:
-    OdysseyModel(OdysseyDevice* device, const std::vector<Vertex>& vertices);
+    OdysseyModel(OdysseyDevice* device, const Builder& builder);
     ~OdysseyModel();
 
     OdysseyModel() = delete;
@@ -40,12 +45,17 @@ public:
 
 private:
     void createVertexBuffer(const std::vector<Vertex>& vertices);
+    void createIndexBuffer(const std::vector<uint32_t>& indices);
 
 private:
     OdysseyDevice* m_device{};
     vk::Buffer m_vertexBuffer{};
     vk::DeviceMemory m_vertexBufferMemory{};
     uint32_t m_vertexCount{0};
+    bool m_hasIndexBuffer{false};
+    vk::Buffer m_indexBuffer{};
+    vk::DeviceMemory m_indexBufferMemory{};
+    uint32_t m_indexCount{0};
 };
 
 }  // namespace odyssey

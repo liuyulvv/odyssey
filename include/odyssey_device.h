@@ -40,7 +40,7 @@ struct SwapChainSupportDetails {
 class OdysseyDevice {
 public:
 #if defined(_WIN32)
-    explicit OdysseyDevice(const vk::Win32SurfaceCreateInfoKHR& surfaceInfo, int width, int height);
+    explicit OdysseyDevice(const vk::Win32SurfaceCreateInfoKHR& surfaceInfo);
 #endif
     ~OdysseyDevice();
     OdysseyDevice(const OdysseyDevice& odysseyDevice) = delete;
@@ -60,6 +60,9 @@ public:
     const vk::Queue& getPresentQueue() const;
     const vk::CommandPool& getCommandPool() const;
     void createBuffer(vk::DeviceSize size, vk::BufferUsageFlags usage, vk::MemoryPropertyFlags properties, vk::Buffer& buffer, vk::DeviceMemory& memory);
+    void copyBuffer(const vk::Buffer& src, vk::Buffer& dst, vk::DeviceSize size);
+    vk::CommandBuffer beginSingleTimeCommands();
+    void endSingleTimeCommands(vk::CommandBuffer commandBuffer);
 
 private:
     void createInstance();
