@@ -22,12 +22,13 @@ OdysseyRenderSystem::~OdysseyRenderSystem() {
 
 void OdysseyRenderSystem::renderObjects(vk::CommandBuffer commandBuffer, std::vector<OdysseyObject>& objects, OdysseyCamera* camera) {
     m_pipelineLine->bind(commandBuffer);
+    auto projectionView = camera->getProjection() * camera->getView();
     for (auto& object : objects) {
         object.transform.rotation.y = glm::mod(object.transform.rotation.y + 0.001F, glm::two_pi<float>());
         object.transform.rotation.x = glm::mod(object.transform.rotation.x + 0.001F, glm::two_pi<float>());
         PushConstantData push{};
         push.color = object.color;
-        push.transform = camera->getProjection() * object.transform.mat4();
+        push.transform = projectionView * object.transform.mat4();
         commandBuffer.pushConstants<PushConstantData>(m_pipelineLayout, vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eFragment, 0, push);
         object.model->bind(commandBuffer);
         object.model->draw(commandBuffer);
