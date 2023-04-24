@@ -20,7 +20,7 @@ class OdysseyDevice;
 
 struct PushConstantData {
     glm::mat4 transform{1.F};
-    alignas(16) glm::vec4 color;
+    glm::mat4 normal{1.F};
 };
 
 class OdysseyRenderSystem {

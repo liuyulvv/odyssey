@@ -25,8 +25,9 @@ void OdysseyRenderSystem::renderObjects(vk::CommandBuffer commandBuffer, std::ve
     auto projectionView = camera->getProjection() * camera->getView();
     for (auto& object : objects) {
         PushConstantData push{};
-        push.color = object.color;
-        push.transform = projectionView * object.transform.mat4();
+        auto model = object.transform.mat4();
+        push.transform = projectionView * model;
+        push.normal = object.transform.normal();
         commandBuffer.pushConstants<PushConstantData>(m_pipelineLayout, vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eFragment, 0, push);
         object.model->bind(commandBuffer);
         object.model->draw(commandBuffer);

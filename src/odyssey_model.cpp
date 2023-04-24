@@ -119,17 +119,11 @@ std::vector<vk::VertexInputBindingDescription> OdysseyModel::Vertex::getBindingD
 }
 
 std::vector<vk::VertexInputAttributeDescription> OdysseyModel::Vertex::getAttributeDescriptions() {
-    std::vector<vk::VertexInputAttributeDescription> attributeDescriptions(2);
-    attributeDescriptions.at(0)
-        .setBinding(0)
-        .setLocation(0)
-        .setFormat(vk::Format::eR32G32B32Sfloat)
-        .setOffset(offsetof(Vertex, position));
-    attributeDescriptions.at(1)
-        .setBinding(0)
-        .setLocation(1)
-        .setFormat(vk::Format::eR32G32B32Sfloat)
-        .setOffset(offsetof(Vertex, color));
+    std::vector<vk::VertexInputAttributeDescription> attributeDescriptions{};
+    attributeDescriptions.push_back({0, 0, vk::Format::eR32G32B32Sfloat, offsetof(Vertex, position)});
+    attributeDescriptions.push_back({1, 0, vk::Format::eR32G32B32Sfloat, offsetof(Vertex, color)});
+    attributeDescriptions.push_back({2, 0, vk::Format::eR32G32B32Sfloat, offsetof(Vertex, normal)});
+    attributeDescriptions.push_back({3, 0, vk::Format::eR32G32Sfloat, offsetof(Vertex, uv)});
     return attributeDescriptions;
 }
 
