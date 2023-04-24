@@ -11,57 +11,57 @@
 namespace odyssey {
 
 glm::mat4 TransformComponent::mat4() {
-    const float c3 = glm::cos(rotation.z);
-    const float s3 = glm::sin(rotation.z);
-    const float c2 = glm::cos(rotation.x);
-    const float s2 = glm::sin(rotation.x);
-    const float c1 = glm::cos(rotation.y);
-    const float s1 = glm::sin(rotation.y);
+    const float C3 = glm::cos(rotation.z);
+    const float S3 = glm::sin(rotation.z);
+    const float C2 = glm::cos(rotation.x);
+    const float S2 = glm::sin(rotation.x);
+    const float C1 = glm::cos(rotation.y);
+    const float S1 = glm::sin(rotation.y);
     return glm::mat4{
         {
-            scale.x * (c1 * c3 + s1 * s2 * s3),
-            scale.x * (c2 * s3),
-            scale.x * (c1 * s2 * s3 - c3 * s1),
-            0.0f,
+            scale.x * (C1 * C3 + S1 * S2 * S3),
+            scale.x * (C2 * S3),
+            scale.x * (C1 * S2 * S3 - C3 * S1),
+            0.0F,
         },
         {
-            scale.y * (c3 * s1 * s2 - c1 * s3),
-            scale.y * (c2 * c3),
-            scale.y * (c1 * c3 * s2 + s1 * s3),
-            0.0f,
+            scale.y * (C3 * S1 * S2 - C1 * S3),
+            scale.y * (C2 * C3),
+            scale.y * (C1 * C3 * S2 + S1 * S3),
+            0.0F,
         },
         {
-            scale.z * (c2 * s1),
-            scale.z * (-s2),
-            scale.z * (c1 * c2),
-            0.0f,
+            scale.z * (C2 * S1),
+            scale.z * (-S2),
+            scale.z * (C1 * C2),
+            0.0F,
         },
-        {translation.x, translation.y, translation.z, 1.0f}};
+        {translation.x, translation.y, translation.z, 1.0F}};
 }
 
 glm::mat3 TransformComponent::normal() {
-    const float c3 = glm::cos(rotation.z);
-    const float s3 = glm::sin(rotation.z);
-    const float c2 = glm::cos(rotation.x);
-    const float s2 = glm::sin(rotation.x);
-    const float c1 = glm::cos(rotation.y);
-    const float s1 = glm::sin(rotation.y);
-    const glm::vec3 inverseScale = 1.0F / scale;
+    const float C3 = glm::cos(rotation.z);
+    const float S3 = glm::sin(rotation.z);
+    const float C2 = glm::cos(rotation.x);
+    const float S2 = glm::sin(rotation.x);
+    const float C1 = glm::cos(rotation.y);
+    const float S1 = glm::sin(rotation.y);
+    glm::vec3 inverseScale = 1.0F / scale;
     return glm::mat3{
         {
-            inverseScale.x * (c1 * c3 + s1 * s2 * s3),
-            inverseScale.x * (c2 * s3),
-            inverseScale.x * (c1 * s2 * s3 - c3 * s1),
+            inverseScale.x * (C1 * C3 + S1 * S2 * S3),
+            inverseScale.x * (C2 * S3),
+            inverseScale.x * (C1 * S2 * S3 - C3 * S1),
         },
         {
-            inverseScale.y * (c3 * s1 * s2 - c1 * s3),
-            inverseScale.y * (c2 * c3),
-            inverseScale.y * (c1 * c3 * s2 + s1 * s3),
+            inverseScale.y * (C3 * S1 * S2 - C1 * S3),
+            inverseScale.y * (C2 * C3),
+            inverseScale.y * (C1 * C3 * S2 + S1 * S3),
         },
         {
-            inverseScale.z * (c2 * s1),
-            inverseScale.z * (-s2),
-            inverseScale.z * (c1 * c2),
+            inverseScale.z * (C2 * S1),
+            inverseScale.z * (-S2),
+            inverseScale.z * (C1 * C2),
         },
     };
 }
