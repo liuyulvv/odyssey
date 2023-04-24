@@ -9,5 +9,4 @@ lib/
 *.lib
 log/
 shaders/*.spv
-odyssey
-imgui.ini
+models/
