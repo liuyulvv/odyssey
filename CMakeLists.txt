@@ -79,8 +79,8 @@ link_directories(
 )
 
 add_executable(${PROJECT_NAME} ${SRCS})
-target_link_libraries(${PROJECT_NAME} 
-PRIVATE  
+target_link_libraries(
+    ${PROJECT_NAME} PRIVATE
     ${Vulkan_LIBRARIES}
     Qt6::Core
     Qt6::Gui

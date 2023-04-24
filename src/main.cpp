@@ -6,7 +6,6 @@
 
 #include <QApplication>
 #include <QWidget>
-#include <iostream>
 
 #include "odyssey.h"
 #include "odyssey_window.h"
