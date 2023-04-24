@@ -6,11 +6,16 @@
  * @date 2023-04-09
  */
 
-#include <QWidget>
+#include <QFileDialog>
+#include <QMainWindow>
 #include <memory>
 
 #include "odyssey_model.h"
 #include "odyssey_object.h"
+
+namespace Ui {
+class Odyssey;
+}
 
 namespace odyssey {
 
@@ -20,7 +25,7 @@ class OdysseyRender;
 class OdysseyRenderSystem;
 class OdysseyCamera;
 
-class Odyssey : public QWidget {
+class Odyssey : public QMainWindow {
 public:
     Odyssey();
     ~Odyssey();
@@ -29,15 +34,21 @@ public:
     Odyssey& operator=(const Odyssey& odyssey) = delete;
     Odyssey& operator=(Odyssey&& odyssey) = delete;
 
-public:
+private:
     void paintEvent(QPaintEvent* event);
     void resizeEvent(QResizeEvent* event);
-    void loadObject();
 
 private:
     void draw();
 
+public slots:
+    void importObject();
+
 private:
+    void loadObject(const std::string& filePath);
+
+private:
+    Ui::Odyssey* ui;
     OdysseyWindow* m_window{};
     OdysseyDevice* m_device{};
     OdysseyRender* m_render{};
