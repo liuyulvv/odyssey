@@ -9,6 +9,7 @@
 #include <array>
 #include <cstddef>
 #include <cstring>
+#include <unordered_map>
 
 #include "odyssey_device.h"
 
@@ -27,6 +28,12 @@ OdysseyModel::~OdysseyModel() {
         m_device->device().freeMemory(m_vertexBufferMemory);
         m_device->device().freeMemory(m_indexBufferMemory);
     }
+}
+
+std::shared_ptr<OdysseyModel> OdysseyModel::createModelFromFile(OdysseyDevice* device, const std::string& filepath) {
+    Builder builder{};
+    builder.loadModel(filepath);
+    return std::make_shared<OdysseyModel>(device, builder);
 }
 
 void OdysseyModel::bind(vk::CommandBuffer& commandBuffer) const {
@@ -98,6 +105,10 @@ void OdysseyModel::createIndexBuffer(const std::vector<uint32_t>& indices) {
     m_device->device().freeMemory(stagingBufferMemory);
 }
 
+bool OdysseyModel::Vertex::operator==(const Vertex& other) const {
+    return position == other.position && color == other.color && normal == other.normal && uv == other.uv;
+}
+
 std::vector<vk::VertexInputBindingDescription> OdysseyModel::Vertex::getBindingDescriptions() {
     std::vector<vk::VertexInputBindingDescription> bindingDescriptions(1);
     bindingDescriptions.at(0)
@@ -120,6 +131,67 @@ std::vector<vk::VertexInputAttributeDescription> OdysseyModel::Vertex::getAttrib
         .setFormat(vk::Format::eR32G32B32Sfloat)
         .setOffset(offsetof(Vertex, color));
     return attributeDescriptions;
+}
+
+void OdysseyModel::Builder::loadModel(const std::string& filepath) {
+    Assimp::Importer importer;
+    const auto* scene = importer.ReadFile(filepath, aiProcess_Triangulate | aiProcess_FlipUVs);
+    processNode(scene->mRootNode, scene);
+}
+
+void OdysseyModel::Builder::processNode(const aiNode* node, const aiScene* scene) {
+    for (uint32_t i = 0; i < node->mNumMeshes; ++i) {
+        auto* mesh = scene->mMeshes[node->mMeshes[i]];
+        processMesh(mesh);
+    }
+    for (uint32_t i = 0; i < node->mNumChildren; ++i) {
+        processNode(node->mChildren[i], scene);
+    }
+}
+
+void OdysseyModel::Builder::processMesh(const aiMesh* mesh) {
+    std::unordered_map<Vertex, uint32_t> uniqueVertices{};
+    for (uint32_t i = 0; i < mesh->mNumVertices; ++i) {
+        glm::vec3 position;
+        position.x = mesh->mVertices[i].x;
+        position.y = mesh->mVertices[i].y;
+        position.z = mesh->mVertices[i].z;
+
+        glm::vec3 normal;
+        normal.x = mesh->mNormals[i].x;
+        normal.y = mesh->mNormals[i].y;
+        normal.z = mesh->mNormals[i].z;
+
+        glm::vec3 color;
+        if (mesh->mColors[0]) {
+            color.x = mesh->mColors[0][i].r;
+            color.y = mesh->mColors[0][i].g;
+            color.z = mesh->mColors[0][i].b;
+        } else {
+            color = {1.0F, 1.0F, 1.0F};
+        }
+
+        glm::vec2 uv;
+        if (mesh->mTextureCoords[0]) {
+            uv.x = mesh->mTextureCoords[0][i].x;
+            uv.y = mesh->mTextureCoords[0][i].y;
+        } else {
+            uv = {0.0F, 0.0F};
+        }
+
+        Vertex vertex{};
+        vertex.position = position;
+        vertex.color = color;
+        vertex.normal = normal;
+        vertex.uv = uv;
+        vertices.push_back(vertex);
+
+        if (!uniqueVertices.contains(vertex)) {
+            uniqueVertices[vertex] = static_cast<uint32_t>(vertices.size());
+            vertices.push_back(vertex);
+        }
+        indices.push_back(uniqueVertices[vertex]);
+    }
 }
 
 }  // namespace odyssey

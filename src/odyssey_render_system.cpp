@@ -24,8 +24,6 @@ void OdysseyRenderSystem::renderObjects(vk::CommandBuffer commandBuffer, std::ve
     m_pipelineLine->bind(commandBuffer);
     auto projectionView = camera->getProjection() * camera->getView();
     for (auto& object : objects) {
-        object.transform.rotation.y = glm::mod(object.transform.rotation.y + 0.001F, glm::two_pi<float>());
-        object.transform.rotation.x = glm::mod(object.transform.rotation.x + 0.001F, glm::two_pi<float>());
         PushConstantData push{};
         push.color = object.color;
         push.transform = projectionView * object.transform.mat4();
