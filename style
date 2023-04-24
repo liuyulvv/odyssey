@@ -1,0 +1,4 @@
+clang-tidy -format-style=file -header-filter=.* -p build src/*.cpp -- -I ./include
+clang-format -style=file -i src/*.cpp
+clang-format -style=file -i include/*.h
+clang-format -style=file -i include/event/*.h

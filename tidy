@@ -1,1 +1,0 @@
-clang-tidy -format-style=file -header-filter=.* -p build src/*.cpp -- -I ./include
