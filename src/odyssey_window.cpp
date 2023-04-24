@@ -30,7 +30,7 @@ vk::Extent2D OdysseyWindow::getExtent() {
     return {static_cast<uint32_t>(width()), static_cast<uint32_t>(height())};
 }
 
-void OdysseyWindow::setMouseCallback(const std::function<void(OdysseyMouseEvent)>& callback) {
+void OdysseyWindow::setMouseCallback(const std::function<void(const OdysseyMouseEvent&)>& callback) {
     mouseCallback = callback;
 }
 

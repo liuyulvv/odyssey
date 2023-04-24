@@ -34,7 +34,7 @@ public:
 #endif
 
 public:
-    void setMouseCallback(const std::function<void(OdysseyMouseEvent)>& callback);
+    void setMouseCallback(const std::function<void(const OdysseyMouseEvent&)>& callback);
 
 private:
     virtual void mouseDoubleClickEvent(QMouseEvent* event) override;
@@ -42,10 +42,10 @@ private:
     virtual void mouseMoveEvent(QMouseEvent* event) override;
 
 private:
-    static void screenToWorld(int screenX, int screenY, int width, int height, float& worldX, float& worldY); 
+    static void screenToWorld(int screenX, int screenY, int width, int height, float& worldX, float& worldY);
 
 private:
-    std::function<void(OdysseyMouseEvent)> mouseCallback{};
+    std::function<void(const OdysseyMouseEvent&)> mouseCallback{};
 };
 
 }  // namespace odyssey
