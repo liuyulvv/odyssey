@@ -8,9 +8,9 @@
 
 #include <qpa/qplatformnativeinterface.h>
 
-#include <QGuiApplication>
-#include <QVBoxLayout>
-#include <array>
+#include <QKeyEvent>
+#include <QPaintEvent>
+#include <QResizeEvent>
 #include <stdexcept>
 
 #include "odyssey_camera.h"
@@ -33,7 +33,7 @@ Odyssey::Odyssey() : m_window(new OdysseyWindow()), ui(new Ui::Odyssey) {
     m_render = new OdysseyRender(m_window, m_device);
     m_renderSystem = new OdysseyRenderSystem(m_device, m_render->getSwapChainRenderPass());
     m_camera = new OdysseyCamera();
-    m_camera->setViewDirection(glm::vec3(0.0F), glm::vec3(0.5F, 0.0F, 1.0F));
+    m_camera->setViewDirection(glm::vec3(0.0F), glm::vec3(0.0F, 0.0F, 1.0F));
     // window mouse event callback
     m_window->setMouseCallback([this](OdysseyMouseEvent event) {
         if (event.type == OdysseyMouseEventType::LEFT_DOUBLE) {
@@ -61,6 +61,36 @@ void Odyssey::resizeEvent([[maybe_unused]] QResizeEvent* event) {
     draw();
 }
 
+void Odyssey::keyPressEvent(QKeyEvent* event) {
+    OdysseyKeyboardEventType type{};
+    switch (event->key()) {
+        case Qt::Key_W:
+            type = OdysseyKeyboardEventType::W;
+            break;
+        case Qt::Key_A:
+            type = OdysseyKeyboardEventType::A;
+            break;
+        case Qt::Key_S:
+            type = OdysseyKeyboardEventType::S;
+            break;
+        case Qt::Key_D:
+            type = OdysseyKeyboardEventType::D;
+            break;
+        case Qt::Key_Up:
+            type = OdysseyKeyboardEventType::UP;
+            break;
+        case Qt::Key_Down:
+            type = OdysseyKeyboardEventType::DOWN;
+            break;
+        case Qt::Key_Left:
+            type = OdysseyKeyboardEventType::LEFT;
+            break;
+        case Qt::Key_Right:
+            type = OdysseyKeyboardEventType::RIGHT;
+            break;
+    }
+}
+
 void Odyssey::draw() {
     if (auto commandBuffer = m_render->beginFrame()) {
         auto aspect = m_render->getAspectRatio();
@@ -79,12 +109,14 @@ void Odyssey::importObject() {
         loadObject(filePath.toStdString());
 }
 
+void Odyssey::keyboardCallback([[maybe_unused]] const OdysseyKeyboardEventType& event) {
+}
+
 void Odyssey::loadObject(const std::string& filePath) {
     std::shared_ptr<OdysseyModel> model = OdysseyModel::createModelFromFile(m_device, filePath);
     auto object = OdysseyObject::createObject();
     object.model = model;
-    object.transform.translation = {0.0F, 0.0F, 2.5F};
-    object.transform.scale = {0.5F, 0.5F, 0.5F};
+    object.transform.translation = {0.0F, 0.0F, 1.0F};
     m_objects.push_back(std::move(object));
 }
 

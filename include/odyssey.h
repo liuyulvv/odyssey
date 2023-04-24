@@ -10,6 +10,7 @@
 #include <QMainWindow>
 #include <memory>
 
+#include "odyssey_keyboard_event.h"
 #include "odyssey_model.h"
 #include "odyssey_object.h"
 
@@ -35,8 +36,9 @@ public:
     Odyssey& operator=(Odyssey&& odyssey) = delete;
 
 private:
-    void paintEvent(QPaintEvent* event);
-    void resizeEvent(QResizeEvent* event);
+    virtual void paintEvent(QPaintEvent* event) override;
+    virtual void resizeEvent(QResizeEvent* event) override;
+    virtual void keyPressEvent(QKeyEvent* event) override;
 
 private:
     void draw();
@@ -45,6 +47,7 @@ public slots:
     void importObject();
 
 private:
+    void keyboardCallback(const OdysseyKeyboardEventType& event);
     void loadObject(const std::string& filePath);
 
 private:
