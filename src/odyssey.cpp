@@ -6,6 +6,7 @@
 
 #include "odyssey.h"
 
+#include <QHBoxLayout>
 #include <QIcon>
 #include <QKeyEvent>
 #include <QPaintEvent>
@@ -16,20 +17,17 @@
 #include "odyssey_device.h"
 #include "odyssey_render.h"
 #include "odyssey_render_system.h"
-#include "odyssey_side_menu.h"
 #include "odyssey_window.h"
-#include "ui_odyssey.h"
 
 namespace odyssey {
 
-Odyssey::Odyssey() : m_window(new OdysseyWindow()), ui(new Ui::Odyssey), m_sideMenu(new OdysseySideMenu()) {
-    setWindowIcon(QIcon(":/icon/odyssey.ico"));
+Odyssey::Odyssey() : m_window(new OdysseyWindow()) {
+    // setWindowIcon(QIcon(":/icon/odyssey.ico"));
     // setup ui
-    ui->setupUi(this);
-    ui->horizontalLayout->addWidget(m_sideMenu);
+    auto layout = new QHBoxLayout();
     auto* wrapper = QWidget::createWindowContainer(m_window, this);
-    ui->horizontalLayout->addWidget(wrapper);
-    ui->centralWidget->setLayout(ui->horizontalLayout);
+    layout->addWidget(wrapper);
+    setLayout(layout);
     // init odyssey
     m_device = new OdysseyDevice(m_window->getSurfaceInfo());
     m_render = new OdysseyRender(m_window, m_device);
@@ -44,14 +42,12 @@ Odyssey::Odyssey() : m_window(new OdysseyWindow()), ui(new Ui::Odyssey), m_sideM
         }
     });
     // connect signals and slots
-    connect(ui->actionImport, &QAction::triggered, this, &Odyssey::importObject);
-    m_sideMenu->show();
+    // connect(ui->actionImport, &QAction::triggered, this, &Odyssey::importObject);
+    // m_sideMenu->show();
     show();
 }
 
 Odyssey::~Odyssey() {
-    delete m_sideMenu;
-    delete ui;
     for (auto& object : m_objects) {
         object.model.reset();
     }
