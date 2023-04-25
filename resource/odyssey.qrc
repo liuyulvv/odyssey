@@ -2,5 +2,8 @@
     <qresource prefix="/">
         <file>icon/odyssey.ico</file>
         <file>image/import.png</file>
+        <file>image/type.png</file>
+        <file>image/soft.png</file>
+        <file>image/hard.png</file>
     </qresource>
 </RCC>

@@ -26,6 +26,9 @@ class OdysseyRender;
 class OdysseyRenderSystem;
 class OdysseyCamera;
 
+// UI
+class OdysseySideMenu;
+
 class Odyssey : public QMainWindow {
 public:
     Odyssey();
@@ -51,13 +54,15 @@ private:
     void loadObject(const std::string& filePath);
 
 private:
-    Ui::Odyssey* ui;
     OdysseyWindow* m_window{};
     OdysseyDevice* m_device{};
     OdysseyRender* m_render{};
     std::vector<OdysseyObject> m_objects{};
     OdysseyRenderSystem* m_renderSystem{};
     OdysseyCamera* m_camera{};
+
+    Ui::Odyssey* ui;
+    OdysseySideMenu* m_sideMenu{};
 };
 
 }  // namespace odyssey

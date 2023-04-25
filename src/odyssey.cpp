@@ -6,25 +6,27 @@
 
 #include "odyssey.h"
 
+#include <QIcon>
 #include <QKeyEvent>
 #include <QPaintEvent>
 #include <QResizeEvent>
 #include <stdexcept>
-#include <QIcon>
 
 #include "odyssey_camera.h"
 #include "odyssey_device.h"
 #include "odyssey_render.h"
 #include "odyssey_render_system.h"
+#include "odyssey_side_menu.h"
 #include "odyssey_window.h"
 #include "ui_odyssey.h"
 
 namespace odyssey {
 
-Odyssey::Odyssey() : m_window(new OdysseyWindow()), ui(new Ui::Odyssey) {
+Odyssey::Odyssey() : m_window(new OdysseyWindow()), ui(new Ui::Odyssey), m_sideMenu(new OdysseySideMenu()) {
     setWindowIcon(QIcon(":/icon/odyssey.ico"));
     // setup ui
     ui->setupUi(this);
+    ui->horizontalLayout->addWidget(m_sideMenu);
     auto* wrapper = QWidget::createWindowContainer(m_window, this);
     ui->horizontalLayout->addWidget(wrapper);
     ui->centralWidget->setLayout(ui->horizontalLayout);
@@ -43,10 +45,12 @@ Odyssey::Odyssey() : m_window(new OdysseyWindow()), ui(new Ui::Odyssey) {
     });
     // connect signals and slots
     connect(ui->actionImport, &QAction::triggered, this, &Odyssey::importObject);
+    m_sideMenu->show();
     show();
 }
 
 Odyssey::~Odyssey() {
+    delete m_sideMenu;
     delete ui;
     for (auto& object : m_objects) {
         object.model.reset();

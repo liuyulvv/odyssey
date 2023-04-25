@@ -71,6 +71,7 @@ include_directories(
     ${Vulkan_INCLUDE_DIRS}
     "include"
     "include/event"
+    "include/ui"
     "glm"
     "assimp/include"
 )

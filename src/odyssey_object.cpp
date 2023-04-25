@@ -1,5 +1,3 @@
-#pragma once
-
 /**
  * @file odyssey_object.cpp
  * @author liuyulvv (liuyulvv@outlook.com)
