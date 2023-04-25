@@ -72,7 +72,6 @@ include_directories(
     "include/event"
     "glm"
     "assimp/include"
-    ${Qt6Gui_PRIVATE_INCLUDE_DIRS}
 )
 
 link_directories(

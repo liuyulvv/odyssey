@@ -6,8 +6,6 @@
  * @date 2023-04-09
  */
 
-#include <qpa/qplatformnativeinterface.h>
-
 #include <QMouseEvent>
 #include <QWindow>
 #include <functional>
@@ -19,7 +17,7 @@ namespace odyssey {
 
 class OdysseyWindow : public QWindow {
 public:
-    OdysseyWindow() = default;
+    OdysseyWindow();
     ~OdysseyWindow() = default;
 
     OdysseyWindow(const OdysseyWindow& odysseyWindow) = delete;

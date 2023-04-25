@@ -6,8 +6,6 @@
 
 #include "odyssey.h"
 
-#include <qpa/qplatformnativeinterface.h>
-
 #include <QKeyEvent>
 #include <QPaintEvent>
 #include <QResizeEvent>

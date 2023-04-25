@@ -6,21 +6,21 @@
 
 #include "odyssey_window.h"
 
-#include <QDebug>
-#include <QGuiApplication>
+#include <QSurface>
 #include <QWindow>
 #include <stdexcept>
 
 namespace odyssey {
 
+OdysseyWindow::OdysseyWindow() {
+    setSurfaceType(QSurface::VulkanSurface);
+}
+
 #if defined(_WIN32)
 vk::Win32SurfaceCreateInfoKHR OdysseyWindow::getSurfaceInfo() {
-    [[maybe_unused]] auto wid = winId();
-    auto* platformInterface = QGuiApplication::platformNativeInterface();
-    auto* handle = platformInterface->nativeResourceForWindow("handle", this);
-    auto* hwnd = static_cast<HWND>(handle);
+    auto wid = winId();
     vk::Win32SurfaceCreateInfoKHR surfaceInfo{};
-    surfaceInfo.setHwnd(hwnd);
+    surfaceInfo.setHwnd(reinterpret_cast<HWND>(wid));
     surfaceInfo.setHinstance(GetModuleHandle(nullptr));
     return surfaceInfo;
 }
