@@ -1,5 +1,6 @@
 <RCC>
     <qresource prefix="/">
         <file>icon/odyssey.ico</file>
+        <file>image/import.png</file>
     </qresource>
 </RCC>
