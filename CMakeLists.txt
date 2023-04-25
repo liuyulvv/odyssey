@@ -32,6 +32,7 @@ endif()
 
 find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets)
 qt_standard_project_setup()
+set(CMAKE_AUTORCC ON)
 
 find_package(Vulkan REQUIRED COMPONENTS glslc)
 find_program(glslc_executable NAMES glslc HINTS Vulkan::glslc)
@@ -63,8 +64,8 @@ add_subdirectory(assimp)
 
 file(GLOB_RECURSE SRCS RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp")
 file(GLOB_RECURSE UI_SRCS RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}/ui/*.ui")
-
-message(STATUS ${SRCS})
+file(GLOB_RECURSE QT_RECOURCE RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}/resource/*.qrc")
+file(GLOB_RECURSE WIN_RECOURCE RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}/resource/*.rc")
 
 include_directories(
     ${Vulkan_INCLUDE_DIRS}
@@ -79,7 +80,7 @@ link_directories(
     ${EXECUTABLE_OUTPUT_PATH}/lib
 )
 
-add_executable(${PROJECT_NAME} ${SRCS} ${UI_SRCS})
+add_executable(${PROJECT_NAME} ${SRCS} ${UI_SRCS} ${QT_RECOURCE} ${WIN_RECOURCE})
 
 target_link_libraries(
     ${PROJECT_NAME} PRIVATE
@@ -100,3 +101,8 @@ if (MSVC)
         /EHsc /W4 /WX
     )
 endif()
+
+set_target_properties(${PROJECT_NAME} PROPERTIES
+    WIN32_EXECUTABLE ON
+    MACOSX_BUNDLE ON
+)

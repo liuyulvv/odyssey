@@ -10,6 +10,7 @@
 #include <QPaintEvent>
 #include <QResizeEvent>
 #include <stdexcept>
+#include <QIcon>
 
 #include "odyssey_camera.h"
 #include "odyssey_device.h"
@@ -21,6 +22,7 @@
 namespace odyssey {
 
 Odyssey::Odyssey() : m_window(new OdysseyWindow()), ui(new Ui::Odyssey) {
+    setWindowIcon(QIcon(":/icon/odyssey.ico"));
     // setup ui
     ui->setupUi(this);
     auto* wrapper = QWidget::createWindowContainer(m_window, this);
