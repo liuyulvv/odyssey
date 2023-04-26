@@ -6,28 +6,35 @@
 
 #include "odyssey.h"
 
-#include <QHBoxLayout>
+#include <QFileDialog>
 #include <QIcon>
 #include <QKeyEvent>
 #include <QPaintEvent>
 #include <QResizeEvent>
-#include <stdexcept>
+#include <QUrl>
+#include <memory>
 
 #include "odyssey_camera.h"
 #include "odyssey_device.h"
 #include "odyssey_render.h"
 #include "odyssey_render_system.h"
 #include "odyssey_window.h"
+#include "ui_odyssey.h"
 
 namespace odyssey {
 
-Odyssey::Odyssey() : m_window(new OdysseyWindow()) {
-    // setWindowIcon(QIcon(":/icon/odyssey.ico"));
+Odyssey::Odyssey() : m_window(new OdysseyWindow()), ui(new Ui::Odyssey), m_quickWidget(new QQuickWidget()) {
     // setup ui
-    auto layout = new QHBoxLayout();
+    setWindowIcon(QIcon(":/icon/odyssey.ico"));
+    ui->setupUi(this);
+    m_quickWidget->setSource(QUrl("qrc:/ui/odyssey_side_bar.qml"));
+    m_quickWidget->setMinimumWidth(64);
+    m_quickWidget->setMaximumWidth(64);
+    m_quickWidget->setResizeMode(QQuickWidget::ResizeMode::SizeRootObjectToView);
     auto* wrapper = QWidget::createWindowContainer(m_window, this);
-    layout->addWidget(wrapper);
-    setLayout(layout);
+    ui->horizontalLayout->addWidget(m_quickWidget);
+    ui->horizontalLayout->addWidget(wrapper);
+    ui->centralWidget->setLayout(ui->horizontalLayout);
     // init odyssey
     m_device = new OdysseyDevice(m_window->getSurfaceInfo());
     m_render = new OdysseyRender(m_window, m_device);
@@ -42,8 +49,8 @@ Odyssey::Odyssey() : m_window(new OdysseyWindow()) {
         }
     });
     // connect signals and slots
-    // connect(ui->actionImport, &QAction::triggered, this, &Odyssey::importObject);
-    // m_sideMenu->show();
+    connect(ui->actionImport, &QAction::triggered, this, &Odyssey::importObject);
+    m_quickWidget->show();
     show();
 }
 
