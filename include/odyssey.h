@@ -52,7 +52,7 @@ private:
 private:
     OdysseyWindow* m_window{};
     Ui::Odyssey* ui;
-    QQuickWidget* m_quickWidget{};
+    QQuickWidget* m_sideBarWidget{};
     OdysseyDevice* m_device{};
     OdysseyRender* m_render{};
     std::vector<OdysseyObject> m_objects{};

@@ -30,7 +30,7 @@ else()
     add_compile_options(-Wall -Wextra -pedantic -Werror)
 endif()
 
-find_package(Qt6 REQUIRED COMPONENTS Quick Gui QuickWidgets Widgets)
+find_package(Qt6 REQUIRED COMPONENTS Quick Gui QuickWidgets Widgets QuickControls2)
 qt_standard_project_setup()
 set(CMAKE_AUTORCC ON)
 
@@ -104,6 +104,7 @@ target_link_libraries(
     Qt6::Gui
     Qt6::QuickWidgets
     Qt6::Widgets
+    Qt6::QuickControls2
     assimp::assimp
 )
 

@@ -11,6 +11,7 @@
 #include <QKeyEvent>
 #include <QPaintEvent>
 #include <QResizeEvent>
+#include <QString>
 #include <QUrl>
 #include <memory>
 
@@ -23,16 +24,18 @@
 
 namespace odyssey {
 
-Odyssey::Odyssey() : m_window(new OdysseyWindow()), ui(new Ui::Odyssey), m_quickWidget(new QQuickWidget()) {
+Odyssey::Odyssey() : m_window(new OdysseyWindow()), ui(new Ui::Odyssey), m_sideBarWidget(new QQuickWidget()) {
     // setup ui
     setWindowIcon(QIcon(":/icon/odyssey.ico"));
     ui->setupUi(this);
-    m_quickWidget->setSource(QUrl("qrc:/ui/odyssey_side_bar.qml"));
-    m_quickWidget->setMinimumWidth(64);
-    m_quickWidget->setMaximumWidth(64);
-    m_quickWidget->setResizeMode(QQuickWidget::ResizeMode::SizeRootObjectToView);
+    QString style = "QMenuBar::item:selected { background: #35393d; } QMenuBar::item:pressed {  background: #35393d; }";
+    menuBar()->setStyleSheet(style);
+    m_sideBarWidget->setSource(QUrl("qrc:/ui/odyssey_side_bar.qml"));
+    m_sideBarWidget->setMinimumWidth(48);
+    m_sideBarWidget->setMaximumWidth(48);
+    m_sideBarWidget->setResizeMode(QQuickWidget::ResizeMode::SizeRootObjectToView);
     auto* wrapper = QWidget::createWindowContainer(m_window, this);
-    ui->horizontalLayout->addWidget(m_quickWidget);
+    ui->horizontalLayout->addWidget(m_sideBarWidget);
     ui->horizontalLayout->addWidget(wrapper);
     ui->centralWidget->setLayout(ui->horizontalLayout);
     // init odyssey
@@ -50,7 +53,7 @@ Odyssey::Odyssey() : m_window(new OdysseyWindow()), ui(new Ui::Odyssey), m_quick
     });
     // connect signals and slots
     connect(ui->actionImport, &QAction::triggered, this, &Odyssey::importObject);
-    m_quickWidget->show();
+    m_sideBarWidget->show();
     show();
 }
 
