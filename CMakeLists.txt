@@ -11,7 +11,7 @@ set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR})
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR})
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${EXECUTABLE_OUTPUT_PATH}/lib)
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${EXECUTABLE_OUTPUT_PATH}/lib)
-set(CMAKE_AUTOUIC_SEARCH_PATHS ${PROJECT_SOURCE_DIR}/ui)
+set(CMAKE_AUTOUIC_SEARCH_PATHS ${PROJECT_SOURCE_DIR}/resource/ui)
 
 set(IS_DEBUG_BUILD CMAKE_BUILD_TYPE STREQUAL "Debug")
 if(NOT ${IS_DEBUG_BUILD})
@@ -30,7 +30,7 @@ else()
     add_compile_options(-Wall -Wextra -pedantic -Werror)
 endif()
 
-find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets)
+find_package(Qt6 REQUIRED COMPONENTS Quick Gui QuickWidgets Widgets)
 qt_standard_project_setup()
 set(CMAKE_AUTORCC ON)
 
@@ -63,7 +63,7 @@ option(ASSIMP_INSTALL "" OFF)
 add_subdirectory(assimp)
 
 file(GLOB_RECURSE SRCS RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp")
-file(GLOB_RECURSE UI_SRCS RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}/ui/*.ui")
+file(GLOB_RECURSE UI_SRCS RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}/resource/*.ui")
 file(GLOB_RECURSE QT_RECOURCE RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}/resource/*.qrc")
 file(GLOB_RECURSE WIN_RECOURCE RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}/resource/*.rc")
 
@@ -81,13 +81,28 @@ link_directories(
     ${EXECUTABLE_OUTPUT_PATH}/lib
 )
 
-add_executable(${PROJECT_NAME} ${SRCS} ${UI_SRCS} ${QT_RECOURCE} ${WIN_RECOURCE})
+qt_add_executable(
+    ${PROJECT_NAME}
+    ${SRCS}
+    ${UI_SRCS}
+    ${QT_RECOURCE}
+    ${WIN_RECOURCE}
+)
+
+# qt_add_qml_module(
+#     ${PROJECT_NAME}
+#     URI ${PROJECT_NAME}
+#     VERSION 0.1
+#     QML_FILES
+#         ui/Odyssey.qml
+# )
 
 target_link_libraries(
     ${PROJECT_NAME} PRIVATE
     ${Vulkan_LIBRARIES}
-    Qt6::Core
+    Qt6::Quick
     Qt6::Gui
+    Qt6::QuickWidgets
     Qt6::Widgets
     assimp::assimp
 )
@@ -103,7 +118,8 @@ if (MSVC)
     )
 endif()
 
-set_target_properties(${PROJECT_NAME} PROPERTIES
+set_target_properties(
+    ${PROJECT_NAME} PROPERTIES
     WIN32_EXECUTABLE ON
     MACOSX_BUNDLE ON
 )

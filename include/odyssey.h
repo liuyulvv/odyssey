@@ -6,9 +6,8 @@
  * @date 2023-04-09
  */
 
-#include <QFileDialog>
 #include <QMainWindow>
-#include <memory>
+#include <QQuickWidget>
 
 #include "odyssey_keyboard_event.h"
 #include "odyssey_model.h"
@@ -25,9 +24,6 @@ class OdysseyDevice;
 class OdysseyRender;
 class OdysseyRenderSystem;
 class OdysseyCamera;
-
-// UI
-class OdysseySideMenu;
 
 class Odyssey : public QMainWindow {
 public:
@@ -55,14 +51,13 @@ private:
 
 private:
     OdysseyWindow* m_window{};
+    Ui::Odyssey* ui;
+    QQuickWidget* m_quickWidget{};
     OdysseyDevice* m_device{};
     OdysseyRender* m_render{};
     std::vector<OdysseyObject> m_objects{};
     OdysseyRenderSystem* m_renderSystem{};
     OdysseyCamera* m_camera{};
-
-    Ui::Odyssey* ui;
-    OdysseySideMenu* m_sideMenu{};
 };
 
 }  // namespace odyssey
