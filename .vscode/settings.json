@@ -1,0 +1,17 @@
+{
+    "files.associations": {
+        "*.bzl": "starlark",
+        "*.mm": "cpp",
+        "*.m": "cpp",
+        "vector": "cpp",
+        "xstring": "cpp"
+    },
+    "cSpell.words": [
+        "Framebuffer",
+        "Hinstance",
+        "HWND",
+        "subresource",
+        "swapchain",
+        "VKAPI"
+    ]
+}

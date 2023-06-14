@@ -1,6 +1,7 @@
 Checks: >
   -*,
   performance-*,
+  -performance-no-int-to-ptr,
   portability-*,
   readability-identifier-naming
 
