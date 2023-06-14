@@ -71,7 +71,7 @@ void OdysseyRender::beginSwapChainRenderPass(vk::CommandBuffer commandBuffer) {
         .setOffset({0, 0})
         .setExtent(m_swapChain->getSwapChainExtent());
     std::array<vk::ClearValue, 2> clearValues{};
-    clearValues[0].setColor({0.17F, 0.17F, 0.17F, 1.0F});
+    clearValues[0].setColor({1.0F, 1.0F, 1.0F, 1.0F});
     clearValues[1].setDepthStencil({1.0F, 0});
     renderPassInfo
         .setClearValueCount(static_cast<uint32_t>(clearValues.size()))

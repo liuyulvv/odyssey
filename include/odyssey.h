@@ -7,7 +7,6 @@
  */
 
 #include <QMainWindow>
-#include <QQuickWidget>
 
 #include "odyssey_keyboard_event.h"
 #include "odyssey_model.h"
@@ -50,9 +49,14 @@ private:
     void loadObject(const std::string& filePath);
 
 private:
+    void setupUI();
+    void setupEngine();
+    void setupEvent();
+    void setupSignalsSlots();
+
+private:
     OdysseyWindow* m_window{};
     Ui::Odyssey* ui;
-    QQuickWidget* m_sideBarWidget{};
     OdysseyDevice* m_device{};
     OdysseyRender* m_render{};
     std::vector<OdysseyObject> m_objects{};

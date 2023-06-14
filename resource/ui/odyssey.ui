@@ -1,113 +1,107 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
-    <class>Odyssey</class>
-    <widget class="QMainWindow" name="Odyssey">
-        <property name="geometry">
-            <rect>
-                <x>0</x>
-                <y>0</y>
-                <width>800</width>
-                <height>600</height>
-            </rect>
-        </property>
-        <property name="minimumSize">
-            <size>
-                <width>800</width>
-                <height>600</height>
-            </size>
-        </property>
-        <property name="windowTitle">
-            <string>Odyssey</string>
-        </property>
-        <property name="styleSheet">
-            <string notr="true">
-                background-color: #1f2428;
-                color: #ffffff;
-            </string>
-        </property>
-        <widget class="QWidget" name="centralWidget">
-            <widget class="QWidget" name="horizontalLayoutWidget">
-                <property name="geometry">
-                    <rect>
-                        <x>0</x>
-                        <y>0</y>
-                        <width>800</width>
-                        <height>559</height>
-                    </rect>
-                </property>
-                <layout class="QHBoxLayout" name="horizontalLayout">
-                    <property name="spacing">
-                        <number>0</number>
-                    </property>
-                </layout>
-            </widget>
-        </widget>
-        <widget class="QMenuBar" name="menubar">
-            <property name="geometry">
-                <rect>
-                    <x>0</x>
-                    <y>0</y>
-                    <width>800</width>
-                    <height>21</height>
-                </rect>
-            </property>
-            <widget class="QMenu" name="menu">
-                <property name="title">
-                    <string>文件</string>
-                </property>
-                <addaction name="actionImport" />
-            </widget>
-            <widget class="QMenu" name="menu123">
-                <property name="title">
-                    <string>123</string>
-                </property>
-                <addaction name="action123" />
-                <addaction name="action123_2" />
-                <addaction name="action123_3" />
-                <addaction name="action123_4" />
-            </widget>
-            <widget class="QMenu" name="menu456">
-                <property name="title">
-                    <string>456</string>
-                </property>
-            </widget>
-            <widget class="QMenu" name="menu789">
-                <property name="title">
-                    <string>789</string>
-                </property>
-            </widget>
-            <addaction name="menu" />
-            <addaction name="menu123" />
-            <addaction name="menu456" />
-            <addaction name="menu789" />
-        </widget>
-        <widget class="QStatusBar" name="statusbar" />
-        <action name="actionImport">
-            <property name="text">
-                <string>导入</string>
-            </property>
-        </action>
-        <action name="action123">
-            <property name="text">
-                <string>123</string>
-            </property>
-        </action>
-        <action name="action123_2">
-            <property name="text">
-                <string>123</string>
-            </property>
-        </action>
-        <action name="action123_3">
-            <property name="text">
-                <string>123</string>
-            </property>
-        </action>
-        <action name="action123_4">
-            <property name="text">
-                <string>123</string>
-            </property>
-        </action>
-    </widget>
-    <resources />
-    <connections />
+ <class>Odyssey</class>
+ <widget class="QMainWindow" name="Odyssey">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>800</width>
+    <height>600</height>
+   </rect>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>800</width>
+    <height>600</height>
+   </size>
+  </property>
+  <property name="windowTitle">
+   <string>Odyssey</string>
+  </property>
+  <widget class="QWidget" name="centralWidget">
+   <widget class="QWidget" name="horizontalLayoutWidget">
+    <property name="geometry">
+     <rect>
+      <x>0</x>
+      <y>0</y>
+      <width>800</width>
+      <height>559</height>
+     </rect>
+    </property>
+    <layout class="QHBoxLayout" name="horizontalLayout">
+     <property name="spacing">
+      <number>0</number>
+     </property>
+    </layout>
+   </widget>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>800</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menu">
+    <property name="title">
+     <string>文件</string>
+    </property>
+    <addaction name="actionImport"/>
+   </widget>
+   <widget class="QMenu" name="menu123">
+    <property name="title">
+     <string>123</string>
+    </property>
+    <addaction name="action123"/>
+    <addaction name="action123_2"/>
+    <addaction name="action123_3"/>
+    <addaction name="action123_4"/>
+   </widget>
+   <widget class="QMenu" name="menu456">
+    <property name="title">
+     <string>456</string>
+    </property>
+   </widget>
+   <widget class="QMenu" name="menu789">
+    <property name="title">
+     <string>789</string>
+    </property>
+   </widget>
+   <addaction name="menu"/>
+   <addaction name="menu123"/>
+   <addaction name="menu456"/>
+   <addaction name="menu789"/>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+  <action name="actionImport">
+   <property name="text">
+    <string>导入</string>
+   </property>
+  </action>
+  <action name="action123">
+   <property name="text">
+    <string>123</string>
+   </property>
+  </action>
+  <action name="action123_2">
+   <property name="text">
+    <string>123</string>
+   </property>
+  </action>
+  <action name="action123_3">
+   <property name="text">
+    <string>123</string>
+   </property>
+  </action>
+  <action name="action123_4">
+   <property name="text">
+    <string>123</string>
+   </property>
+  </action>
+ </widget>
+ <resources/>
+ <connections/>
 </ui>

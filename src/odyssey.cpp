@@ -24,36 +24,11 @@
 
 namespace odyssey {
 
-Odyssey::Odyssey() : m_window(new OdysseyWindow()), ui(new Ui::Odyssey), m_sideBarWidget(new QQuickWidget()) {
-    // setup ui
-    setWindowIcon(QIcon(":/icon/odyssey.ico"));
-    ui->setupUi(this);
-    QString style = "QMenuBar::item:selected { background: #35393d; } QMenuBar::item:pressed {  background: #35393d; }";
-    menuBar()->setStyleSheet(style);
-    m_sideBarWidget->setSource(QUrl("qrc:/ui/odyssey_side_bar.qml"));
-    m_sideBarWidget->setMinimumWidth(48);
-    m_sideBarWidget->setMaximumWidth(48);
-    m_sideBarWidget->setResizeMode(QQuickWidget::ResizeMode::SizeRootObjectToView);
-    auto* wrapper = QWidget::createWindowContainer(m_window, this);
-    ui->horizontalLayout->addWidget(m_sideBarWidget);
-    ui->horizontalLayout->addWidget(wrapper);
-    ui->centralWidget->setLayout(ui->horizontalLayout);
-    // init odyssey
-    m_device = new OdysseyDevice(m_window->getSurfaceInfo());
-    m_render = new OdysseyRender(m_window, m_device);
-    m_renderSystem = new OdysseyRenderSystem(m_device, m_render->getSwapChainRenderPass());
-    m_camera = new OdysseyCamera();
-    m_camera->setViewDirection(glm::vec3(0.0F), glm::vec3(0.0F, 0.0F, 1.0F));
-    // window mouse event callback
-    m_window->setMouseCallback([this](OdysseyMouseEvent event) {
-        if (event.type == OdysseyMouseEventType::LEFT_DOUBLE) {
-        } else if (event.type == OdysseyMouseEventType::LEFT) {
-        } else if (event.type == OdysseyMouseEventType::RIGHT) {
-        }
-    });
-    // connect signals and slots
-    connect(ui->actionImport, &QAction::triggered, this, &Odyssey::importObject);
-    m_sideBarWidget->show();
+Odyssey::Odyssey() : m_window(new OdysseyWindow()), ui(new Ui::Odyssey) {
+    setupUI();
+    setupEngine();
+    setupEvent();
+    setupSignalsSlots();
     show();
 }
 
@@ -128,6 +103,36 @@ void Odyssey::loadObject(const std::string& filePath) {
     object.model = model;
     object.transform.translation = {0.0F, 0.0F, 1.0F};
     m_objects.push_back(std::move(object));
+}
+
+void Odyssey::setupUI() {
+    setWindowIcon(QIcon(":/icon/odyssey.ico"));
+    ui->setupUi(this);
+    auto* wrapper = QWidget::createWindowContainer(m_window, this);
+    ui->horizontalLayout->addWidget(wrapper);
+    ui->centralWidget->setLayout(ui->horizontalLayout);
+}
+
+void Odyssey::setupEngine() {
+    m_device = new OdysseyDevice(m_window->getSurfaceInfo());
+    m_render = new OdysseyRender(m_window, m_device);
+    m_renderSystem = new OdysseyRenderSystem(m_device, m_render->getSwapChainRenderPass());
+    m_camera = new OdysseyCamera();
+    m_camera->setViewDirection(glm::vec3(0.0F), glm::vec3(0.0F, 0.0F, 1.0F));
+}
+
+void Odyssey::setupEvent() {
+    // window mouse event callback
+    m_window->setMouseCallback([this](OdysseyMouseEvent event) {
+        if (event.type == OdysseyMouseEventType::LEFT_DOUBLE) {
+        } else if (event.type == OdysseyMouseEventType::LEFT) {
+        } else if (event.type == OdysseyMouseEventType::RIGHT) {
+        }
+    });
+}
+
+void Odyssey::setupSignalsSlots() {
+    connect(ui->actionImport, &QAction::triggered, this, &Odyssey::importObject);
 }
 
 }  // namespace odyssey

@@ -30,7 +30,7 @@ else()
     add_compile_options(-Wall -Wextra -pedantic -Werror)
 endif()
 
-find_package(Qt6 REQUIRED COMPONENTS Quick Gui QuickWidgets Widgets QuickControls2)
+find_package(Qt6 REQUIRED COMPONENTS Gui Widgets)
 qt_standard_project_setup()
 set(CMAKE_AUTORCC ON)
 
@@ -89,22 +89,11 @@ qt_add_executable(
     ${WIN_RECOURCE}
 )
 
-# qt_add_qml_module(
-#     ${PROJECT_NAME}
-#     URI ${PROJECT_NAME}
-#     VERSION 0.1
-#     QML_FILES
-#         ui/Odyssey.qml
-# )
-
 target_link_libraries(
     ${PROJECT_NAME} PRIVATE
     ${Vulkan_LIBRARIES}
-    Qt6::Quick
     Qt6::Gui
-    Qt6::QuickWidgets
     Qt6::Widgets
-    Qt6::QuickControls2
     assimp::assimp
 )
 
