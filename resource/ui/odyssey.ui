@@ -77,6 +77,10 @@
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <action name="actionImport">
+   <property name="icon">
+    <iconset resource="../odyssey.qrc">
+     <normaloff>:/image/import.png</normaloff>:/image/import.png</iconset>
+   </property>
    <property name="text">
     <string>导入</string>
    </property>
@@ -102,6 +106,8 @@
    </property>
   </action>
  </widget>
- <resources/>
+ <resources>
+  <include location="../odyssey.qrc"/>
+ </resources>
  <connections/>
 </ui>
