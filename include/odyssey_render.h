@@ -17,7 +17,7 @@ namespace odyssey {
 
 class OdysseyRender {
 public:
-    explicit OdysseyRender(OdysseyWindow* window, OdysseyDevice* device);
+    OdysseyRender(OdysseyWindow* window, OdysseyDevice* device);
     ~OdysseyRender();
 
     OdysseyRender() = delete;
